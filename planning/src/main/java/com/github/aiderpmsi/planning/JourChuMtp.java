@@ -15,7 +15,8 @@ import solver.variables.VariableFactory;
 public class JourChuMtp implements Jour {
 
 	private Ligne[] lignes = new Ligne[] {
-			new LunelLigne()
+			new LunelLigne(),
+			new FmcLigne()
 	};
 	
 	/** Buffers the list of config datas for each day */
@@ -91,6 +92,16 @@ public class JourChuMtp implements Jour {
 					solver.post(IntConstraintFactory.arithm(lunel1, "=", lunel2));
 				}
 			}
+
+			// IMPOSSIBLE TO WORK ON FMC1 AND FMC2
+			{
+				IntVar fmc1 = toDay.get("Fmc_1");
+				IntVar fmc2 = toDay.get("Fmc_2");
+				if (fmc1 != null && fmc2 != null) {
+					solver.post(IntConstraintFactory.arithm(fmc1, "!=", fmc2));
+				}
+					
+			}
 			
 			// IMPOSIBLE TO WORK CONCURRENTLY (MUTUALLY EXCLUSIVE)
 			// - FMC_1
@@ -109,7 +120,8 @@ public class JourChuMtp implements Jour {
 				IntVar lunel2yesterday = yesterday == null ? null : yesterday.get("Lunel_2");
 				if (lunel2yesterday != null) concurrent.add(lunel2yesterday);
 				
-				solver.post(IntConstraintFactory.alldifferent(concurrent.toArray(new IntVar[concurrent.size()])));
+				if (concurrent.size() >= 2)
+					solver.post(IntConstraintFactory.alldifferent(concurrent.toArray(new IntVar[concurrent.size()])));
 			}
 			
 			// IMPOSIBLE TO WORK CONCURRENTLY (MUTUALLY EXCLUSIVE)
@@ -129,9 +141,10 @@ public class JourChuMtp implements Jour {
 				IntVar lunel2yesterday = yesterday == null ? null : yesterday.get("Lunel_2");
 				if (lunel2yesterday != null) concurrent.add(lunel2yesterday);
 				
-				solver.post(IntConstraintFactory.alldifferent(concurrent.toArray(new IntVar[concurrent.size()])));
+				if (concurrent.size() >= 2)
+					solver.post(IntConstraintFactory.alldifferent(concurrent.toArray(new IntVar[concurrent.size()])));
 			}
-
+			
 		}
 	}
 

@@ -2,6 +2,7 @@ package com.github.aiderpmsi.planning;
 
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -20,7 +21,7 @@ public class SimplePlanning3 {
 	public static void main(String[] args) {
 
 		// NUMBER OF GENERATED DAYS
-		int DAYS = 10;
+		int DAYS = 365;
 		// START DATE
 		LocalDate START_DATE = LocalDate.of(2014, 1, 1);
 		
@@ -29,6 +30,7 @@ public class SimplePlanning3 {
 		docs.put(1, "Med 1");
 		docs.put(2, "Med 2");
 		docs.put(3, "Med_3");
+		docs.put(4, "Med_4");
 		
 		// SOLVER
 		Solver solver = new Solver("SimplePlan");
@@ -59,10 +61,12 @@ public class SimplePlanning3 {
 		// NOW, SELECT MAX NB DAYS FOR EACH DOC
 		IntVar maxnbDays = VariableFactory.bounded("maxnbdays", 0, DAYS * 2, solver);
 
+		HashMap<Integer, IntVar> counts = new LinkedHashMap<>();
 		for (Integer docIndice : docs.keySet()) {
 			IntVar count = VariableFactory.bounded("count_" + docIndice, 0, DAYS * 2, solver);
 			solver.post(IntConstraintFactory.count(docIndice, allDaysArray, count));
 			solver.post(IntConstraintFactory.arithm(count, "<=", maxnbDays));
+			counts.put(docIndice, count);
 		}
 
 		solver.set(IntStrategyFactory.lastKConflicts(solver, 100, IntStrategyFactory.random_value(allDaysArray, new Random().nextLong())));
@@ -72,10 +76,13 @@ public class SimplePlanning3 {
 		if (solver.isFeasible() == ESat.TRUE) {
 			System.out.println("Solution trouvée");
 			System.out.println("Max : " + maxnbDays.getValue());
+			for (Entry<Integer, IntVar> count : counts.entrySet()) {
+				System.out.println(docs.get(count.getKey()) + " : charge = " + count.getValue().getValue());
+			}
 			for (Entry<LocalDate, HashMap<String, IntVar>> oneDay : allIntVarsBuffer.entrySet()) {
 				System.out.println("date : " + oneDay.getKey());
 				for (IntVar var : oneDay.getValue().values()) {
-					System.out.println(var.getName() + " : " + var.getValue());
+					System.out.println(var.getName() + " : " + docs.get(var.getValue()));
 				}
 			}
 		} else {

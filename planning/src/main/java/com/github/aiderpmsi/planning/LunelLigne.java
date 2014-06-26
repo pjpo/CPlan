@@ -10,11 +10,11 @@ public class LunelLigne implements Ligne {
 		HashMap<String, Plage> plages = new HashMap<>();
 		// IF DAY IS EVEN, GENERATE TWO PERIODS
 		if ((date.getDayOfYear() & 1) != 0) {
-			LocalDateTime workStart = LocalDateTime.from(date).plusHours(8).plusMinutes(30); 
+			LocalDateTime workStart = date.atTime(8, 30); 
 			Plage plageJour = new Plage(workStart, workStart.plusHours(10));
 			plages.put(getName() + "_1", plageJour);
 			Plage plageNuit = new Plage(workStart.plusHours(10), workStart.plusHours(24));
-			plages.put(getName() + "_1", plageNuit);
+			plages.put(getName() + "_2", plageNuit);
 		}
 		return plages;
 	}
