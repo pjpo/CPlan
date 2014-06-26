@@ -1,5 +1,9 @@
 package com.github.aiderpmsi.planning;
 
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map.Entry;
 import java.util.Random;
 
 import solver.ResolutionPolicy;
@@ -14,41 +18,65 @@ import util.ESat;
 public class SimplePlanning3 {
 
 	public static void main(String[] args) {
+
+		// NUMBER OF GENERATED DAYS
+		int DAYS = 10;
+		// START DATE
+		LocalDate START_DATE = LocalDate.of(2014, 1, 1);
 		
-		int MEDS = 10;
-		int DAYS = 80;
+		// DOCS
+		HashMap<Integer, String> docs = new HashMap<>();
+		docs.put(1, "Med 1");
+		docs.put(2, "Med 2");
+		docs.put(3, "Med_3");
 		
+		// SOLVER
 		Solver solver = new Solver("SimplePlan");
 		
-		IntVar max =
-				VariableFactory.bounded("maxnbdays", 0, DAYS, solver);
+		// AGENDA GENERATOR
+		JourChuMtp agenda = new JourChuMtp(docs);
 		
-		IntVar[] days = new IntVar[DAYS];
+		// GENERATE INTVARS FOR EACH DAY
+		for (LocalDate date = START_DATE ; date.isBefore(START_DATE.plusDays(DAYS)) ; date = date.plusDays(1)) {
+			agenda.generatePlages(date, solver);
+		}
+		
+		// GENERATE CONSTRAINTS FOR EACH DAY
+		for (LocalDate date = START_DATE ; date.isBefore(START_DATE.plusDays(DAYS)) ; date = date.plusDays(1)) {
+			agenda.generateConstraints(date, solver);
+		}
 
-		IntVar[] count = new IntVar[MEDS];
-		
-		for (int i = 0 ; i < DAYS ; i++) {
-			days[i] = VariableFactory.enumerated("day_" + i, 0, MEDS - 1, solver);
+		// GETS AN ARRAY OF EACH INTVAR
+		LinkedList<IntVar> allDays = new LinkedList<>();
+		HashMap<LocalDate, HashMap<String, IntVar>> allIntVarsBuffer = agenda.getIntVarsBuffer();
+		for (HashMap<String, IntVar> oneDay : allIntVarsBuffer.values()) {
+			for (IntVar var : oneDay.values()) {
+				allDays.add(var);
+			}
 		}
+		IntVar[] allDaysArray = allDays.toArray(new IntVar[allDays.size()]);
 		
-		for (int i = 0 ; i < MEDS ; i++) {
-			count[i] = VariableFactory.bounded("count_" + i, 0, DAYS, solver);
-			solver.post(IntConstraintFactory.count(i, days, count[i]));
-			solver.post(IntConstraintFactory.arithm(count[i], "<=", max));
+		// NOW, SELECT MAX NB DAYS FOR EACH DOC
+		IntVar maxnbDays = VariableFactory.bounded("maxnbdays", 0, DAYS * 2, solver);
+
+		for (Integer docIndice : docs.keySet()) {
+			IntVar count = VariableFactory.bounded("count_" + docIndice, 0, DAYS * 2, solver);
+			solver.post(IntConstraintFactory.count(docIndice, allDaysArray, count));
+			solver.post(IntConstraintFactory.arithm(count, "<=", maxnbDays));
 		}
-		
-		solver.set(IntStrategyFactory.lastKConflicts(solver, 100, IntStrategyFactory.random_value(days, new Random().nextLong())));
+
+		solver.set(IntStrategyFactory.lastKConflicts(solver, 100, IntStrategyFactory.random_value(allDaysArray, new Random().nextLong())));
 		SearchMonitorFactory.limitTime(solver, 6000);
-		solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, max);
+		solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, maxnbDays);
 		
 		if (solver.isFeasible() == ESat.TRUE) {
 			System.out.println("Solution trouvée");
-			System.out.println("Max : " + max.getValue());
-			for (IntVar day : days) {
-				System.out.println(day.getName() + " : " + day.getValue());
-			}
-			for (IntVar singleCount : count) {
-				System.out.println(singleCount.getName() + " : " + singleCount.getValue());
+			System.out.println("Max : " + maxnbDays.getValue());
+			for (Entry<LocalDate, HashMap<String, IntVar>> oneDay : allIntVarsBuffer.entrySet()) {
+				System.out.println("date : " + oneDay.getKey());
+				for (IntVar var : oneDay.getValue().values()) {
+					System.out.println(var.getName() + " : " + var.getValue());
+				}
 			}
 		} else {
 			System.out.println("Pas de solution");
