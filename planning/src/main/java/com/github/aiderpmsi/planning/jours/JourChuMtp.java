@@ -1,4 +1,4 @@
-package com.github.aiderpmsi.planning;
+package com.github.aiderpmsi.planning.jours;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -6,6 +6,12 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
+
+import com.github.aiderpmsi.planning.lignes.FmcLigne;
+import com.github.aiderpmsi.planning.lignes.Ligne;
+import com.github.aiderpmsi.planning.lignes.LunelLigne;
+import com.github.aiderpmsi.planning.lignes.Plage;
+import com.github.aiderpmsi.planning.lignes.SILigne;
 
 import solver.Solver;
 import solver.constraints.IntConstraintFactory;
@@ -16,7 +22,8 @@ public class JourChuMtp implements Jour {
 
 	private Ligne[] lignes = new Ligne[] {
 			new LunelLigne(),
-			new FmcLigne()
+			new FmcLigne(),
+			new SILigne()
 	};
 	
 	/** Buffers the list of config datas for each day */
@@ -108,6 +115,8 @@ public class JourChuMtp implements Jour {
 			// - FMC_2 DAY BEFORE
 			// - LUNEL_1 (HAS A CONSTRAINT LUNEL_1 = LUNEL_2)
 			// - LUNEL_2 DAY BEFORE
+			// - SI_1
+			// - SI_2 DAY BEFORE
 			{
 				LinkedList<IntVar> concurrent = new LinkedList<>();
 				HashMap<String, IntVar> yesterday = intVarsBuffer.get(date.minusDays(1));
@@ -119,6 +128,10 @@ public class JourChuMtp implements Jour {
 				if (lunel1 != null) concurrent.add(lunel1);
 				IntVar lunel2yesterday = yesterday == null ? null : yesterday.get("Lunel_2");
 				if (lunel2yesterday != null) concurrent.add(lunel2yesterday);
+				IntVar si1 = toDay.get("Si_1");
+				if (si1 != null) concurrent.add(si1);
+				IntVar si2yesterday = yesterday == null ? null : yesterday.get("Si_2");
+				if (si2yesterday != null) concurrent.add(si2yesterday);
 				
 				if (concurrent.size() >= 2)
 					solver.post(IntConstraintFactory.alldifferent(concurrent.toArray(new IntVar[concurrent.size()])));
@@ -129,6 +142,8 @@ public class JourChuMtp implements Jour {
 			// - FMC_2 DAY BEFORE
 			// - LUNEL_2 (HAS A CONSTRAINT LUNEL_1 = LUNEL_2)
 			// - LUNEL_2 DAY BEFORE
+			// - SI_2
+			// - SI_2 DAY BEFORE
 			{
 				LinkedList<IntVar> concurrent = new LinkedList<>();
 				HashMap<String, IntVar> yesterday = intVarsBuffer.get(date.minusDays(1));
@@ -140,6 +155,10 @@ public class JourChuMtp implements Jour {
 				if (lunel2 != null) concurrent.add(lunel2);
 				IntVar lunel2yesterday = yesterday == null ? null : yesterday.get("Lunel_2");
 				if (lunel2yesterday != null) concurrent.add(lunel2yesterday);
+				IntVar si2 = toDay.get("Si_2");
+				if (si2 != null) concurrent.add(si2);
+				IntVar si2yesterday = yesterday == null ? null : yesterday.get("Si_2");
+				if (si2yesterday != null) concurrent.add(si2yesterday);
 				
 				if (concurrent.size() >= 2)
 					solver.post(IntConstraintFactory.alldifferent(concurrent.toArray(new IntVar[concurrent.size()])));

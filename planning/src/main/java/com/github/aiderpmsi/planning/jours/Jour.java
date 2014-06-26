@@ -1,4 +1,4 @@
-package com.github.aiderpmsi.planning;
+package com.github.aiderpmsi.planning.jours;
 
 import java.time.LocalDate;
 import solver.Solver;
