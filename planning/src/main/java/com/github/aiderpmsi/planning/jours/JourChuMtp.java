@@ -1,22 +1,24 @@
 package com.github.aiderpmsi.planning.jours;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 
+import solver.Solver;
+import solver.constraints.IntConstraintFactory;
+import solver.variables.IntVar;
+import solver.variables.VariableFactory;
+
 import com.github.aiderpmsi.planning.lignes.FmcLigne;
 import com.github.aiderpmsi.planning.lignes.Ligne;
 import com.github.aiderpmsi.planning.lignes.LunelLigne;
 import com.github.aiderpmsi.planning.lignes.Plage;
 import com.github.aiderpmsi.planning.lignes.SILigne;
-
-import solver.Solver;
-import solver.constraints.IntConstraintFactory;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
+import com.github.aiderpmsi.planning.physician.Physician;
 
 public class JourChuMtp implements Jour {
 
@@ -33,9 +35,9 @@ public class JourChuMtp implements Jour {
 	HashMap<LocalDate, HashMap<String, IntVar>> intVarsBuffer = new LinkedHashMap<>();
 	
 	/** List of docs */
-	HashMap<Integer, String> docs;
+	private ArrayList<Physician> docs;
 	
-	public JourChuMtp(HashMap<Integer, String> docs) {
+	public JourChuMtp(ArrayList<Physician> docs) {
 		this.docs = docs;
 	}
 	
@@ -59,9 +61,8 @@ public class JourChuMtp implements Jour {
 
 		// CREATES ONCE THE LIST OF DOCS (PREVENTS IT FROM BEEING RECALCULATED EVERY ITERATION)
 		int[] docsIndices = new int[docs.size()];
-		int position = 0;
-		for (Integer docKey : docs.keySet()) {
-			docsIndices[position++] = docKey;
+		for (int i = 0 ; i < docs.size() ; i++) {
+			docsIndices[i] = i;
 		}
 		
 		// GET PLAGES FROM LIGNES
@@ -159,6 +160,26 @@ public class JourChuMtp implements Jour {
 				if (si2 != null) concurrent.add(si2);
 				IntVar si2yesterday = yesterday == null ? null : yesterday.get("Si_2");
 				if (si2yesterday != null) concurrent.add(si2yesterday);
+				
+				if (concurrent.size() >= 2)
+					solver.post(IntConstraintFactory.alldifferent(concurrent.toArray(new IntVar[concurrent.size()])));
+			}
+			
+			// MUTUALLY EXCLUSIVE :
+			// - FMC_1
+			// - FMC_2
+			// - SI_1
+			// - SI_2
+			{
+				LinkedList<IntVar> concurrent = new LinkedList<>();
+				IntVar fmc1 = toDay.get("Fmc_1");
+				if (fmc1 != null) concurrent.add(fmc1);
+				IntVar fmc2 = toDay.get("Fmc_2");
+				if (fmc2 != null) concurrent.add(fmc2);
+				IntVar si1 = toDay.get("Si_1");
+				if (si1 != null) concurrent.add(si1);
+				IntVar si2 = toDay.get("Si_2");
+				if (si2 != null) concurrent.add(si2);
 				
 				if (concurrent.size() >= 2)
 					solver.post(IntConstraintFactory.alldifferent(concurrent.toArray(new IntVar[concurrent.size()])));
