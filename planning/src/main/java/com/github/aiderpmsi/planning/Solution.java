@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
+
 import solver.variables.IntVar;
 
 import com.github.aiderpmsi.planning.lignes.Plage;
@@ -85,7 +86,7 @@ public class Solution {
 										throw new IllegalArgumentException("Solution does not meet working periods configuration");
 									else {
 										// VERIFIES THAT THIS PHYSICIAN EXISTS
-										if ((solution.getValue() < 0) || (solution.getValue() >= physicians.size() - 1))
+										if ((solution.getValue() < 0) || (solution.getValue() >= physicians.size()))
 											throw new IllegalArgumentException("Solution does not meet working periods configuration");
 										// COPIES THE DEFINITION
 										newSolutionMedIndicesMap.get(localDate).put(def, solution.getValue());
@@ -106,7 +107,7 @@ public class Solution {
 			
 			// CREATES THE HASHMAP FOR WORKLOAD
 			workLoads = new ArrayList<>(physicians.size());
-			for (int i = 0 ; i < workLoads.size() ; i++) {
+			for (int i = 0 ; i < physicians.size() ; i++) {
 				workLoads.add(0);
 			}
 
@@ -123,7 +124,7 @@ public class Solution {
 		}
 	}
 	
-	public HashMap<LocalDate, HashMap<String, Integer>> lightenWorkBurden() {
+	public HashMap<LocalDate, HashMap<String, Integer>> lightenWorkBurden(int shake) {
 		if (workLoads == null)
 			throw new IllegalArgumentException("No solution has been set");
 		// GETS THE MAX WORKER
@@ -132,6 +133,8 @@ public class Solution {
 		int minWorkLoad = getMinWorkLoad();
 		int maxWorkLoad = getMaxWorkLoad();
 		
+		System.out.println("Maxworker = " + maxWorker);
+
 		// RANDOM USED
 		Random randomsInts = new Random();
 		
@@ -146,17 +149,21 @@ public class Solution {
 							(String key, Integer value) -> {
 								// RANDOMLY REMOVES THIS WORK PERIOD IF WORKER WORKS TOO MUCH
 								// IF DIFFERENCE BETWEEN MAX AND MIN WORKLOAD IS LOW, WE WILL NOT REMOVE A LOT OF THEM
-								if (value == maxWorker && randomsInts.nextInt(maxWorkLoad) > minWorkLoad) {
+								int random = 0;
+								if (value == maxWorker && (random = randomsInts.nextInt(maxWorkLoad)) > minWorkLoad) {
 									newSolutionMap.get(localDate).put(key, null);
 								}
 								// ELSE REMOVE THE PHYSICIAN DEPENDING ON RANDOM
-								else if (randomsInts.nextInt(maxWorkLoad * physicians.size()) < minWorkLoad) {
-									newSolutionMap.get(localDate).put(key, value);
-								} else {
+								else if (value != maxWorker && (random = randomsInts.nextInt(10 + shake)) > 10) {
 									newSolutionMap.get(localDate).put(key, null);
+								} else {
+									newSolutionMap.get(localDate).put(key, value);
 								}
 					});
 		});
+		
+		System.out.println(" === SHAKER : " + shake + " ===");
+		//Planning.prettyPrintInteger(newSolutionMap, physicians);
 		
 		return newSolutionMap;
 	}
@@ -179,8 +186,10 @@ public class Solution {
 		int maxLoad = -1;
 		int maxWorker = -1;
 		for (int i = 0 ; i < physicians.size() ; i++) {
-			if (workLoads.get(i) > maxLoad)
+			if (workLoads.get(i) > maxLoad) {
 				maxWorker = i;
+				maxLoad = workLoads.get(i);
+			}
 		}
 		return maxWorker;
 	}

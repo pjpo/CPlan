@@ -1,9 +1,16 @@
 package com.github.aiderpmsi.planning.jours;
 
 import java.time.LocalDate;
-import solver.Solver;
+import java.util.HashMap;
+import java.util.List;
+
+import solver.constraints.Constraint;
+import solver.variables.IntVar;
+
+import com.github.aiderpmsi.planning.lignes.Plage;
 
 public interface Jour {
-	public void generatePlages(LocalDate date, Solver solver); 
-	public void generateConstraints(LocalDate date, Solver solver);
+	public HashMap<String, Plage> getPlages(LocalDate date); 
+	public List<Constraint> getConstraints(
+			LocalDate date, HashMap<LocalDate, HashMap<String, IntVar>> workers);
 }
