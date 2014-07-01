@@ -8,7 +8,10 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 
+import org.controlsfx.dialog.Dialogs;
+
 import com.github.aiderpmsi.planning.physician.Physician;
+import com.github.aiderpmsi.planning.physician.PhysicianBuilder;
 import com.github.aiderpmsi.planning.ui.PlanningMainUIApp;
 
 public class PhysicianController {
@@ -62,7 +65,59 @@ public class PhysicianController {
     @FXML
     private void handleDeletePhysician() {
       int selectedIndex = physicianTable.getSelectionModel().getSelectedIndex();
-      physicianTable.getItems().remove(selectedIndex);
+      if (selectedIndex >= 0) {
+    	  physicianTable.getItems().remove(selectedIndex);
+      } else {
+    	  // NOTHING SELECTED
+    	  Dialogs.create()
+    	  .owner(mainApp.getPrimaryStage())
+    	  .title("Information Dialog")
+          .masthead("No person selected")
+          .message("Please select a physician in the table")
+          .showInformation();
+      }
+    }
+    
+    @FXML
+    private void handleNewPhysician() {
+      Physician tempPhysician = new PhysicianBuilder().setName("").setTimePart(100).toPhysician();
+      boolean okClicked = mainApp.showPhysicianEditDialog(tempPhysician);
+      if (okClicked) {
+        mainApp.getPhysicians().add(tempPhysician);
+      }
+    }
+
+    /**
+     * Called when the user clicks the edit button.
+     * Opens a dialog to edit details for the selected person.
+     */
+    @FXML
+    private void handleEditPhysician() {
+      Physician selectedPhysician = physicianTable.getSelectionModel().getSelectedItem();
+      if (selectedPhysician != null) {
+        boolean okClicked = mainApp.showPhysicianEditDialog(selectedPhysician);
+        if (okClicked) {
+          refreshPhysicianTable();
+          showPhysicianDetails(selectedPhysician);
+        }
+
+      } else {
+        // Nothing selected
+        Dialogs.create()
+        .owner(mainApp.getPrimaryStage())
+        .title("Information dialog")
+        .masthead("No physician selected")
+        .message("Select a physician")
+        .showInformation();
+      }
+    }
+    
+    private void refreshPhysicianTable() {
+    	  int selectedIndex = physicianTable.getSelectionModel().getSelectedIndex();
+    	  physicianTable.setItems(null);
+    	  physicianTable.layout();
+    	  physicianTable.setItems(mainApp.getPhysicians());
+    	  physicianTable.getSelectionModel().select(selectedIndex);
     }
     
     /**

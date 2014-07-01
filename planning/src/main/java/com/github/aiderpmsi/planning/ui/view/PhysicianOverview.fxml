@@ -44,17 +44,17 @@
                   </GridPane>
                   <HBox layoutX="14.0" layoutY="260.0" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="10.0">
                      <children>
-                        <Button layoutX="14.0" layoutY="260.0" mnemonicParsing="false" text="Nouveau...">
+                        <Button layoutX="14.0" layoutY="260.0" mnemonicParsing="false" onAction="#handleNewPhysician" text="Nouveau...">
                            <HBox.margin>
                               <Insets right="5.0" />
                            </HBox.margin>
                         </Button>
-                        <Button layoutX="106.0" layoutY="260.0" mnemonicParsing="false" text="Modifier...">
+                        <Button layoutX="106.0" layoutY="260.0" mnemonicParsing="false" onAction="#handleEditPhysician" text="Modifier...">
                            <HBox.margin>
                               <Insets left="5.0" right="5.0" />
                            </HBox.margin>
                         </Button>
-                        <Button layoutX="195.0" layoutY="260.0" mnemonicParsing="false" text="Supprimer">
+                        <Button layoutX="195.0" layoutY="260.0" mnemonicParsing="false" onAction="#handleDeletePhysician" text="Supprimer">
                            <HBox.margin>
                               <Insets left="5.0" />
                            </HBox.margin>

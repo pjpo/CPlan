@@ -154,7 +154,7 @@ public class Solution {
 									newSolutionMap.get(localDate).put(key, null);
 								}
 								// ELSE REMOVE THE PHYSICIAN DEPENDING ON RANDOM
-								else if (value != maxWorker && (random = randomsInts.nextInt(10 + shake)) > 10) {
+								else if ((random = randomsInts.nextInt(10 + shake)) > 10) {
 									newSolutionMap.get(localDate).put(key, null);
 								} else {
 									newSolutionMap.get(localDate).put(key, value);
