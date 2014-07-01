@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map.Entry;
-import java.util.Random;
 
 import solver.ResolutionPolicy;
 import solver.Solver;
@@ -75,47 +74,25 @@ public class Planning {
 		}
 		IntVar[] allDaysArray = allDays.toArray(new IntVar[allDays.size()]);
 		
-		// NOW, SELECT MAX NB DAYS FOR EACH DOC
-		IntVar maxnbDays = VariableFactory.bounded("maxnbdays", 0, VariableFactory.MAX_INT_BOUND, solver);
+		// USE A RANDOM SETTER
+		solver.set(IntStrategyFactory.random_value(allDaysArray));
 
-		ArrayList<IntVar> counts = new ArrayList<>(planning.getPhysicians().size());
-		ArrayList<IntVar> scalars = new ArrayList<>(planning.getPhysicians().size());
-		for (int i = 0 ; i < planning.getPhysicians().size() ; i++) {
-			// WE SCALE THE NUMBER OF WORKING PLANNINGS IN ORDER TO TAKE CARE OF PART TIME WORKING
-			// BUT THIS MEANS WE CAN'T TAKE INTO ACCOUNT MORE THAN 2147 WORKING PLAGES PER WORKER
-			Physician physician = planning.getPhysicians().get(i);
-			
-			// COUNTS NUMBER OF WORKS
-			IntVar count = VariableFactory.bounded("count_" + i, 0, VariableFactory.MAX_INT_BOUND / 10000, solver);
-			solver.post(IntConstraintFactory.count(i, allDaysArray, count));
-			counts.add(count);
+		// FINDS A SOLUTION
+		solver.findSolution();
 
-			// SCLAES THIS NUMBER OF WORKS
-			/** Scale vs temps de travail :
-			 * cste = 100% = 100 (100000/1000)
-			 * 90% = (10000/90) => 111
-			 * 80% = (10000/80) => 125
-			 * 10% => 1000
-			 * 1% => 10000
-			 */
-			int scale = 10000 / physician.getTimePart();
-			IntVar scaledCount = VariableFactory.scale(count, scale);
-			solver.post(IntConstraintFactory.arithm(scaledCount, "<=", maxnbDays));
-			scalars.add(scaledCount);
-		}
-
-		//solver.set(IntStrategyFactory.lastKConflicts(solver, 100, IntStrategyFactory.));
-		SearchMonitorFactory.limitTime(solver, 12000000);
-		solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, maxnbDays);
-		
 		if (solver.isFeasible() == ESat.TRUE) {
+			// STORES THIS SOLUTION
+			Solution solution = new Solution();
+			solution.setPhysicians(planning.getPhysicians());
+			solution.setWorkingPeriodsMap(agenda.getPlagesBuffer());
+			solution.setSolutionMedIndicesMap(allIntVarsBuffer);
+			
 			System.out.println("Solution trouvée");
-			System.out.println("Max : " + maxnbDays.getValue());
+			System.out.println("Max : " + solution.getMaxWorkLoad());
+			System.out.println("Min : " + solution.getMinWorkLoad());
 			for (int i = 0 ; i < planning.getPhysicians().size() ; i++) {
 				System.out.println(planning.getPhysicians().get(i).getName() + " : charge = " +
-						counts.get(i).getValue());
-				System.out.println(planning.getPhysicians().get(i).getName() + " : scaled count = " +
-						scalars.get(i).getValue());
+						solution.getWorkLoads().get(i));
 			}
 			for (Entry<LocalDate, HashMap<String, IntVar>> oneDay : allIntVarsBuffer.entrySet()) {
 				System.out.println("date : " + oneDay.getKey());

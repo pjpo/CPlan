@@ -29,10 +29,10 @@ public class JourChuMtp implements Jour {
 	};
 	
 	/** Buffers the list of config datas for each day */
-	HashMap<LocalDate, HashMap<String, Plage>> plagesBuffer = new HashMap<>();
+	private HashMap<LocalDate, HashMap<String, Plage>> plagesBuffer = new HashMap<>();
 	
 	/** Buffers the list of intVars for each day */
-	HashMap<LocalDate, HashMap<String, IntVar>> intVarsBuffer = new LinkedHashMap<>();
+	private HashMap<LocalDate, HashMap<String, IntVar>> intVarsBuffer = new LinkedHashMap<>();
 	
 	/** List of docs */
 	private ArrayList<Physician> docs;
@@ -190,6 +190,10 @@ public class JourChuMtp implements Jour {
 
 	public HashMap<LocalDate, HashMap<String, IntVar>> getIntVarsBuffer() {
 		return intVarsBuffer;
+	}
+
+	public HashMap<LocalDate, HashMap<String, Plage>> getPlagesBuffer() {
+		return plagesBuffer;
 	}
 
 	public int[] intArrayListToPrimitive(List<Integer> list) {

@@ -59,6 +59,12 @@ public class PhysicianController {
     	}
     }
 
+    @FXML
+    private void handleDeletePhysician() {
+      int selectedIndex = physicianTable.getSelectionModel().getSelectedIndex();
+      physicianTable.getItems().remove(selectedIndex);
+    }
+    
     /**
      * Is called by the main application to give a reference back to itself.
      * 
