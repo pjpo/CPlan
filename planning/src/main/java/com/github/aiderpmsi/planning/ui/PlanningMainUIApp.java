@@ -28,7 +28,6 @@ public class PlanningMainUIApp extends Application {
 	
 	@Override
 	public void start(Stage primaryStage) {
-		physicians.add(new PhysicianBuilder().setName("Med 1").setTimePart(100).toPhysician());
 		this.primaryStage = primaryStage;
         this.primaryStage.setTitle("Planning");
 
