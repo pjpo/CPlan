@@ -8,6 +8,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.TabPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
@@ -22,54 +23,70 @@ public class PlanningMainUIApp extends Application {
 
 	private Stage primaryStage;
     
-	private BorderPane rootLayout;
-	
 	private ObservableList<Physician> physicians = FXCollections.observableArrayList();
 	
 	private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 	
 	@Override
 	public void start(Stage primaryStage) {
+
 		this.primaryStage = primaryStage;
         this.primaryStage.setTitle("Planning");
 
         try {
-            // Load the root layout from the fxml file
-            FXMLLoader loader = new FXMLLoader(PlanningMainUIApp.class.getResource("view/RootLayout.fxml"));
+            // LOADS THE ROOT LAYOUT
+        	BorderPane rootLayout = loadRootLayout();
 
-            RootLayoutController root = new RootLayoutController();
-            root.setMainApp(this);
-            
-            loader.setController(root);
-            rootLayout = (BorderPane) loader.load();
- 
+        	// USE THIS ELEMENT AS ROOT FOR THE SCENE
             Scene scene = new Scene(rootLayout);
+
             primaryStage.setScene(scene);
             primaryStage.show();
         } catch (IOException e) {
             // Exception gets thrown if the fxml file could not be loaded
             e.printStackTrace();
         }
+        
+	}
+	
+	private BorderPane loadRootLayout() throws IOException {
+		// LOADS UI DEFINITION
+        FXMLLoader loader = new FXMLLoader(PlanningMainUIApp.class.getResource("view/RootLayout.fxml"));
 
-        showPhysicianOverview();
+        // LOADS ROOT LAYOUT
+        BorderPane borderPane = (BorderPane) loader.load();
 
+        // RETRIEVES CONTROLLER
+        RootLayoutController controller = loader.getController();
+
+        // SETS CONTROLLER DEFINITIONS
+        controller.setMainApp(this);
+        
+        // LOADS THE PHYSICIAN OVERVIEW
+        AnchorPane physicianOverview = loadPhysicianOverview();
+        
+        // SETS THE TAB PANES
+        TabPane tabPane = (TabPane) borderPane.getCenter();
+        tabPane.getTabs().get(0).setContent(physicianOverview);
+        
+        return borderPane;
 	}
 
-    public void showPhysicianOverview() {
-        try {
-            // Load the fxml file and set into the center of the main layout
-            FXMLLoader loader = new FXMLLoader(PlanningMainUIApp.class.getResource("view/PhysicianOverview.fxml"));
-            AnchorPane overviewPage = (AnchorPane) loader.load();
-            rootLayout.setCenter(overviewPage);
-            
-            PhysicianOverviewController controller = loader.getController();
-            controller.setMainApp(this);
-            controller.setDateFormatter(dateFormatter);
+    public AnchorPane loadPhysicianOverview() throws IOException {
+    	// LOADS UI DEFINITION
+    	FXMLLoader loader = new FXMLLoader(PlanningMainUIApp.class.getResource("view/PhysicianOverview.fxml"));
+        
+    	// LOADS LAYOUT
+    	AnchorPane overviewPage = (AnchorPane) loader.load();
 
-        } catch (IOException e) {
-            // Exception gets thrown if the fxml file could not be loaded
-            e.printStackTrace();
-        }
+    	// RETRIEVES CONTROLLER
+    	PhysicianOverviewController controller = loader.getController();
+
+    	// SETS CONTROLLER DEFINITIONS
+    	controller.setMainApp(this);
+    	controller.setDateFormatter(dateFormatter);
+    	
+    	return overviewPage;
     }
     
 	public ObservableList<Physician> getPhysicians() {

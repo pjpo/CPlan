@@ -79,14 +79,14 @@ public class PhysicianEditDialogController {
     }
 
     private boolean isInputValid() {
-        String errorMessage = "";
+        StringBuilder errorMessageBuilder = new StringBuilder();
 
         if (nameField.getText() == null || nameField.getText().length() == 0) {
-            errorMessage += "Nom invalide!\n"; 
+            errorMessageBuilder.append("Nom invalide!\n"); 
         }
         
         if (timePartField.getText() == null || timePartField.getText().length() == 0) {
-            errorMessage += "Proportion de temps invalide!\n"; 
+            errorMessageBuilder.append("Proportion de temps invalide!\n"); 
         } else {
             // TRY TO PARSE THIS AS AN INT
             try {
@@ -94,18 +94,25 @@ public class PhysicianEditDialogController {
             	if (timePartI < 1 || timePartI > 100)
             		throw new NumberFormatException();
             } catch (NumberFormatException e) {
-                errorMessage += "Proportion de temps invalide (doit être un entier entre 1 et 100)!\n"; 
+            	errorMessageBuilder.append("Proportion de temps invalide (doit être un entier entre 1 et 100)!\n"); 
             }
         }
         
-        if (errorMessage.length() == 0) {
+        if (startWorkPicker.getValue() != null && endWorkPicker.getValue() != null) {
+        	// CHECK IF END OF WORK IS GREATER THAN START OF WORK
+        	if (!endWorkPicker.getValue().isAfter(startWorkPicker.getValue())) {
+        		errorMessageBuilder.append("Fin de période de travail doit être supérieur à début de période de travail!\n");
+        	}
+        }
+        
+        if (errorMessageBuilder.length() == 0) {
         	return true;
         } else {
         	Dialogs.create()
         	.owner(dialogStage)
         	.title("Information Dialog")
             .masthead("Invalid fields")
-            .message(errorMessage)
+            .message(errorMessageBuilder.toString())
             .showError();
         	return false;
         }
