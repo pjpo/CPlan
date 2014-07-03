@@ -109,7 +109,7 @@ public class Planning {
 		for (int i = 0 ; i < 1000000 ; i++) {
 			// TELL HOW MANY IDEM SOLUTIONS WE HAVE
 			int idem = 1;
-			int maxWorks = -1;
+			long maxWorks = -1;
 			Iterator<Solution> lastSolutions =  solutions.descendingIterator();
 			
 			while (lastSolutions.hasNext()) {

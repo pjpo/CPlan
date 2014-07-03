@@ -3,6 +3,8 @@ package com.github.aiderpmsi.planning;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Random;
 
 import solver.variables.IntVar;
@@ -22,7 +24,7 @@ public class Solution {
 	private HashMap<LocalDate, HashMap<String, Integer>> solutionMedIndicesMap = null;
 	
 	/** Stores the workload for each physician */
-	private ArrayList<Integer> workLoads = null;
+	private ArrayList<Long> workLoads = null;
 	
 	public HashMap<LocalDate, HashMap<String, Plage>> getWorkingPeriodsMap() {
 		return workingPeriodsMap;
@@ -54,7 +56,7 @@ public class Solution {
 		}
 	}
 
-	public ArrayList<Integer> getWorkLoads() {
+	public ArrayList<Long> getWorkLoads() {
 		return workLoads;
 	}
 
@@ -108,7 +110,7 @@ public class Solution {
 			// CREATES THE HASHMAP FOR WORKLOAD
 			workLoads = new ArrayList<>(physicians.size());
 			for (int i = 0 ; i < physicians.size() ; i++) {
-				workLoads.add(0);
+				workLoads.add(0L);
 			}
 
 			// COUNTS THE WORKLOAD FOR EACH PHYSICIAN
@@ -116,11 +118,43 @@ public class Solution {
 					(HashMap<String, Integer> def) -> {
 						def.values().forEach(
 								(Integer physicianIndice) -> {
-									Integer newWorkLoad =
-											workLoads.get(physicianIndice) +  Integer.divideUnsigned(100000, physicians.get(physicianIndice).getTimePart());
+									// WE ADAPT THE WORKLOAD DEPENDING ON THE PART TIME :
+									// MULTIPLY NB WORKS WITH 1000000/PART TIME
+									Long newWorkLoad =
+											workLoads.get(physicianIndice) +  Long.divideUnsigned(10000000L, physicians.get(physicianIndice).getTimePart());
 									workLoads.set(physicianIndice, newWorkLoad);
 								});
 					});
+			
+			// WE ADAPT THE WORKLOAD DEPENDING ON THE NUMBER OF WORKED DAYS
+			// 1 - LIST NUMBER OF WORKED DAYS
+			HashSet<LocalDate> workedDays = new HashSet<>();
+			newSolutionMedIndicesMap.keySet().forEach(
+					(localDate) -> workedDays.add(localDate));
+			
+			// 2 - DIVIDE THE WORKLOAD BY THE NUMBER OF WORKED DAYS
+			for (int i = 0 ; i < workLoads.size() ; i++) {
+				// CALCULATES NUMBER OF DAYS WORKED IN PERIOD FOR THIS PHYSICIAN
+				// 1 - FINDS THE NUMBER OF WORKED DAYS
+				@SuppressWarnings("unchecked")
+				HashSet<LocalDate> clonedWorkedDays = (HashSet<LocalDate>) workedDays.clone();
+				// 2 - FINDS THE PHYSICIAN
+				Physician physician = physicians.get(i);
+				// 3 - REMOVES THE NOT WORKED DAYS
+				Iterator<LocalDate> localDateIt = clonedWorkedDays.iterator();
+				while (localDateIt.hasNext()) {
+					LocalDate localDate = localDateIt.next();
+					if ((physician.getWorkStart() != null && localDate.isBefore(physician.getWorkStart()))
+							|| (physician.getWorkEnd() != null && localDate.isAfter(physician.getWorkEnd()))) {
+						// DATE IS OUTSIDE WORK RANGE, REMOVE IT FROM WORKED DAYS FOR THIS PHYSICIAN
+						localDateIt.remove();
+					} else {
+						// TODO : IF WORK IN PERIOD, CHECK IF THERE IS THE PHYSICIAN HAS VACANCIES
+					}
+				}
+				// 4 - DIVIDE THE WORKLOAD
+				workLoads.set(i, Long.divideUnsigned(workLoads.get(i), clonedWorkedDays.size()));
+			}
 		}
 	}
 	
@@ -130,14 +164,13 @@ public class Solution {
 		// GETS THE MAX WORKER
 		int maxWorker = getMaxWorkerPhysician();
 		// GET MIN AND MAX WORKLOAD
-		int minWorkLoad = getMinWorkLoad();
-		int maxWorkLoad = getMaxWorkLoad();
+		long minWorkLoad = getMinWorkLoad();
+		long maxWorkLoad = getMaxWorkLoad();
 		
 		System.out.println("Maxworker = " + maxWorker);
 
 		// RANDOM USED
-		Random randomsInts = new Random();
-		
+		Random randomLongs = new Random();
 		// CREATES THE NEW INDICES MAP
 		HashMap<LocalDate, HashMap<String, Integer>> newSolutionMap = new HashMap<>();
 		solutionMedIndicesMap.forEach(
@@ -149,12 +182,12 @@ public class Solution {
 							(String key, Integer value) -> {
 								// RANDOMLY REMOVES THIS WORK PERIOD IF WORKER WORKS TOO MUCH
 								// IF DIFFERENCE BETWEEN MAX AND MIN WORKLOAD IS LOW, WE WILL NOT REMOVE A LOT OF THEM
-								int random = 0;
-								if (value == maxWorker && (random = randomsInts.nextInt(maxWorkLoad)) > minWorkLoad) {
+								long random = 0;
+								if (value == maxWorker && (random = nextLong(randomLongs, maxWorkLoad)) > minWorkLoad) {
 									newSolutionMap.get(localDate).put(key, null);
 								}
 								// ELSE REMOVE THE PHYSICIAN DEPENDING ON RANDOM
-								else if ((random = randomsInts.nextInt(10 + shake)) > 10) {
+								else if ((random = nextLong(randomLongs, 10 + shake)) > 10) {
 									newSolutionMap.get(localDate).put(key, null);
 								} else {
 									newSolutionMap.get(localDate).put(key, value);
@@ -168,22 +201,22 @@ public class Solution {
 		return newSolutionMap;
 	}
 	
-	public int getMinWorkLoad() {
+	public long getMinWorkLoad() {
 		if (workLoads == null)
 			throw new IllegalArgumentException("No solution has been set");
-		return workLoads.stream().min(Integer::compare).get();
+		return workLoads.stream().min(Long::compare).get();
 	}
 
-	public int getMaxWorkLoad() {
+	public long getMaxWorkLoad() {
 		if (workLoads == null)
 			throw new IllegalArgumentException("No solution has been set");
-		return workLoads.stream().max(Integer::compare).get();
+		return workLoads.stream().max(Long::compare).get();
 	}
 	
 	public int getMaxWorkerPhysician() {
 		if (workLoads == null)
 			throw new IllegalArgumentException("No solution has been set");
-		int maxLoad = -1;
+		long maxLoad = -1;
 		int maxWorker = -1;
 		for (int i = 0 ; i < physicians.size() ; i++) {
 			if (workLoads.get(i) > maxLoad) {
@@ -192,5 +225,17 @@ public class Solution {
 			}
 		}
 		return maxWorker;
+	}
+	
+	private long nextLong(Random rng, long n) {
+		if (n<=0)
+            throw new IllegalArgumentException("n must be positive");
+
+		long bits, val;
+		do {
+			bits = (rng.nextLong() << 1) >>> 1;
+			val = bits % n;
+		} while (bits-val+(n-1) < 0L);
+		return val;
 	}
 }

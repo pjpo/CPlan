@@ -1,7 +1,7 @@
 package com.github.aiderpmsi.planning.ui.controller;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
+import java.time.format.DateTimeFormatter;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
@@ -14,7 +14,7 @@ import com.github.aiderpmsi.planning.physician.Physician;
 import com.github.aiderpmsi.planning.physician.PhysicianBuilder;
 import com.github.aiderpmsi.planning.ui.PlanningMainUIApp;
 
-public class PhysicianController {
+public class PhysicianOverviewController {
 
 	@FXML
     private TableView<Physician> physicianTable;
@@ -27,8 +27,15 @@ public class PhysicianController {
     private Label nameLabel;
     @FXML
     private Label parttimeLabel;
+    @FXML
+    private Label startWorkLabel;
+    @FXML
+    private Label endWorkLabel;
     
-    // Reference to the main application
+    /** Date Formatter */
+    private DateTimeFormatter dateFormatter;
+    
+    /** Reference to the main application */
     private PlanningMainUIApp mainApp;
 
     @FXML
@@ -42,26 +49,16 @@ public class PhysicianController {
 
         // Listen for selection changes
         physicianTable.getSelectionModel().selectedItemProperty().addListener(
-        		new ChangeListener<Physician>() {
-
-        			@Override
-        			public void changed(ObservableValue<? extends Physician> observable,
-        					Physician oldValue, Physician newValue) {
-        				showPhysicianDetails(newValue);
-        			}
-        		});
-    }
+        		(observable, oldValue, newValue) -> showPhysicianDetails(newValue));
+        }
     
     private void showPhysicianDetails(Physician physician) {
-    	if (physician == null) {
-    		nameLabel.setText("");
-    		parttimeLabel.setText("");
-    	} else {
-    		nameLabel.setText(physician.getName());
-    		parttimeLabel.setText(physician.getTimePart().toString());
-    	}
+    	nameLabel.setText(physician == null ? "" : (physician.getName() == null ? "Non défini" : physician.getName()));
+    	parttimeLabel.setText(physician == null ? "" : (physician.getTimePart() == null ? "Non défini" : physician.getTimePart().toString()));
+    	startWorkLabel.setText(physician == null ? "" : (physician.getWorkStart() == null ? "Non défini" : physician.getWorkStart().format(dateFormatter)));
+    	endWorkLabel.setText(physician == null ? "" : (physician.getWorkEnd() == null ? "Non défini" : physician.getWorkEnd().format(dateFormatter)));
     }
-
+    
     @FXML
     private void handleDeletePhysician() {
       int selectedIndex = physicianTable.getSelectionModel().getSelectedIndex();
@@ -131,5 +128,9 @@ public class PhysicianController {
         // Add observable list data to the table
         physicianTable.setItems(mainApp.getPhysicians());
     }
+
+	public void setDateFormatter(DateTimeFormatter dateFormatter) {
+		this.dateFormatter = dateFormatter;
+	}
     
 }

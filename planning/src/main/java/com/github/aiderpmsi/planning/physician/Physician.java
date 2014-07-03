@@ -1,5 +1,7 @@
 package com.github.aiderpmsi.planning.physician;
 
+import java.time.LocalDate;
+
 public class Physician extends PhysicianBase {
 
 	public String getName() {
@@ -18,4 +20,21 @@ public class Physician extends PhysicianBase {
 		this.timePart = timePart;
 	}
 	
+
+	public LocalDate getWorkStart() {
+		return workStart;
+	}
+
+	public void setWorkStart(LocalDate workStart) {
+		this.workStart = workStart;
+	}
+
+	public LocalDate getWorkEnd() {
+		return workEnd;
+	}
+
+	public void setWorkEnd(LocalDate workEnd) {
+		this.workEnd = workEnd;
+	}
+
 }

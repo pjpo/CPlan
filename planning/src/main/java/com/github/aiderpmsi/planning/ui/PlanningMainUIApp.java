@@ -1,12 +1,7 @@
 package com.github.aiderpmsi.planning.ui;
 
 import java.io.IOException;
-
-import com.github.aiderpmsi.planning.physician.Physician;
-import com.github.aiderpmsi.planning.physician.PhysicianBuilder;
-import com.github.aiderpmsi.planning.ui.controller.PhysicianController;
-import com.github.aiderpmsi.planning.ui.controller.PhysicianEditDialogController;
-import com.github.aiderpmsi.planning.ui.controller.RootLayoutController;
+import java.time.format.DateTimeFormatter;
 
 import javafx.application.Application;
 import javafx.collections.FXCollections;
@@ -18,6 +13,11 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import com.github.aiderpmsi.planning.physician.Physician;
+import com.github.aiderpmsi.planning.ui.controller.PhysicianEditDialogController;
+import com.github.aiderpmsi.planning.ui.controller.PhysicianOverviewController;
+import com.github.aiderpmsi.planning.ui.controller.RootLayoutController;
+
 public class PlanningMainUIApp extends Application {
 
 	private Stage primaryStage;
@@ -25,6 +25,8 @@ public class PlanningMainUIApp extends Application {
 	private BorderPane rootLayout;
 	
 	private ObservableList<Physician> physicians = FXCollections.observableArrayList();
+	
+	private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 	
 	@Override
 	public void start(Stage primaryStage) {
@@ -34,10 +36,13 @@ public class PlanningMainUIApp extends Application {
         try {
             // Load the root layout from the fxml file
             FXMLLoader loader = new FXMLLoader(PlanningMainUIApp.class.getResource("view/RootLayout.fxml"));
+
             RootLayoutController root = new RootLayoutController();
             root.setMainApp(this);
+            
             loader.setController(root);
             rootLayout = (BorderPane) loader.load();
+ 
             Scene scene = new Scene(rootLayout);
             primaryStage.setScene(scene);
             primaryStage.show();
@@ -57,8 +62,9 @@ public class PlanningMainUIApp extends Application {
             AnchorPane overviewPage = (AnchorPane) loader.load();
             rootLayout.setCenter(overviewPage);
             
-            PhysicianController controller = loader.getController();
+            PhysicianOverviewController controller = loader.getController();
             controller.setMainApp(this);
+            controller.setDateFormatter(dateFormatter);
 
         } catch (IOException e) {
             // Exception gets thrown if the fxml file could not be loaded
@@ -86,6 +92,7 @@ public class PlanningMainUIApp extends Application {
   	    PhysicianEditDialogController controller = loader.getController();
   	    controller.setDialogStage(dialogStage);
   	    controller.setPhysician(physician);
+  	    controller.setDateFormatter(dateFormatter);
 
   	    // Show the dialog and wait until the user closes it
   	    dialogStage.showAndWait();

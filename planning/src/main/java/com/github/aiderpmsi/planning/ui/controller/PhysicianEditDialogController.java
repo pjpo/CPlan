@@ -1,10 +1,13 @@
 package com.github.aiderpmsi.planning.ui.controller;
 
+import java.time.format.DateTimeFormatter;
+
 import org.controlsfx.dialog.Dialogs;
 
 import com.github.aiderpmsi.planning.physician.Physician;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
@@ -16,8 +19,19 @@ public class PhysicianEditDialogController {
 	@FXML
 	private TextField timePartField;
 	
+	@FXML
+	private DatePicker startWorkPicker;
+	
+	@FXML
+	private DatePicker endWorkPicker;
+
+	
+	@SuppressWarnings("unused")
+	private DateTimeFormatter dateFormatter;
+	
 	private Stage dialogStage;
-    private Physician physician;
+    
+	private Physician physician;
 
     private boolean okClicked = false;
     
@@ -32,11 +46,17 @@ public class PhysicianEditDialogController {
     public void setPhysician(Physician physician) {
         this.physician = physician;
 
-        nameField.setText(physician.getName());
-        timePartField.setText(physician.getTimePart().toString());
+        nameField.setText(physician.getName() == null ? "" : physician.getName());
+        timePartField.setText(physician.getTimePart() == null ? "" : physician.getTimePart().toString());
+        startWorkPicker.setValue(physician.getWorkStart());
+        endWorkPicker.setValue(physician.getWorkEnd());
     }
 
-    public boolean isOkClicked() {
+    public void setDateFormatter(DateTimeFormatter dateFormatter) {
+		this.dateFormatter = dateFormatter;
+	}
+
+	public boolean isOkClicked() {
         return okClicked;
     }
     
@@ -45,6 +65,8 @@ public class PhysicianEditDialogController {
         if (isInputValid()) {
             physician.setName(nameField.getText());
             physician.setTimePart(Integer.decode(timePartField.getText()));
+            physician.setWorkStart(startWorkPicker.getValue());
+            physician.setWorkEnd(endWorkPicker.getValue());
 
             okClicked = true;
             dialogStage.close();
