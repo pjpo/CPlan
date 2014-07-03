@@ -28,6 +28,8 @@ public class PhysicianBuilder extends PhysicianBase {
 		Physician physician = new Physician();
 		physician.setName(name);
 		physician.setTimePart(timePart);
+		physician.setWorkStart(workStart);
+		physician.setWorkEnd(workEnd);
 		return physician;
 	}
 }

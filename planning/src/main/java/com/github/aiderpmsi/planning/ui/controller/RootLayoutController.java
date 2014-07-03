@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.time.LocalDate;
 import java.util.LinkedList;
 
 import org.controlsfx.dialog.Dialogs;
@@ -59,9 +60,13 @@ public class RootLayoutController {
 			 writer.append("01:docs\n");
 			 for (Physician physician : mainApp.getPhysicians()) {
 				 writer.append("02:");
-				 writer.append(physician.getName());
+				 writer.append(physician.getName() == null ? "N" : ":" + physician.getName());
 				 writer.append("\n03:");
-				 writer.append(physician.getTimePart().toString());
+				 writer.append(physician.getTimePart() == null ? "N" : ":" + physician.getTimePart().toString());
+				 writer.append("\n04:");
+				 writer.append(physician.getWorkStart() == null ? "N" : ":" + physician.getWorkStart().toString());
+				 writer.append("\n05:");
+				 writer.append(physician.getWorkEnd() == null ? "N" : ":" + physician.getWorkEnd().toString());
 				 writer.append('\n');
 			 }
 		 }
@@ -98,16 +103,22 @@ public class RootLayoutController {
 			 while ((readedLine = reader.readLine()) != null && !readedLine.equals("01:docs")) {}
 
 			 // READ DOCS DEFINITIONS
-			 PhysicianBuilder tempPhysBuilder = new PhysicianBuilder();
+			 PhysicianBuilder physicianBuilder = new PhysicianBuilder();
 			 while ((readedLine = reader.readLine()) != null && !readedLine.startsWith("01:plages")) {
-				 if (readedLine.startsWith("02:")) {
-					 tempPhysBuilder.setName(readedLine.substring(3));
-				 } else if (readedLine.startsWith("03:")) {
-					 tempPhysBuilder.setTimePart(Integer.decode(readedLine.substring(3)));
-					 physicians.add(tempPhysBuilder.toPhysician());
-					 tempPhysBuilder = new PhysicianBuilder();
+				 if (readedLine.startsWith("02:") && readedLine.charAt(3) == ':') {
+					 physicianBuilder.setName(readedLine.substring(4));
+				 } else if (readedLine.startsWith("03:") && readedLine.charAt(3) == ':') {
+					 physicianBuilder.setTimePart(Integer.decode(readedLine.substring(4)));
+				 } else if (readedLine.startsWith("04:") && readedLine.charAt(3) == ':') {
+					 physicianBuilder.setWorkStart(LocalDate.parse(readedLine.substring(4)));
+				 } else if (readedLine.startsWith("05:") && readedLine.charAt(3) == ':') {
+					 physicianBuilder.setWorkEnd(LocalDate.parse(readedLine.substring(4)));
 				 }
-				 ;
+				 
+				 if (readedLine.startsWith("05:")) {
+					 physicians.add(physicianBuilder.toPhysician());
+					 physicianBuilder = new PhysicianBuilder();
+				 }
 			 }
 		 }
 
