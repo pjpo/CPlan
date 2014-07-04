@@ -80,6 +80,9 @@ public class Planning {
 	
 	public Solution findSolution(
 			LinkedList<Solution> previousAcceptedSolutions) throws SolutionException {
+		// IF NO PHYSICIAN HAS BEEN SET, THROW EXCEPTION
+		if (physicians.size() == 0)
+			throw new SolutionException("Aucun médecin défini");
 		// FINDS HOW MANY SOLUTIONS WE HAVE WITH IDEM MAX WORK INDICE
 		int idem = 1;
 		long maxWorks = -1;
@@ -187,18 +190,4 @@ public class Planning {
 		}
 	}		
 
-	@FunctionalInterface
-	public interface TemporaryNoSolutionCallback {
-		public void callback();
-	}
-	
-	@FunctionalInterface
-	public interface NewSolutionCallback {
-		public void callback(Solution solution, ArrayList<Physician> physicians);
-	}
-	
-	@FunctionalInterface
-	public interface NewSolutionSearchCallback {
-		public void callback();
-	}
 }

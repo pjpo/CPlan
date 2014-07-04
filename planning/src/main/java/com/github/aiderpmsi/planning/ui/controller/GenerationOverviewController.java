@@ -5,14 +5,24 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.concurrent.locks.ReentrantLock;
-import org.controlsfx.dialog.Dialogs;
 
+import javafx.beans.property.Property;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.ReadOnlyDoubleProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyStringProperty;
+import javafx.concurrent.Task;
+import javafx.concurrent.Worker;
+import javafx.event.Event;
+import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.util.StringConverter;
+
+import org.controlsfx.dialog.Dialogs;
 
 import com.github.aiderpmsi.planning.Planning;
 import com.github.aiderpmsi.planning.Solution;
@@ -22,6 +32,7 @@ import com.github.aiderpmsi.planning.ui.PlanningMainUIApp;
 
 public class GenerationOverviewController {
 
+	public static final EventType<GenerationActionEvent> GENERATION_EVENT = new EventType<>("GenerationEvent"); 
 
 	@FXML
     private DatePicker startPeriodPicker;
@@ -48,12 +59,9 @@ public class GenerationOverviewController {
     /** Locks multithreaded variables */
     private ReentrantLock lock = new ReentrantLock();
     
-    /** Indicates if the calculation havs to stop */
+    /** Indicates if the calculation have to stop */
     private boolean continueGeneration = false;
-    
-	/** List of calculated Solutions */
-	private LinkedList<Solution> solutions = null;
-	
+    	
 	/** Date formatter */
 	private DateTimeFormatter dateFormatter;
 
@@ -103,45 +111,72 @@ public class GenerationOverviewController {
     			endPeriodPicker.getValue(),
     			new ArrayList<>(mainApp.getPhysicians()),
     			new JourChuMtp());
+
+    	Property<T>
     	
-    	// INIT SOLUTIONS
-    	solutions = new LinkedList<>();
+    	Task<LinkedList<Solution>> task = new Task<LinkedList<Solution>>() {
+
+			@Override
+			protected LinkedList<Solution> call() throws Exception {
+				// INIT VARS
+				LinkedList<Solution> solutions = new LinkedList<>();
+				Integer retrys = 0;
     	
-    	new Thread( () -> {
-    		boolean canSave = false;
-    		Integer retrys = 0;
-    		for (;;) {
-    			// FIRST CHECK GENERATION STATUS
-    			try {
-    				lock.lock();
-    				if (!continueGeneration)
-    					break;
-    			} finally {
-    				lock.unlock();
-    			}
-    			// GENERATION STATUS OK, SEARCHES A SOLUTION
-    			try {
+				
+				
+				for (;;) {
+					// FIRST CHECK GENERATION STATUS
+					try {
+						lock.lock();
+						if (!continueGeneration)
+							break;
+					} finally {
+						lock.unlock();
+					}
+					
+	    			// GENERATION STATUS OK, SEARCHES A SOLUTION
     				retrys++;
     				Solution solution = planning.findSolution(solutions);
     				
     				if (solution != null) {
     					// UPDATES VALUES IN LABELS
-    					showFeedBack(retrys, solution.getMaxWorkLoad(), solution.getMinWorkLoad());
+    					fireEvent(new GenerationActionEvent(retrys, solution.getMaxWorkLoad(), solution.getMinWorkLoad()));
     					// ADDS THIS SOLUTION AS LAST SOLUTION
     					solutions.add(solution);
-    					canSave = true;
     				}
-    			} catch (SolutionException e) {
-    				Dialogs.create()
-    				.owner(mainApp.getPrimaryStage())
-    				.showException(e);
-    				canSave = false;
-    				break;
-    			}
-    		}
-    		// HERE, REINIT BUTTONS
-    		setButtonsStatus(true, false, canSave);
+	    		}
+				// HERE, RETURN SOLUTIONS
+				return solutions;
+			}
+    	};
+    	
+    	task.addEventHandler(GENERATION_EVENT,
+    			(event) -> {
+    				showFeedBack(event.retrys, event.max, event.min);
+    			});
+    	task.setOnFailed( (event) -> {
+    		Throwable exception  =
+    				event.getSource().getException() == null ?
+    						new Exception("Erreur inconnue") :
+    							event.getSource().getException();
+    		if (exception instanceof SolutionException) 
+    			Dialogs.create()
+    			.owner(mainApp.getPrimaryStage())
+    			.masthead("Pas de solution")
+    			.message(exception.getMessage())
+    			.showError();
+    		else
+    			Dialogs.create()
+    			.owner(mainApp.getPrimaryStage())
+    			.masthead("Erreur")
+    			.showException(exception);
+			setButtonsStatus(true, false, false);
+		});
+    	task.setOnSucceeded( (event) -> {
+    		setButtonsStatus(true, false, true);
     	});
+    	
+    	new Thread(task).start();
     }	
     
     public void handlePauseButton() {
@@ -153,25 +188,15 @@ public class GenerationOverviewController {
     	}
     }
     private void showFeedBack(Integer nbTests, Long maxIndice, Long minIndice) {
-    	try {
-    		lock.lock();
-    		nbTestsLabel.setText(nbTests == null ? "" : nbTests.toString());
-    		maxIndiceLabel.setText(maxIndice == null ? "" : maxIndice.toString());
-    		minIndiceLabel.setText(minIndice == null ? "" : minIndice.toString());
-    	} finally {
-    		lock.unlock();
-    	}
+		nbTestsLabel.setText(nbTests == null ? "" : nbTests.toString());
+		maxIndiceLabel.setText(maxIndice == null ? "" : maxIndice.toString());
+		minIndiceLabel.setText(minIndice == null ? "" : minIndice.toString());
     }
     
     private void setButtonsStatus(boolean generateStatus, boolean pauseStatus, boolean saveStatus) {
-    	try {
-    		lock.lock();
-    		generateButton.setDisable(!generateStatus);
-    		pauseButton.setDisable(!pauseStatus);
-    		saveButton.setDisable(!saveStatus);
-    	} finally {
-    		lock.unlock();
-    	}
+		generateButton.setDisable(!generateStatus);
+		pauseButton.setDisable(!pauseStatus);
+		saveButton.setDisable(!saveStatus);
     }
     
     public void setMainApp(PlanningMainUIApp mainApp) {
@@ -228,4 +253,22 @@ public class GenerationOverviewController {
 		}
 	};
 
+	private class GenerationActionEvent extends Event {
+		
+		/** Generated serial id */
+		private static final long serialVersionUID = -1534382480286743862L;
+
+		public Integer retrys;
+		public Long max;
+		public Long min;
+		
+		public GenerationActionEvent(Integer retrys, Long max, Long min) {
+			super(GENERATION_EVENT);
+			this.retrys = retrys;
+			this.max = max;
+			this.min = min;
+		}
+		
+	}
+	
 }
