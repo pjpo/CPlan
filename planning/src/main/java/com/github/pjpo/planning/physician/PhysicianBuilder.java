@@ -1,6 +1,9 @@
 package com.github.pjpo.planning.physician;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+
+import com.github.pjpo.planning.utils.DaysPeriod;
 
 public class PhysicianBuilder extends PhysicianBase {
 	
@@ -23,6 +26,26 @@ public class PhysicianBuilder extends PhysicianBase {
 		this.workEnd = workEnd;
 		return this;
 	}
+	
+	public PhysicianBuilder addPaidVacation(DaysPeriod period) {
+		paidVacation.add(period);
+		return this;
+	}
+	
+	public PhysicianBuilder addUnpaidVacation(DaysPeriod period) {
+		unpaidVacation.add(period);
+		return this;
+	}
+	
+	public PhysicianBuilder addWorkedVac(LocalDate date, String poste) {
+		ArrayList<String> postes;
+		if ((postes = workedVacs.get(date)) == null) {
+			postes = new ArrayList<>();
+			workedVacs.put(date, postes);
+		}
+		postes.add(poste);
+		return this;
+	}
 
 	public Physician toPhysician() {
 		Physician physician = new Physician();
@@ -30,6 +53,7 @@ public class PhysicianBuilder extends PhysicianBase {
 		physician.setTimePart(timePart);
 		physician.setWorkStart(workStart);
 		physician.setWorkEnd(workEnd);
+		physician.setPaidVacation(paidVacation);
 		return physician;
 	}
 }

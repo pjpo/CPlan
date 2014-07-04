@@ -2,7 +2,7 @@ package com.github.pjpo.planning.utils;
 
 import java.time.LocalDate;
 
-public class DaysPeriod {
+public class DaysPeriod implements Comparable<DaysPeriod> {
 
 	private LocalDate start;
 	
@@ -42,6 +42,18 @@ public class DaysPeriod {
 	public LocalDate getEnd() {
 		return end;
 	}
-	
+
+	@Override
+	public int compareTo(DaysPeriod compare) {
+		if (start == compare.getStart() && end == compare.getEnd())
+			return 0;
+		else if (start == null && compare.getStart() != null)
+			return -1;
+		else if (start != null && compare.getStart() == null)
+			return 1;
+		else {
+			return start.compareTo(end);
+		}
+	}
 	
 }

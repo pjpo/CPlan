@@ -48,4 +48,16 @@ public class DaysPeriodTest extends TestCase {
     	assertEquals(true, period1.isOverlapping(period2));
     }
     
+    public void test5() {
+    	DaysPeriod period1 = new DaysPeriod(LocalDate.of(2001, 01, 10), null);
+    	DaysPeriod period2 = new DaysPeriod(null, LocalDate.of(2001, 01, 10));
+    	assertEquals(true, period1.compareTo(period2) > 0);
+    }
+
+    public void test6() {
+    	DaysPeriod period1 = new DaysPeriod(LocalDate.of(2001, 01, 10), null);
+    	DaysPeriod period2 = new DaysPeriod(null, LocalDate.of(2001, 01, 10));
+    	assertEquals(true, period2.compareTo(period1) < 0);
+    }
+
 }

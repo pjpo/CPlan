@@ -1,6 +1,10 @@
 package com.github.pjpo.planning.physician;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import com.github.pjpo.planning.utils.DaysPeriod;
 
 public class Physician extends PhysicianBase {
 
@@ -35,6 +39,30 @@ public class Physician extends PhysicianBase {
 
 	public void setWorkEnd(LocalDate workEnd) {
 		this.workEnd = workEnd;
+	}
+
+	public ArrayList<DaysPeriod> getPaidVacation() {
+		return paidVacation;
+	}
+
+	public void setPaidVacation(ArrayList<DaysPeriod> paidVacation) {
+		this.paidVacation = paidVacation;
+	}
+
+	public ArrayList<DaysPeriod> getUnpaidVacation() {
+		return unpaidVacation;
+	}
+
+	public void setUnpaidVacation(ArrayList<DaysPeriod> unpaidVacation) {
+		this.unpaidVacation = unpaidVacation;
+	}
+
+	public HashMap<LocalDate, ArrayList<String>> getWorkedVacs() {
+		return workedVacs;
+	}
+
+	public void setWorkedVacs(HashMap<LocalDate, ArrayList<String>> workedVacs) {
+		this.workedVacs = workedVacs;
 	}
 
 }

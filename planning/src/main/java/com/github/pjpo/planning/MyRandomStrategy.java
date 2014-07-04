@@ -26,8 +26,6 @@ public class MyRandomStrategy implements IntValueSelector {
 	public int selectValue(IntVar var) {
 		LinkedList<Integer> possiblePhysicians = new LinkedList<>();  
 		for (int i = var.getLB(); i <= var.getUB(); i = var.nextValue(i)) {
-			// CHECK IF THIS PHYSICIAN WORKS THIS DAY
-			// TODO
 			// LISTS ALL THE POSSIBLE PHYSICIANS
 			possiblePhysicians.add(i);
 		}
