@@ -54,6 +54,8 @@ public class PhysicianBuilder extends PhysicianBase {
 		physician.setWorkStart(workStart);
 		physician.setWorkEnd(workEnd);
 		physician.setPaidVacation(paidVacation);
+		physician.setUnpaidVacation(unpaidVacation);
+		physician.setWorkedVacs(workedVacs);
 		return physician;
 	}
 }

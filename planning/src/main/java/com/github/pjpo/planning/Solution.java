@@ -11,6 +11,7 @@ import solver.variables.IntVar;
 
 import com.github.pjpo.planning.lignes.Plage;
 import com.github.pjpo.planning.physician.Physician;
+import com.github.pjpo.planning.utils.DaysPeriod;
 
 public class Solution {
 	
@@ -149,7 +150,13 @@ public class Solution {
 						// DATE IS OUTSIDE WORK RANGE, REMOVE IT FROM WORKED DAYS FOR THIS PHYSICIAN
 						localDateIt.remove();
 					} else {
-						// TODO : IF WORK IN PERIOD, CHECK IF THERE IS THE PHYSICIAN HAS VACANCIES
+						// IF WORK IN PERIOD, CHECK IF THERE IS THE PHYSICIAN HAS VACANCIES
+						for (DaysPeriod daysPeriod : physician.getPaidVacation()) {
+							if (daysPeriod.isInPeriod(localDate)) {
+								localDateIt.remove();
+								break;
+							}
+						}
 					}
 				}
 				// 4 - DIVIDE THE WORKLOAD

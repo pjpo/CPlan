@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.aiderpmsi.planning.ui.controller.GenerationOverviewController">
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.pjpo.planning.ui.controller.GenerationOverviewController">
    <children>
       <VBox layoutX="25.9619140625" layoutY="21.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
          <children>
@@ -78,7 +78,7 @@
                   <Insets right="10.0" />
                </HBox.margin>
             </Button>
-            <Button fx:id="saveButton" layoutX="117.0" layoutY="166.0" mnemonicParsing="false" text="Sauvegarder" />
+            <Button fx:id="saveButton" layoutX="117.0" layoutY="166.0" mnemonicParsing="false" onAction="#handleSaveButton" text="Sauvegarder" />
          </children>
       </HBox>
    </children>

@@ -1,9 +1,20 @@
 package com.github.pjpo.planning.ui.controller;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Map.Entry;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javafx.application.Platform;
@@ -13,14 +24,18 @@ import javafx.scene.control.Button;
 import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.stage.FileChooser;
 import javafx.util.StringConverter;
 
 import org.controlsfx.dialog.Dialogs;
+
+import au.com.bytecode.opencsv.CSVWriter;
 
 import com.github.pjpo.planning.Planning;
 import com.github.pjpo.planning.Solution;
 import com.github.pjpo.planning.SolutionException;
 import com.github.pjpo.planning.jours.JourChuMtp;
+import com.github.pjpo.planning.lignes.Plage;
 import com.github.pjpo.planning.ui.PlanningMainUIApp;
 
 public class GenerationOverviewController {
@@ -55,6 +70,8 @@ public class GenerationOverviewController {
     	
 	/** Date formatter */
 	private DateTimeFormatter dateFormatter;
+	
+	private Solution solution = null;
 
 	@FXML
     private void initialize() {
@@ -161,7 +178,19 @@ public class GenerationOverviewController {
 		});
 
     	task.setOnSucceeded( (event) -> {
-    		setButtonsStatus(true, false, true);
+    		try {
+				if (task.get() == null || task.get().size() == 0)
+					setButtonsStatus(true, false, false);
+				else {
+					setButtonsStatus(true, false, true);
+					solution = task.get().getLast();
+				}
+			} catch (Exception e) {
+    			Dialogs.create()
+    			.owner(mainApp.getPrimaryStage())
+    			.masthead("Erreur")
+    			.showException(e);
+			}
     	});
     	
     	new Thread(task).start();
@@ -175,7 +204,65 @@ public class GenerationOverviewController {
     		lock.unlock();
     	}
     }
-    private void showFeedBack(Integer nbTests, Long maxIndice, Long minIndice) {
+    
+	 public void handleSaveButton() {
+		 FileChooser fileChooser = new FileChooser();
+		 fileChooser.setTitle("Save Planning");
+		 
+		 File saveFile = fileChooser.showSaveDialog(mainApp.getPrimaryStage());
+		 if (saveFile != null) {
+			 try {
+				 saveConfiguration(saveFile);
+			 } catch (IOException e) {
+				 Dialogs.create()
+				 .owner(mainApp.getPrimaryStage())
+				 .showException(e);
+			 }
+		 }
+	 }
+    
+	 public void saveConfiguration(File file) throws IOException {
+		 Path saveFile = Paths.get(file.toURI());
+		 try (CSVWriter csvWriter = new CSVWriter(Files.newBufferedWriter(
+				 saveFile, Charset.forName("UTF-8"),
+				 StandardOpenOption.WRITE,
+				 StandardOpenOption.CREATE,
+				 StandardOpenOption.TRUNCATE_EXISTING))) {
+			 
+			 // SEARCHES THE LIST OF POSTES AND LIST OF DATES
+			 HashSet<String> postes = new HashSet<>();
+			 ArrayList<LocalDate> dates = new ArrayList<>();
+			 for (Entry<LocalDate, HashMap<String, Plage>> entry : solution.getWorkingPeriodsMap().entrySet()) {
+				 dates.add(entry.getKey());
+				 for (String poste : entry.getValue().keySet()) {
+					 postes.add(poste);
+				 }
+			 }
+			 // SORTS LIST OF POSTES AND DATES
+			 ArrayList<String> postesArray = new ArrayList<>(postes);
+			 Collections.sort(postesArray);
+			 Collections.sort(dates);
+			 
+			 // WRITE HEADERS
+			ArrayList<String> header = new ArrayList<>(postesArray.size() + 1);
+			header.add("");
+			header.addAll(postesArray);
+			csvWriter.writeNext(header.toArray(new String[header.size()]));
+			
+			// WRITE CONTENTS
+			for (LocalDate localDate : dates) {
+				ArrayList<String> content = new ArrayList<>(postesArray.size() + 1);
+				content.add(localDate.toString());
+				HashMap<String, Integer> physiciansNb = solution.getSolutionMedIndicesMap().get(localDate);
+				for (String poste : postesArray) {
+					content.add(physiciansNb.containsKey(poste) ? solution.getPhysicians().get(physiciansNb.get(poste)).getName() : "");
+				}
+				csvWriter.writeNext(content.toArray(new String[content.size()]));
+			 }
+		 }
+	 }
+
+	 private void showFeedBack(Integer nbTests, Long maxIndice, Long minIndice) {
 		nbTestsLabel.setText(nbTests == null ? "" : nbTests.toString());
 		maxIndiceLabel.setText(maxIndice == null ? "" : maxIndice.toString());
 		minIndiceLabel.setText(minIndice == null ? "" : minIndice.toString());

@@ -43,6 +43,14 @@ public class DaysPeriod implements Comparable<DaysPeriod> {
 		return end;
 	}
 
+	public void setStart(LocalDate start) {
+		this.start = start;
+	}
+	
+	public void setEnd(LocalDate end) {
+		this.end = end;
+	}
+
 	@Override
 	public int compareTo(DaysPeriod compare) {
 		if (start == compare.getStart() && end == compare.getEnd())
