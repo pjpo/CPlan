@@ -167,8 +167,6 @@ public class Solution {
 		long minWorkLoad = getMinWorkLoad();
 		long maxWorkLoad = getMaxWorkLoad();
 		
-		System.out.println("Maxworker = " + maxWorker);
-
 		// RANDOM USED
 		Random randomLongs = new Random();
 		// CREATES THE NEW INDICES MAP
@@ -182,12 +180,11 @@ public class Solution {
 							(String key, Integer value) -> {
 								// RANDOMLY REMOVES THIS WORK PERIOD IF WORKER WORKS TOO MUCH
 								// IF DIFFERENCE BETWEEN MAX AND MIN WORKLOAD IS LOW, WE WILL NOT REMOVE A LOT OF THEM
-								long random = 0;
-								if (value == maxWorker && (random = nextLong(randomLongs, maxWorkLoad)) > minWorkLoad) {
+								if (value == maxWorker && nextLong(randomLongs, maxWorkLoad) > minWorkLoad) {
 									newSolutionMap.get(localDate).put(key, null);
 								}
 								// ELSE REMOVE THE PHYSICIAN DEPENDING ON RANDOM
-								else if ((random = nextLong(randomLongs, 10 + shake)) > 10) {
+								else if (nextLong(randomLongs, 10 + shake) > 10) {
 									newSolutionMap.get(localDate).put(key, null);
 								} else {
 									newSolutionMap.get(localDate).put(key, value);
@@ -195,7 +192,6 @@ public class Solution {
 					});
 		});
 		
-		System.out.println(" === SHAKER : " + shake + " ===");
 		//Planning.prettyPrintInteger(newSolutionMap, physicians);
 		
 		return newSolutionMap;

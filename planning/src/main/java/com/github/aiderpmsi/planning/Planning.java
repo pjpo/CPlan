@@ -77,6 +77,53 @@ public class Planning {
 			
 		};
 	}
+	
+	public Solution findSolution(
+			LinkedList<Solution> previousAcceptedSolutions) throws SolutionException {
+		// FINDS HOW MANY SOLUTIONS WE HAVE WITH IDEM MAX WORK INDICE
+		int idem = 1;
+		long maxWorks = -1;
+		
+		// DESCENDS SOLUTIONS FROM LAST TO FIRST
+		Iterator<Solution> lastSolutions =  previousAcceptedSolutions.descendingIterator();
+		while (lastSolutions.hasNext()) {
+			Solution lastSolution = lastSolutions.next();
+			if (maxWorks == -1 || lastSolution.getMaxWorkLoad() == maxWorks) {
+				idem++;
+				maxWorks = lastSolution.getMaxWorkLoad();
+			} else {
+				break;
+			}
+		}
+		
+		// GENERATES A NEW SOLVER FROM THE LAST SOLUTION (IF WE HAVE ONE)
+		// THE MORE WE HAVE IDEM SOLUTIONS, THE MORE WE HAVE TO SHAKE THE SOLUTION
+		Entry<Solver, HashMap<LocalDate, HashMap<String, IntVar>>> entry = generateSolver(
+				previousAcceptedSolutions.size() != 0 ? previousAcceptedSolutions.getLast() : null, idem);
+		
+		// FINDS A SOLUTION
+		entry.getKey().findSolution();
+		
+		// IF NO SOLUTION, RETRY IF A SOLUTION ALREADY EXISTS
+		if (entry.getKey().isFeasible() != ESat.TRUE && previousAcceptedSolutions.size() == 0) {
+				throw new SolutionException("No solution");
+		} else {
+			Solution solution = new Solution();
+			solution.setPhysicians(physicians);
+			solution.setWorkingPeriodsMap(getAgenda().getWorkingPeriods());
+			solution.setSolutionMedIndicesMap(entry.getValue());
+			// IF WE HAVE AT LEAST 1 SOLUTIONS IN SOLUTIONS LIST, COMPARE IT WITH THE PRECEDENT
+			if (previousAcceptedSolutions.size() > 0 &&
+					(solution.getMaxWorkLoad() - solution.getMinWorkLoad()) > (previousAcceptedSolutions.getLast().getMaxWorkLoad() - previousAcceptedSolutions.getLast().getMinWorkLoad())) {
+					// REJECTED SOLUTION
+					return null;
+			}
+			// IF WE ARE THERE, THIS SOLUTION IS BETTER THAN THE PRECEDENT
+			else {
+				return solution;
+			}
+		}
+	}
 
 	public static void main(String[] args) throws IOException {
 
@@ -107,69 +154,29 @@ public class Planning {
 		
 		// GENERATES A PLANNING SOLVER
 		for (int i = 0 ; i < 1000000 ; i++) {
-			// TELL HOW MANY IDEM SOLUTIONS WE HAVE
-			int idem = 1;
-			long maxWorks = -1;
-			Iterator<Solution> lastSolutions =  solutions.descendingIterator();
-			
-			while (lastSolutions.hasNext()) {
-				Solution lastSolution = lastSolutions.next();
-				if (maxWorks == -1 || lastSolution.getMaxWorkLoad() == maxWorks) {
-					idem++;
-					maxWorks = lastSolution.getMaxWorkLoad();
-				} else {
-					break;
-				}
-			}
+			try {
+				Solution solution = planning.findSolution(solutions);
 
-			// THE MORe WE HAVE IDEM SOLUTIONS, THE MORE WE HAVE TO SHAKE THE SOLUTION
-			Entry<Solver, HashMap<LocalDate, HashMap<String, IntVar>>> entry = planning.generateSolver(
-					solutions.size() != 0 ? solutions.getLast() : null, idem);
-		
-			// FINDS A SOLUTION
-			entry.getKey().findSolution();
-			
-			// IF NO SOLUTION, RETRY IF A SOLUTION ALREADY EXISTS
-			if (entry.getKey().isFeasible() != ESat.TRUE) {
-				if (solutions.size() == 0)
-					throw new IOException("No solution");
-				else {
-					System.out.println("Temporary no solution");
-				}
-			} else {
-				Solution solution = new Solution();
-				solution.setPhysicians(physicians);
-				solution.setWorkingPeriodsMap(planning.getAgenda().getWorkingPeriods());
-				solution.setSolutionMedIndicesMap(entry.getValue());
-				// IF WE HAVE AT LEAST 1 SOLUTIONS IN SOLUTIONS LIST, COMPARE IT WITH THE PRECEDENT
-				if (solutions.size() > 0 &&
-						(solution.getMaxWorkLoad() - solution.getMinWorkLoad()) > (solutions.getLast().getMaxWorkLoad() - solutions.getLast().getMinWorkLoad())) {
-						// REJECTED SOLUTION
-						System.out.println("Solution trouvée non retenue");
-						System.out.println("Max : " + solution.getMaxWorkLoad() + (solutions.size() > 0 ? (" (Best = " + solutions.getLast().getMaxWorkLoad() + ")") : "") );
-						System.out.println("Min : " + solution.getMinWorkLoad() + (solutions.size() > 0 ? (" (Best = " + solutions.getLast().getMinWorkLoad() + ")") : "") );
-				}
-				// TELL HOW MANY IDEM SOLUTIONS WE HAVE
-				else {
+				System.out.println("Essai num " + i);
+				
+				if (solution != null) {
 					System.out.println("Solution trouvée retenue");
 					System.out.println("Max : " + solution.getMaxWorkLoad() + (solutions.size() > 0 ? (" (Best = " + solutions.getLast().getMaxWorkLoad() + ")") : "") );
 					System.out.println("Min : " + solution.getMinWorkLoad() + (solutions.size() > 0 ? (" (Best = " + solutions.getLast().getMinWorkLoad() + ")") : "") );
 					solutions.add(solution);
-					prettyPrintIntVar(entry.getValue(), physicians);
+					prettyPrintInteger(solution.getSolutionMedIndicesMap(), physicians);
+				} else if (solutions.size() != 0) {
+					System.out.println("Last Max : " + solutions.getLast().getMaxWorkLoad());
+					System.out.println("Last Min : " + solutions.getLast().getMinWorkLoad());
 				}
+			} catch (SolutionException e) {
+				System.out.println("No solution");
+				break;
 			}
+			
 		}
 		
 	}
-	
-	public static void prettyPrintIntVar(HashMap<LocalDate, HashMap<String, IntVar>> solution, ArrayList<Physician> physicians) {
-		for (Entry<LocalDate, HashMap<String, IntVar>> oneDay : solution.entrySet()) {
-			System.out.println("date : " + oneDay.getKey());
-			for (IntVar var : oneDay.getValue().values()) {
-				System.out.println(var.getName() + " : " + physicians.get(var.getValue()).getName());
-			}
-		}
-	}		
 		
 	public static void prettyPrintInteger(HashMap<LocalDate, HashMap<String, Integer>> solution, ArrayList<Physician> physicians) {
 		for (Entry<LocalDate, HashMap<String, Integer>> oneDay : solution.entrySet()) {
@@ -180,4 +187,18 @@ public class Planning {
 		}
 	}		
 
+	@FunctionalInterface
+	public interface TemporaryNoSolutionCallback {
+		public void callback();
+	}
+	
+	@FunctionalInterface
+	public interface NewSolutionCallback {
+		public void callback(Solution solution, ArrayList<Physician> physicians);
+	}
+	
+	@FunctionalInterface
+	public interface NewSolutionSearchCallback {
+		public void callback();
+	}
 }
