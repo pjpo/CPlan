@@ -15,6 +15,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import com.github.aiderpmsi.planning.physician.Physician;
+import com.github.aiderpmsi.planning.ui.controller.GenerationOverviewController;
 import com.github.aiderpmsi.planning.ui.controller.PhysicianEditDialogController;
 import com.github.aiderpmsi.planning.ui.controller.PhysicianOverviewController;
 import com.github.aiderpmsi.planning.ui.controller.RootLayoutController;
@@ -65,9 +66,13 @@ public class PlanningMainUIApp extends Application {
         // LOADS THE PHYSICIAN OVERVIEW
         AnchorPane physicianOverview = loadPhysicianOverview();
         
+        // LOADS THE GENERATION OVERVIEW
+        AnchorPane generationOverview = loadGenerationOverview();
+
         // SETS THE TAB PANES
         TabPane tabPane = (TabPane) borderPane.getCenter();
         tabPane.getTabs().get(0).setContent(physicianOverview);
+        tabPane.getTabs().get(1).setContent(generationOverview);
         
         return borderPane;
 	}
@@ -89,7 +94,24 @@ public class PlanningMainUIApp extends Application {
     	return overviewPage;
     }
     
-	public ObservableList<Physician> getPhysicians() {
+    public AnchorPane loadGenerationOverview() throws IOException {
+    	// LOADS UI DEFINITION
+    	FXMLLoader loader = new FXMLLoader(PlanningMainUIApp.class.getResource("view/GenerationOverview.fxml"));
+        
+    	// LOADS LAYOUT
+    	AnchorPane overviewPage = (AnchorPane) loader.load();
+
+    	// RETRIEVES CONTROLLER
+    	GenerationOverviewController controller = loader.getController();
+
+    	// SETS CONTROLLER DEFINITIONS
+    	controller.setMainApp(this);
+    	controller.setDateFormatter(dateFormatter);
+    	
+    	return overviewPage;
+    }
+
+    public ObservableList<Physician> getPhysicians() {
 		return physicians;
 	}
 
