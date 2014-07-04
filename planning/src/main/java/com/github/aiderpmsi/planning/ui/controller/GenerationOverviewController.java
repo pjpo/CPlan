@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javafx.beans.property.SimpleStringProperty;
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -47,8 +47,11 @@ public class GenerationOverviewController {
     /** Reference to the main application */
     private PlanningMainUIApp mainApp;
 
-    /** Task used for generation */
-    private GenerationTask task = null;
+    /** Locks multithreaded variables */
+    private ReentrantLock lock = new ReentrantLock();
+    
+    /** Indicates if the calculation have to stop */
+    private boolean continueGeneration = false;
     	
 	/** Date formatter */
 	private DateTimeFormatter dateFormatter;
@@ -90,6 +93,9 @@ public class GenerationOverviewController {
     	// ADAPTS BUTTONS VISIBILITY
     	setButtonsStatus(false, true, false);
     	
+    	// SETS THE GENERATION CONTINUATION POLICY
+    	continueGeneration = true;
+    	
     	// INIT PLANNING
     	Planning planning = new Planning(
     			startPeriodPicker.getValue(),
@@ -97,12 +103,44 @@ public class GenerationOverviewController {
     			new ArrayList<>(mainApp.getPhysicians()),
     			new JourChuMtp());
 
-    	task = new GenerationTask(planning);
+    	Task<LinkedList<Solution>> task = new Task<LinkedList<Solution>>() {
 
-    	nbTestsLabel.textProperty().bind(task.getRetrys());
-    	maxIndiceLabel.textProperty().bind(task.getMax());
-    	minIndiceLabel.textProperty().bind(task.getMin());
-
+			@Override protected LinkedList<Solution> call() throws Exception {
+				// INIT VARS
+				LinkedList<Solution> solutions = new LinkedList<>();
+				Integer retrys = 0;
+				
+				for (;;) {
+					// FIRST CHECK GENERATION STATUS
+					try {
+						lock.lock();
+						if (!continueGeneration || isCancelled())
+							break;
+					} finally {
+						lock.unlock();
+					}
+					
+	    			// GENERATION STATUS OK, SEARCHES A SOLUTION
+    				retrys++;
+    				final Solution solution = planning.findSolution(solutions);
+    				final Integer nbRetrys = new Integer(retrys);
+    				
+    				if (solution != null) {
+    					// UPDATES VALUES IN LABELS
+    					Platform.runLater(() -> {
+    						showFeedBack(nbRetrys, solution.getMaxWorkLoad(), solution.getMinWorkLoad());
+    					});
+    					// ADDS THIS SOLUTION AS LAST SOLUTION
+    					solutions.add(solution);
+    				} else {
+    					Platform.runLater(() -> nbTestsLabel.setText(nbRetrys.toString()));
+    				}
+	    		}
+				// HERE, RETURN SOLUTIONS
+				return solutions;
+			}
+    	};
+    	
     	task.setOnFailed( (event) -> {
     		Throwable exception  =
     				event.getSource().getException() == null ?
@@ -121,7 +159,7 @@ public class GenerationOverviewController {
     			.showException(exception);
 			setButtonsStatus(true, false, false);
 		});
-    	
+
     	task.setOnSucceeded( (event) -> {
     		setButtonsStatus(true, false, true);
     	});
@@ -130,10 +168,13 @@ public class GenerationOverviewController {
     }	
     
     public void handlePauseButton() {
-    	if (task != null)
-    		task.setContinueGeneration(false);
+    	try {
+    		lock.lock();
+    		continueGeneration = false;
+    	} finally {
+    		lock.unlock();
+    	}
     }
-    
     private void showFeedBack(Integer nbTests, Long maxIndice, Long minIndice) {
 		nbTestsLabel.setText(nbTests == null ? "" : nbTests.toString());
 		maxIndiceLabel.setText(maxIndice == null ? "" : maxIndice.toString());
@@ -200,76 +241,4 @@ public class GenerationOverviewController {
 		}
 	};
 
-	private class GenerationTask extends Task<LinkedList<Solution>> {
-		
-		private SimpleStringProperty retrys = new SimpleStringProperty();
-		private SimpleStringProperty max = new SimpleStringProperty();
-		private SimpleStringProperty min = new SimpleStringProperty();
-		private boolean continueGeneration = true;
-		private ReentrantLock lock = new ReentrantLock();
-		private Planning planning;
-
-		public GenerationTask(Planning planning) {
-			this.planning = planning;
-		}
-		
-		public SimpleStringProperty getRetrys() {
-			return retrys;
-		}
-
-		public SimpleStringProperty getMax() {
-			return max;
-		}
-
-		public SimpleStringProperty getMin() {
-			return min;
-		}
-		
-		public void setContinueGeneration(boolean bool) {
-			try {
-				lock.lock();
-				continueGeneration = bool;
-			} finally {
-				lock.unlock();
-			}
-		}
-
-		public boolean getContinueGeneration() {
-			try {
-				lock.lock();
-				return continueGeneration;
-			} finally {
-				lock.unlock();
-			}
-		}
-		
-		protected LinkedList<Solution> call() throws Exception {
-			// INIT VARS
-			LinkedList<Solution> solutions = new LinkedList<>();
-			Integer retrys = 0;
-			
-			for (;;) {
-				// FIRST CHECK GENERATION STATUS
-				if (!getContinueGeneration())
-					break;
-				
-    			// GENERATION STATUS OK, SEARCHES A SOLUTION
-				retrys++;
-				Solution solution = planning.findSolution(solutions);
-				
-				if (solution != null) {
-					// UPDATES VALUES IN LABELS
-					this.retrys.set(retrys.toString());
-					max.set(Long.toString(solution.getMaxWorkLoad()));
-					min.set(Long.toString(solution.getMinWorkLoad()));
-					// ADDS THIS SOLUTION AS LAST SOLUTION
-					solutions.add(solution);
-				}
-    		}
-			// HERE, RETURN SOLUTIONS
-			return solutions;
-		}
-		
-	}
-	
 }

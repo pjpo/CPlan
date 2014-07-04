@@ -58,8 +58,9 @@ public class Planning {
 		IntVar[] allDaysArray = allDays.toArray(new IntVar[allDays.size()]);
 		
 		// USE A RANDOM CUSTOM SETTER
-		solver.set(IntStrategyFactory.custom(
-				IntStrategyFactory.random_var_selector(new Date().getTime()), (IntValueSelector) new MyRandomStrategy(physicians), allDaysArray));
+		solver.set(
+				IntStrategyFactory.lastKConflicts(solver, 100, IntStrategyFactory.custom(
+				IntStrategyFactory.random_var_selector(new Date().getTime()), (IntValueSelector) new MyRandomStrategy(physicians), allDaysArray)));
 		
 		// RETURN SOLVER AND VARS
 		return new Entry<Solver, HashMap<LocalDate, HashMap<String, IntVar>>>() {
