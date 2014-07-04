@@ -1,4 +1,4 @@
-package com.github.aiderpmsi.planning.ui;
+package com.github.pjpo.planning.ui;
 
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
@@ -14,17 +14,19 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import com.github.aiderpmsi.planning.physician.Physician;
-import com.github.aiderpmsi.planning.ui.controller.GenerationOverviewController;
-import com.github.aiderpmsi.planning.ui.controller.PhysicianEditDialogController;
-import com.github.aiderpmsi.planning.ui.controller.PhysicianOverviewController;
-import com.github.aiderpmsi.planning.ui.controller.RootLayoutController;
+import com.github.pjpo.planning.physician.Physician;
+import com.github.pjpo.planning.ui.controller.GenerationOverviewController;
+import com.github.pjpo.planning.ui.controller.PhysicianEditDialogController;
+import com.github.pjpo.planning.ui.controller.PhysicianOverviewController;
+import com.github.pjpo.planning.ui.controller.RootLayoutController;
 
 public class PlanningMainUIApp extends Application {
 
 	private Stage primaryStage;
     
 	private ObservableList<Physician> physicians = FXCollections.observableArrayList();
+	
+	private GenerationOverviewController generationOverviewController;
 	
 	private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 	
@@ -42,6 +44,11 @@ public class PlanningMainUIApp extends Application {
             Scene scene = new Scene(rootLayout);
 
             primaryStage.setScene(scene);
+            
+            primaryStage.setOnCloseRequest( (event) -> {
+            	generationOverviewController.handlePauseButton();
+            });
+            
             primaryStage.show();
         } catch (IOException e) {
             // Exception gets thrown if the fxml file could not be loaded
@@ -102,11 +109,11 @@ public class PlanningMainUIApp extends Application {
     	AnchorPane overviewPage = (AnchorPane) loader.load();
 
     	// RETRIEVES CONTROLLER
-    	GenerationOverviewController controller = loader.getController();
+    	generationOverviewController = loader.getController();
 
     	// SETS CONTROLLER DEFINITIONS
-    	controller.setMainApp(this);
-    	controller.setDateFormatter(dateFormatter);
+    	generationOverviewController.setMainApp(this);
+    	generationOverviewController.setDateFormatter(dateFormatter);
     	
     	return overviewPage;
     }

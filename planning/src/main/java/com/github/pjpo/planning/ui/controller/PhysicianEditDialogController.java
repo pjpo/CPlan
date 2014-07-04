@@ -1,10 +1,10 @@
-package com.github.aiderpmsi.planning.ui.controller;
+package com.github.pjpo.planning.ui.controller;
 
 import java.time.format.DateTimeFormatter;
 
 import org.controlsfx.dialog.Dialogs;
 
-import com.github.aiderpmsi.planning.physician.Physician;
+import com.github.pjpo.planning.physician.Physician;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.DatePicker;

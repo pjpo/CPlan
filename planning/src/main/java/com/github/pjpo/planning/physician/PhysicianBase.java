@@ -1,4 +1,4 @@
-package com.github.aiderpmsi.planning.physician;
+package com.github.pjpo.planning.physician;
 
 import java.time.LocalDate;
 
@@ -11,5 +11,5 @@ public class PhysicianBase {
 	protected LocalDate workStart = null;
 	
 	protected LocalDate workEnd = null;
-	
+		
 }

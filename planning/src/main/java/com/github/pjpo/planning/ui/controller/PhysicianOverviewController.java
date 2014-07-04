@@ -1,4 +1,4 @@
-package com.github.aiderpmsi.planning.ui.controller;
+package com.github.pjpo.planning.ui.controller;
 
 import java.time.format.DateTimeFormatter;
 
@@ -10,9 +10,9 @@ import javafx.scene.control.cell.PropertyValueFactory;
 
 import org.controlsfx.dialog.Dialogs;
 
-import com.github.aiderpmsi.planning.physician.Physician;
-import com.github.aiderpmsi.planning.physician.PhysicianBuilder;
-import com.github.aiderpmsi.planning.ui.PlanningMainUIApp;
+import com.github.pjpo.planning.physician.Physician;
+import com.github.pjpo.planning.physician.PhysicianBuilder;
+import com.github.pjpo.planning.ui.PlanningMainUIApp;
 
 public class PhysicianOverviewController {
 

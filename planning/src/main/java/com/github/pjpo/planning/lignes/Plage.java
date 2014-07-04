@@ -1,4 +1,4 @@
-package com.github.aiderpmsi.planning.lignes;
+package com.github.pjpo.planning.lignes;
 
 import java.time.LocalDateTime;
 

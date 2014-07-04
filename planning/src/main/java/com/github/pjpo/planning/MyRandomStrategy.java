@@ -1,4 +1,4 @@
-package com.github.aiderpmsi.planning;
+package com.github.pjpo.planning;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -8,7 +8,7 @@ import java.util.Random;
 import solver.search.strategy.selectors.IntValueSelector;
 import solver.variables.IntVar;
 
-import com.github.aiderpmsi.planning.physician.Physician;
+import com.github.pjpo.planning.physician.Physician;
 
 @SuppressWarnings("serial")
 public class MyRandomStrategy implements IntValueSelector {

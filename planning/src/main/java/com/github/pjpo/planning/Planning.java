@@ -1,4 +1,4 @@
-package com.github.aiderpmsi.planning;
+package com.github.pjpo.planning;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -15,11 +15,11 @@ import solver.search.strategy.selectors.IntValueSelector;
 import solver.variables.IntVar;
 import util.ESat;
 
-import com.github.aiderpmsi.planning.jours.Agenda;
-import com.github.aiderpmsi.planning.jours.Jour;
-import com.github.aiderpmsi.planning.jours.JourChuMtp;
-import com.github.aiderpmsi.planning.physician.Physician;
-import com.github.aiderpmsi.planning.physician.PhysicianBuilder;
+import com.github.pjpo.planning.jours.Agenda;
+import com.github.pjpo.planning.jours.Jour;
+import com.github.pjpo.planning.jours.JourChuMtp;
+import com.github.pjpo.planning.physician.Physician;
+import com.github.pjpo.planning.physician.PhysicianBuilder;
 
 public class Planning {
 

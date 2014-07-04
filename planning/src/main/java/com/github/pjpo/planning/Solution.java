@@ -1,4 +1,4 @@
-package com.github.aiderpmsi.planning;
+package com.github.pjpo.planning;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -9,8 +9,8 @@ import java.util.Random;
 
 import solver.variables.IntVar;
 
-import com.github.aiderpmsi.planning.lignes.Plage;
-import com.github.aiderpmsi.planning.physician.Physician;
+import com.github.pjpo.planning.lignes.Plage;
+import com.github.pjpo.planning.physician.Physician;
 
 public class Solution {
 	

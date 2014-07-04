@@ -1,4 +1,4 @@
-package com.github.aiderpmsi.planning.jours;
+package com.github.pjpo.planning.jours;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -8,8 +8,8 @@ import solver.Solver;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
-import com.github.aiderpmsi.planning.lignes.Plage;
-import com.github.aiderpmsi.planning.physician.Physician;
+import com.github.pjpo.planning.lignes.Plage;
+import com.github.pjpo.planning.physician.Physician;
 
 public class Agenda {
 

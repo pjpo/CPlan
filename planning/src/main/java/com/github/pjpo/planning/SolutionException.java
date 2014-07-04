@@ -1,4 +1,4 @@
-package com.github.aiderpmsi.planning;
+package com.github.pjpo.planning;
 
 public class SolutionException extends Exception {
 

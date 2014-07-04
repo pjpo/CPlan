@@ -1,4 +1,4 @@
-package com.github.aiderpmsi.planning.ui.controller;
+package com.github.pjpo.planning.ui.controller;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -17,9 +17,9 @@ import org.controlsfx.dialog.Dialogs;
 import javafx.fxml.FXML;
 import javafx.stage.FileChooser;
 
-import com.github.aiderpmsi.planning.physician.Physician;
-import com.github.aiderpmsi.planning.physician.PhysicianBuilder;
-import com.github.aiderpmsi.planning.ui.PlanningMainUIApp;
+import com.github.pjpo.planning.physician.Physician;
+import com.github.pjpo.planning.physician.PhysicianBuilder;
+import com.github.pjpo.planning.ui.PlanningMainUIApp;
 
 public class RootLayoutController {
 

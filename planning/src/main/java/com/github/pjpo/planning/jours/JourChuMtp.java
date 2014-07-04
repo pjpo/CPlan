@@ -1,18 +1,20 @@
-package com.github.aiderpmsi.planning.jours;
+package com.github.pjpo.planning.jours;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
-import com.github.aiderpmsi.planning.lignes.FmcLigne;
-import com.github.aiderpmsi.planning.lignes.Ligne;
-import com.github.aiderpmsi.planning.lignes.LunelLigne;
-import com.github.aiderpmsi.planning.lignes.Plage;
-import com.github.aiderpmsi.planning.lignes.SILigne;
+
+import com.github.pjpo.planning.lignes.FmcLigne;
+import com.github.pjpo.planning.lignes.Ligne;
+import com.github.pjpo.planning.lignes.LunelLigne;
+import com.github.pjpo.planning.lignes.Plage;
+import com.github.pjpo.planning.lignes.SILigne;
 
 public class JourChuMtp implements Jour {
 

@@ -1,4 +1,4 @@
-package com.github.aiderpmsi.planning.physician;
+package com.github.pjpo.planning.physician;
 
 import java.time.LocalDate;
 

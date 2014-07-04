@@ -1,4 +1,4 @@
-package com.github.aiderpmsi.planning.ui.controller;
+package com.github.pjpo.planning.ui.controller;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -17,11 +17,11 @@ import javafx.util.StringConverter;
 
 import org.controlsfx.dialog.Dialogs;
 
-import com.github.aiderpmsi.planning.Planning;
-import com.github.aiderpmsi.planning.Solution;
-import com.github.aiderpmsi.planning.SolutionException;
-import com.github.aiderpmsi.planning.jours.JourChuMtp;
-import com.github.aiderpmsi.planning.ui.PlanningMainUIApp;
+import com.github.pjpo.planning.Planning;
+import com.github.pjpo.planning.Solution;
+import com.github.pjpo.planning.SolutionException;
+import com.github.pjpo.planning.jours.JourChuMtp;
+import com.github.pjpo.planning.ui.PlanningMainUIApp;
 
 public class GenerationOverviewController {
 
