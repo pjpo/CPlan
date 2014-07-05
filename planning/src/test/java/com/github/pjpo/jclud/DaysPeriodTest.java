@@ -6,7 +6,7 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import com.github.pjpo.planning.utils.DaysPeriod;
+import com.github.pjpo.planning.utils.Interval;
 
 /**
  * Unit test for simple App.
@@ -25,38 +25,38 @@ public class DaysPeriodTest extends TestCase {
     }
     
     public void test1() {
-    	DaysPeriod period1 = new DaysPeriod(null, null);
-    	DaysPeriod period2 = new DaysPeriod(null, null);
+    	Interval period1 = new Interval(null, null);
+    	Interval period2 = new Interval(null, null);
     	assertEquals(true, period1.isOverlapping(period2));
     }
 
     public void test2() {
-    	DaysPeriod period1 = new DaysPeriod(LocalDate.of(2001, 01, 11), null);
-    	DaysPeriod period2 = new DaysPeriod(null, LocalDate.of(2001, 01, 10));
+    	Interval period1 = new Interval(LocalDate.of(2001, 01, 11), null);
+    	Interval period2 = new Interval(null, LocalDate.of(2001, 01, 10));
     	assertEquals(false, period1.isOverlapping(period2));
     }
 
     public void test3() {
-    	DaysPeriod period1 = new DaysPeriod(LocalDate.of(2001, 01, 10), null);
-    	DaysPeriod period2 = new DaysPeriod(null, LocalDate.of(2001, 01, 10));
+    	Interval period1 = new Interval(LocalDate.of(2001, 01, 10), null);
+    	Interval period2 = new Interval(null, LocalDate.of(2001, 01, 10));
     	assertEquals(true, period1.isOverlapping(period2));
     }
     
     public void test4() {
-    	DaysPeriod period1 = new DaysPeriod(LocalDate.of(2001, 01, 10), LocalDate.of(2001, 01, 11));
-    	DaysPeriod period2 = new DaysPeriod(LocalDate.of(2001, 01, 9), LocalDate.of(2001, 01, 12));
+    	Interval period1 = new Interval(LocalDate.of(2001, 01, 10), LocalDate.of(2001, 01, 11));
+    	Interval period2 = new Interval(LocalDate.of(2001, 01, 9), LocalDate.of(2001, 01, 12));
     	assertEquals(true, period1.isOverlapping(period2));
     }
     
     public void test5() {
-    	DaysPeriod period1 = new DaysPeriod(LocalDate.of(2001, 01, 10), null);
-    	DaysPeriod period2 = new DaysPeriod(null, LocalDate.of(2001, 01, 10));
+    	Interval period1 = new Interval(LocalDate.of(2001, 01, 10), null);
+    	Interval period2 = new Interval(null, LocalDate.of(2001, 01, 10));
     	assertEquals(true, period1.compareTo(period2) > 0);
     }
 
     public void test6() {
-    	DaysPeriod period1 = new DaysPeriod(LocalDate.of(2001, 01, 10), null);
-    	DaysPeriod period2 = new DaysPeriod(null, LocalDate.of(2001, 01, 10));
+    	Interval period1 = new Interval(LocalDate.of(2001, 01, 10), null);
+    	Interval period2 = new Interval(null, LocalDate.of(2001, 01, 10));
     	assertEquals(true, period2.compareTo(period1) < 0);
     }
 

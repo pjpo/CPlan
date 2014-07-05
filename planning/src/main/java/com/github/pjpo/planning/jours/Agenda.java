@@ -13,7 +13,7 @@ import solver.variables.VariableFactory;
 
 import com.github.pjpo.planning.lignes.Plage;
 import com.github.pjpo.planning.physician.Physician;
-import com.github.pjpo.planning.utils.DaysPeriod;
+import com.github.pjpo.planning.utils.Interval;
 
 public class Agenda {
 
@@ -91,15 +91,15 @@ public class Agenda {
 					ArrayList<Integer> workingPhysicians = new ArrayList<>();
 					eachPhysician : for (int i = 0 ; i < physicians.size() ; i++) {
 						// CHECKS IF THE PHYSICIAN IS DURING CONTRACT
-						if (new DaysPeriod(physicians.get(i).getWorkStart(), physicians.get(i).getWorkEnd()).isInPeriod(date)) {
+						if (new Interval(physicians.get(i).getWorkStart(), physicians.get(i).getWorkEnd()).isInPeriod(date)) {
 							// IF UNDER CONTRACT, TEST PAID VACANCIES
-							for (DaysPeriod paidVacation : physicians.get(i).getPaidVacation()) {
+							for (Interval paidVacation : physicians.get(i).getPaidVacation()) {
 								if (paidVacation.isInPeriod(date)) {
 									continue eachPhysician;
 								}
 							}
 							// TEST UNPAID VACANCES
-							for (DaysPeriod unpaidVacation : physicians.get(i).getUnpaidVacation()) {
+							for (Interval unpaidVacation : physicians.get(i).getUnpaidVacation()) {
 								if (unpaidVacation.isInPeriod(date)) {
 									continue eachPhysician;
 								}

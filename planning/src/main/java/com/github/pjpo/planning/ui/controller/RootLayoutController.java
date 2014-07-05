@@ -20,6 +20,7 @@ import javafx.stage.FileChooser;
 import com.github.pjpo.planning.physician.Physician;
 import com.github.pjpo.planning.physician.PhysicianBuilder;
 import com.github.pjpo.planning.ui.PlanningMainUIApp;
+import com.github.pjpo.planning.utils.Interval;
 
 public class RootLayoutController {
 
@@ -57,9 +58,9 @@ public class RootLayoutController {
 				 StandardOpenOption.CREATE,
 				 StandardOpenOption.TRUNCATE_EXISTING)) {
 			 // WRITE MEDS
-			 writer.append("01:docs\n");
+			 writer.append("01:docs");
 			 for (Physician physician : mainApp.getPhysicians()) {
-				 writer.append("02:");
+				 writer.append("\n02:");
 				 writer.append(physician.getName() == null ? "N" : ":" + physician.getName());
 				 writer.append("\n03:");
 				 writer.append(physician.getTimePart() == null ? "N" : ":" + physician.getTimePart().toString());
@@ -67,8 +68,15 @@ public class RootLayoutController {
 				 writer.append(physician.getWorkStart() == null ? "N" : ":" + physician.getWorkStart().toString());
 				 writer.append("\n05:");
 				 writer.append(physician.getWorkEnd() == null ? "N" : ":" + physician.getWorkEnd().toString());
-				 writer.append('\n');
+				 for (Interval interval : physician.getPaidVacation()) {
+					 writer.append("\n06:");
+					 writer.append(interval.getStart() == null ? "N" : interval.getStart().toString());
+					 writer.append(':');
+					 writer.append(interval.getEnd() == null ? "N" : interval.getEnd().toString());
+				 }
+				 writer.append("\n99:END");
 			 }
+			 writer.append('\n');
 		 }
 	 }
 
@@ -113,9 +121,15 @@ public class RootLayoutController {
 					 physicianBuilder.setWorkStart(LocalDate.parse(readedLine.substring(4)));
 				 } else if (readedLine.startsWith("05:") && readedLine.charAt(3) == ':') {
 					 physicianBuilder.setWorkEnd(LocalDate.parse(readedLine.substring(4)));
+				 } else if (readedLine.startsWith("06:")) {
+					 int splitPosition = readedLine.indexOf(':', 3);
+					 String start = readedLine.substring(3, splitPosition);
+					 String end = readedLine.substring(splitPosition + 1);
+					 physicianBuilder.addPaidVacation(new Interval(
+							 start.equals("N") ? null : LocalDate.parse(start),
+							 end.equals("N") ? null : LocalDate.parse(end)));
 				 }
-				 
-				 if (readedLine.startsWith("05:")) {
+				 if (readedLine.equals("99:END")) {
 					 physicians.add(physicianBuilder.toPhysician());
 					 physicianBuilder = new PhysicianBuilder();
 				 }

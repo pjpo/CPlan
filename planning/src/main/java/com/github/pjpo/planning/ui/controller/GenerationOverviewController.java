@@ -25,7 +25,6 @@ import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.stage.FileChooser;
-import javafx.util.StringConverter;
 
 import org.controlsfx.dialog.Dialogs;
 
@@ -37,6 +36,7 @@ import com.github.pjpo.planning.SolutionException;
 import com.github.pjpo.planning.jours.JourChuMtp;
 import com.github.pjpo.planning.lignes.Plage;
 import com.github.pjpo.planning.ui.PlanningMainUIApp;
+import com.github.pjpo.planning.ui.controller.utils.DefaultDatePickerConverter;
 
 public class GenerationOverviewController {
 
@@ -69,6 +69,7 @@ public class GenerationOverviewController {
     private boolean continueGeneration = false;
     	
 	/** Date formatter */
+	@SuppressWarnings("unused")
 	private DateTimeFormatter dateFormatter;
 	
 	private Solution solution = null;
@@ -289,43 +290,5 @@ public class GenerationOverviewController {
     					startPeriodPicker, null));
 	}
 
-	private class DefaultDatePickerConverter extends StringConverter<LocalDate> {
-		
-		private DateTimeFormatter dateTimeFormatter;
-		private DatePicker beforeDatePicker;
-		private DatePicker afterDatePicker;
-
-		public DefaultDatePickerConverter(
-				DateTimeFormatter dateTimeFormatter,
-				DatePicker beforeDatePicker,
-				DatePicker afterDatePicker) {
-			this.dateTimeFormatter = dateTimeFormatter;
-			this.beforeDatePicker = beforeDatePicker;
-			this.afterDatePicker = afterDatePicker;
-		}
-		
-		@Override public String toString(LocalDate object) {
-			if (object == null)
-				return null;
-			else
-				return dateFormatter.format(object);
-		}
-
-		@Override public LocalDate fromString(String string) {
-			if (string == null) {
-				return beforeDatePicker.getValue().plusDays(1);
-			} else {
-				LocalDate newDate = dateTimeFormatter.parse(string, LocalDate::from);
-				if (beforeDatePicker != null && !newDate.isAfter(beforeDatePicker.getValue())) {
-					beforeDatePicker.setValue(newDate.minusDays(1));
-				}
-				if (afterDatePicker != null && !newDate.isBefore(afterDatePicker.getValue())) {
-					afterDatePicker.setValue(newDate.plusDays(1));
-				}
-				return newDate;
-			}
-
-		}
-	};
 
 }

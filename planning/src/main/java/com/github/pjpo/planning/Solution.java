@@ -11,7 +11,7 @@ import solver.variables.IntVar;
 
 import com.github.pjpo.planning.lignes.Plage;
 import com.github.pjpo.planning.physician.Physician;
-import com.github.pjpo.planning.utils.DaysPeriod;
+import com.github.pjpo.planning.utils.Interval;
 
 public class Solution {
 	
@@ -151,7 +151,7 @@ public class Solution {
 						localDateIt.remove();
 					} else {
 						// IF WORK IN PERIOD, CHECK IF THERE IS THE PHYSICIAN HAS VACANCIES
-						for (DaysPeriod daysPeriod : physician.getPaidVacation()) {
+						for (Interval daysPeriod : physician.getPaidVacation()) {
 							if (daysPeriod.isInPeriod(localDate)) {
 								localDateIt.remove();
 								break;

@@ -2,13 +2,13 @@ package com.github.pjpo.planning.utils;
 
 import java.time.LocalDate;
 
-public class DaysPeriod implements Comparable<DaysPeriod> {
+public class Interval implements Comparable<Interval> {
 
 	private LocalDate start;
 	
 	private LocalDate end;
 	
-	public DaysPeriod(LocalDate start, LocalDate end) {
+	public Interval(LocalDate start, LocalDate end) {
 		this.start = start;
 		this.end = end;
 	}
@@ -25,7 +25,7 @@ public class DaysPeriod implements Comparable<DaysPeriod> {
 	}
 
 	
-	public boolean isOverlapping(DaysPeriod compare) {
+	public boolean isOverlapping(Interval compare) {
 		if (
 				((start != null && compare.getEnd() != null && !compare.getEnd().isBefore(start)) || start == null || compare.getEnd() == null)
 				&&
@@ -52,7 +52,7 @@ public class DaysPeriod implements Comparable<DaysPeriod> {
 	}
 
 	@Override
-	public int compareTo(DaysPeriod compare) {
+	public int compareTo(Interval compare) {
 		if (start == compare.getStart() && end == compare.getEnd())
 			return 0;
 		else if (start == null && compare.getStart() != null)

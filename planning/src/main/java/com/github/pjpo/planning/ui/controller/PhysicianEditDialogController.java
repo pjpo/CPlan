@@ -2,12 +2,11 @@ package com.github.pjpo.planning.ui.controller;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -20,7 +19,9 @@ import javafx.util.Callback;
 import org.controlsfx.dialog.Dialogs;
 
 import com.github.pjpo.planning.physician.Physician;
-import com.github.pjpo.planning.utils.DaysPeriod;
+import com.github.pjpo.planning.ui.controller.utils.DateEditingCell;
+import com.github.pjpo.planning.ui.controller.utils.DefaultDatePickerConverter;
+import com.github.pjpo.planning.utils.Interval;
 
 public class PhysicianEditDialogController {
 
@@ -37,15 +38,14 @@ public class PhysicianEditDialogController {
 	private DatePicker endWorkPicker;
 	
 	@FXML
-    private TableView<DaysPeriod> paidVacationsTable;
+    private TableView<Interval> paidVacationsTable;
     @FXML
-    private TableColumn<DaysPeriod, LocalDate> paidVacationsStartColumn;
+    private TableColumn<Interval, LocalDate> paidVacationsStartColumn;
     @FXML
-    private TableColumn<DaysPeriod, LocalDate> paidVacationEndColumn;
+    private TableColumn<Interval, LocalDate> paidVacationEndColumn;
 	
-	private ObservableList<DaysPeriod> paidVacationsList = FXCollections.observableArrayList();
+	private ObservableList<Interval> paidVacationsList = FXCollections.observableArrayList();
     
-	@SuppressWarnings("unused")
 	private DateTimeFormatter dateFormatter;
 	
 	private Stage dialogStage;
@@ -56,18 +56,18 @@ public class PhysicianEditDialogController {
     
     @FXML
     private void initialize() {
-    	Callback<TableColumn<DaysPeriod, LocalDate>, 
-           TableCell<DaysPeriod, LocalDate>> cellFactory
-               = (TableColumn<DaysPeriod, LocalDate> p) -> new DateEditingCell();
+    	Callback<TableColumn<Interval, LocalDate>, 
+           TableCell<Interval, LocalDate>> cellFactory
+               = (TableColumn<Interval, LocalDate> p) -> new DateEditingCell(new DefaultDatePickerConverter(dateFormatter, null, null));
 
         paidVacationsStartColumn.setCellFactory(cellFactory);
     	paidVacationsStartColumn.setOnEditCommit( (event) ->
-                ((DaysPeriod) event.getTableView().getItems().get(
+                ((Interval) event.getTableView().getItems().get(
                 		event.getTablePosition().getRow())
                         ).setStart(event.getNewValue()));
     	paidVacationEndColumn.setCellFactory(cellFactory);
     	paidVacationEndColumn.setOnEditCommit( (event) ->
-                ((DaysPeriod) event.getTableView().getItems().get(
+                ((Interval) event.getTableView().getItems().get(
                 		event.getTablePosition().getRow())
                         ).setEnd(event.getNewValue()));
     	
@@ -90,14 +90,14 @@ public class PhysicianEditDialogController {
         // LINKS TABLE WITH OBSERVABLE
         paidVacationsTable.setItems(paidVacationsList);
         // LINKS THE COLUMNS
-        paidVacationsStartColumn.setCellValueFactory(new PropertyValueFactory<DaysPeriod, LocalDate>("start"));
-        paidVacationEndColumn.setCellValueFactory(new PropertyValueFactory<DaysPeriod, LocalDate>("end"));
+        paidVacationsStartColumn.setCellValueFactory(new PropertyValueFactory<Interval, LocalDate>("start"));
+        paidVacationEndColumn.setCellValueFactory(new PropertyValueFactory<Interval, LocalDate>("end"));
     
     }
 
     @FXML
     private void handleNewPaidVacation() {
-    	DaysPeriod paidVacation = new DaysPeriod(null, null);
+    	Interval paidVacation = new Interval(null, null);
     	paidVacationsList.add(paidVacation);
     }
 
@@ -116,6 +116,7 @@ public class PhysicianEditDialogController {
             physician.setTimePart(Integer.decode(timePartField.getText()));
             physician.setWorkStart(startWorkPicker.getValue());
             physician.setWorkEnd(endWorkPicker.getValue());
+            physician.setPaidVacation(new ArrayList<>(paidVacationsTable.getItems()));
 
             okClicked = true;
             dialogStage.close();
@@ -167,63 +168,4 @@ public class PhysicianEditDialogController {
         }
     }
     
-    private class DateEditingCell extends TableCell<DaysPeriod, LocalDate> {
-    	 
-        private DatePicker datePicker;
-       
-        public DateEditingCell() {}
-       
-        @Override
-        public void startEdit() {
-            if (!isEmpty()) {
-                super.startEdit();
-                createDatePicker();
-                setText(null);
-                setGraphic(datePicker);
-            }
-            setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-        }
-       
-        @Override
-        public void cancelEdit() {
-            super.cancelEdit();
-           
-            setText(getItem() == null ? "Pas de limite" : getItem().toString());
-            setGraphic(null);
-            setContentDisplay(ContentDisplay.TEXT_ONLY);
-        }
-   
-        @Override
-        public void updateItem(LocalDate item, boolean empty) {
-            super.updateItem(item, empty);
-           
-            if (empty) {
-                setText(null);
-                setGraphic(null);
-            } else {
-                if (isEditing()) {
-                    if (datePicker != null) {
-                    	datePicker.setValue(getItem() == null ? LocalDate.now() : getItem());
-                    }
-                    setText(null);
-                    setGraphic(datePicker);
-                    setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-                } else {
-                	setText(getItem() == null ? "Pas de limite" : getItem().toString());
-                	setContentDisplay(ContentDisplay.TEXT_ONLY);
-                }
-            }
-        }
-   
-        private void createDatePicker() {
-            datePicker = new DatePicker(getItem());
-            datePicker.setMinWidth(this.getWidth() - this.getGraphicTextGap()*2);
-            datePicker.focusedProperty().addListener(
-            		(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-					if (!newValue)
-						commitEdit(datePicker.getValue());
-			});
-        }
-       
-    }
 }

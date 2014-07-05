@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import com.github.pjpo.planning.utils.DaysPeriod;
+import com.github.pjpo.planning.utils.Interval;
 
 public class PhysicianBase {
 
@@ -16,9 +16,9 @@ public class PhysicianBase {
 	
 	protected LocalDate workEnd = null;
 		
-	protected ArrayList<DaysPeriod> paidVacation = new ArrayList<>();
+	protected ArrayList<Interval> paidVacation = new ArrayList<>();
 	
-	protected ArrayList<DaysPeriod> unpaidVacation = new ArrayList<>();
+	protected ArrayList<Interval> unpaidVacation = new ArrayList<>();
 
 	protected HashMap<LocalDate, ArrayList<String>> workedVacs = new HashMap<>();
 

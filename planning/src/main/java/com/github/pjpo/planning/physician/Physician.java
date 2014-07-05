@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import com.github.pjpo.planning.utils.DaysPeriod;
+import com.github.pjpo.planning.utils.Interval;
 
 public class Physician extends PhysicianBase {
 
@@ -41,19 +41,19 @@ public class Physician extends PhysicianBase {
 		this.workEnd = workEnd;
 	}
 
-	public ArrayList<DaysPeriod> getPaidVacation() {
+	public ArrayList<Interval> getPaidVacation() {
 		return paidVacation;
 	}
 
-	public void setPaidVacation(ArrayList<DaysPeriod> paidVacation) {
+	public void setPaidVacation(ArrayList<Interval> paidVacation) {
 		this.paidVacation = paidVacation;
 	}
 
-	public ArrayList<DaysPeriod> getUnpaidVacation() {
+	public ArrayList<Interval> getUnpaidVacation() {
 		return unpaidVacation;
 	}
 
-	public void setUnpaidVacation(ArrayList<DaysPeriod> unpaidVacation) {
+	public void setUnpaidVacation(ArrayList<Interval> unpaidVacation) {
 		this.unpaidVacation = unpaidVacation;
 	}
 
