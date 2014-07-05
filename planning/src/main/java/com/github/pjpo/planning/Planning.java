@@ -38,6 +38,7 @@ public class Planning {
 	}
 	
 	public Entry<Solver, HashMap<LocalDate, HashMap<String, IntVar>>> generateSolver(Solution solution, int shake) {
+		System.out.println("Shaker : " + shake);
 		Solver solver = new Solver();
 
 		// FILLS THE SOLVER
@@ -59,7 +60,7 @@ public class Planning {
 		
 		// USE A RANDOM CUSTOM SETTER
 		solver.set(
-				IntStrategyFactory.lastKConflicts(solver, 100, IntStrategyFactory.custom(
+				IntStrategyFactory.lastKConflicts(solver, 1000, IntStrategyFactory.custom(
 				IntStrategyFactory.random_var_selector(new Date().getTime()), (IntValueSelector) new MyRandomStrategy(physicians), allDaysArray)));
 		
 		// RETURN SOLVER AND VARS
@@ -117,6 +118,7 @@ public class Planning {
 			solution.setWorkingPeriodsMap(getAgenda().getWorkingPeriods());
 			solution.setSolutionMedIndicesMap(entry.getValue());
 			// IF WE HAVE AT LEAST 1 SOLUTIONS IN SOLUTIONS LIST, COMPARE IT WITH THE PRECEDENT
+			System.out.println("Diff : " + (solution.getMaxWorkLoad() - solution.getMinWorkLoad()));
 			if (previousAcceptedSolutions.size() > 0 &&
 					(solution.getMaxWorkLoad() - solution.getMinWorkLoad()) > (previousAcceptedSolutions.getLast().getMaxWorkLoad() - previousAcceptedSolutions.getLast().getMinWorkLoad())) {
 					// REJECTED SOLUTION
@@ -148,7 +150,15 @@ public class Planning {
 		physicians.add(new PhysicianBuilder().setName("Med8").setTimePart(65).toPhysician());
 		physicians.add(new PhysicianBuilder().setName("Med9").setTimePart(60).toPhysician());
 		physicians.add(new PhysicianBuilder().setName("Med10").setTimePart(55).toPhysician());
-		physicians.add(new PhysicianBuilder().setName("Med11").setTimePart(55).toPhysician());
+		physicians.add(new PhysicianBuilder().setName("Med11").setTimePart(100).toPhysician());
+		physicians.add(new PhysicianBuilder().setName("Med12").setTimePart(100).toPhysician());
+		physicians.add(new PhysicianBuilder().setName("Med13").setTimePart(100).toPhysician());
+		physicians.add(new PhysicianBuilder().setName("Med14").setTimePart(100).toPhysician());
+		physicians.add(new PhysicianBuilder().setName("Med15").setTimePart(100).toPhysician());
+		physicians.add(new PhysicianBuilder().setName("Med16").setTimePart(100).toPhysician());
+		physicians.add(new PhysicianBuilder().setName("Med17").setTimePart(100).toPhysician());
+		physicians.add(new PhysicianBuilder().setName("Med18").setTimePart(100).toPhysician());
+		physicians.add(new PhysicianBuilder().setName("Med19").setTimePart(100).toPhysician());
 	
 		// PLANNING
 		Planning planning = new Planning(START_DATE, START_DATE.plusDays(DAYS), physicians, new JourChuMtp());
@@ -172,6 +182,7 @@ public class Planning {
 				} else if (solutions.size() != 0) {
 					System.out.println("Last Max : " + solutions.getLast().getMaxWorkLoad());
 					System.out.println("Last Min : " + solutions.getLast().getMinWorkLoad());
+					System.out.println("Max worker : " + solutions.getLast().getMaxWorkerPhysician());
 				}
 			} catch (SolutionException e) {
 				System.out.println("No solution");
