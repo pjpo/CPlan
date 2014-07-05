@@ -7,9 +7,7 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.TableCell;
 import javafx.util.StringConverter;
 
-import com.github.pjpo.planning.utils.Interval;
-
-public class DateEditingCell extends TableCell<Interval, LocalDate> {
+public class DateEditingCell<T> extends TableCell<T, LocalDate> {
 	 
     private DatePicker datePicker = null;
    
@@ -25,6 +23,7 @@ public class DateEditingCell extends TableCell<Interval, LocalDate> {
         if (!isEmpty()) {
             super.startEdit();
             setText(null);
+            datePicker.setValue(getItem());
             setGraphic(datePicker);
         }
         setContentDisplay(ContentDisplay.GRAPHIC_ONLY);

@@ -3,6 +3,8 @@ package com.github.pjpo.planning.ui.controller;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -13,6 +15,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
@@ -21,6 +24,7 @@ import org.controlsfx.dialog.Dialogs;
 import com.github.pjpo.planning.physician.Physician;
 import com.github.pjpo.planning.ui.controller.utils.DateEditingCell;
 import com.github.pjpo.planning.ui.controller.utils.DefaultDatePickerConverter;
+import com.github.pjpo.planning.ui.model.Poste;
 import com.github.pjpo.planning.utils.Interval;
 
 public class PhysicianEditDialogController {
@@ -43,9 +47,24 @@ public class PhysicianEditDialogController {
     private TableColumn<Interval, LocalDate> paidVacationsStartColumn;
     @FXML
     private TableColumn<Interval, LocalDate> paidVacationEndColumn;
-	
 	private ObservableList<Interval> paidVacationsList = FXCollections.observableArrayList();
     
+	@FXML
+    private TableView<Interval> unpaidVacationsTable;
+    @FXML
+    private TableColumn<Interval, LocalDate> unpaidVacationsStartColumn;
+    @FXML
+    private TableColumn<Interval, LocalDate> unpaidVacationEndColumn;
+	private ObservableList<Interval> unpaidVacationsList = FXCollections.observableArrayList();
+	
+	@FXML
+    private TableView<Poste> neededVacTable;
+    @FXML
+    private TableColumn<Poste, LocalDate> neededVacDateColumn;
+    @FXML
+    private TableColumn<Poste, String> neededVacPosteColumn;
+	private ObservableList<Poste> neededVacList = FXCollections.observableArrayList();
+
 	private DateTimeFormatter dateFormatter;
 	
 	private Stage dialogStage;
@@ -57,20 +76,45 @@ public class PhysicianEditDialogController {
     @FXML
     private void initialize() {
     	Callback<TableColumn<Interval, LocalDate>, 
-           TableCell<Interval, LocalDate>> cellFactory
-               = (TableColumn<Interval, LocalDate> p) -> new DateEditingCell(new DefaultDatePickerConverter(dateFormatter, null, null));
+    		TableCell<Interval, LocalDate>> intervalCellFactory
+    		= (TableColumn<Interval, LocalDate> p) -> new DateEditingCell<Interval>(new DefaultDatePickerConverter(dateFormatter, null, null));
+    	Callback<TableColumn<Poste, LocalDate>, 
+    		TableCell<Poste, LocalDate>> posteCellFactory
+    		= (TableColumn<Poste, LocalDate> p) -> new DateEditingCell<Poste>(new DefaultDatePickerConverter(dateFormatter, null, null));
 
-        paidVacationsStartColumn.setCellFactory(cellFactory);
+        paidVacationsStartColumn.setCellFactory(intervalCellFactory);
     	paidVacationsStartColumn.setOnEditCommit( (event) ->
                 ((Interval) event.getTableView().getItems().get(
                 		event.getTablePosition().getRow())
                         ).setStart(event.getNewValue()));
-    	paidVacationEndColumn.setCellFactory(cellFactory);
+    	paidVacationEndColumn.setCellFactory(intervalCellFactory);
     	paidVacationEndColumn.setOnEditCommit( (event) ->
                 ((Interval) event.getTableView().getItems().get(
                 		event.getTablePosition().getRow())
                         ).setEnd(event.getNewValue()));
     	
+        unpaidVacationsStartColumn.setCellFactory(intervalCellFactory);
+    	unpaidVacationsStartColumn.setOnEditCommit( (event) ->
+                ((Interval) event.getTableView().getItems().get(
+                		event.getTablePosition().getRow())
+                        ).setStart(event.getNewValue()));
+    	unpaidVacationEndColumn.setCellFactory(intervalCellFactory);
+    	unpaidVacationEndColumn.setOnEditCommit( (event) ->
+                ((Interval) event.getTableView().getItems().get(
+                		event.getTablePosition().getRow())
+                        ).setEnd(event.getNewValue()));
+
+        neededVacDateColumn.setCellFactory(posteCellFactory);
+        neededVacDateColumn.setOnEditCommit( (event) ->
+        		((Poste) event.getTableView().getItems().get(
+        				event.getTablePosition().getRow())
+        				).setDate(event.getNewValue()));
+        
+        neededVacPosteColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        neededVacPosteColumn.setOnEditCommit( (event) ->
+        		((Poste) event.getTableView().getItems().get(
+        				event.getTablePosition().getRow())
+                        ).setPoste(event.getNewValue()));
     }
 
     public void setDialogStage(Stage dialogStage) {
@@ -85,6 +129,7 @@ public class PhysicianEditDialogController {
         startWorkPicker.setValue(physician.getWorkStart());
         endWorkPicker.setValue(physician.getWorkEnd());
         
+        // == PAID VACATIONS ==
         // LINKS OBSERVABLE WITH PHYSICIAN
         paidVacationsList.setAll(physician.getPaidVacation());
         // LINKS TABLE WITH OBSERVABLE
@@ -93,12 +138,102 @@ public class PhysicianEditDialogController {
         paidVacationsStartColumn.setCellValueFactory(new PropertyValueFactory<Interval, LocalDate>("start"));
         paidVacationEndColumn.setCellValueFactory(new PropertyValueFactory<Interval, LocalDate>("end"));
     
+        // == UNPAID VACATIONS ==
+        // LINKS OBSERVABLE WITH PHYSICIAN
+        unpaidVacationsList.setAll(physician.getUnpaidVacation());
+        // LINKS TABLE WITH OBSERVABLE
+        unpaidVacationsTable.setItems(unpaidVacationsList);
+        // LINKS THE COLUMNS
+        unpaidVacationsStartColumn.setCellValueFactory(new PropertyValueFactory<Interval, LocalDate>("start"));
+        unpaidVacationEndColumn.setCellValueFactory(new PropertyValueFactory<Interval, LocalDate>("end"));
+
+        // == NEEDED VACS LIST ==
+        // FILLS THE OBSERVABLE ASSOCIATED LIST
+        neededVacList.clear();
+        ArrayList<LocalDate> neededVacDates = new ArrayList<>(physician.getWorkedVacs().size());
+        for (LocalDate date : physician.getWorkedVacs().keySet()) {
+        	neededVacDates.add(date);
+        }
+        Collections.sort(neededVacDates);
+        for (LocalDate date : neededVacDates) {
+        	for (String posteName : physician.getWorkedVacs().get(date)) {
+        		Poste poste = new Poste();
+        		poste.setDate(null);
+        		poste.setPoste(posteName);
+        		neededVacList.add(poste);
+        	}
+        }
+        // LINKS TABLE WITH OBSERVABLE
+        neededVacTable.setItems(neededVacList);
+        // LINKS THE COLUMNS
+        neededVacDateColumn.setCellValueFactory(new PropertyValueFactory<Poste, LocalDate>("date"));
+        neededVacPosteColumn.setCellValueFactory(new PropertyValueFactory<Poste, String>("poste"));
     }
 
     @FXML
     private void handleNewPaidVacation() {
     	Interval paidVacation = new Interval(null, null);
     	paidVacationsList.add(paidVacation);
+    }
+
+    @FXML
+    private void handleDeletePaidVacation() {
+        int selectedIndex = paidVacationsTable.getSelectionModel().getSelectedIndex();
+        if (selectedIndex >= 0) {
+        	paidVacationsTable.getItems().remove(selectedIndex);
+        } else {
+      	  // NOTHING SELECTED
+      	  Dialogs.create()
+      	  .owner(dialogStage)
+      	  .title("Information Dialog")
+            .masthead("Pas de période sélectionnée")
+            .message("Merci de sélectionner une période")
+            .showInformation();
+        }
+    }
+
+    @FXML
+    private void handleNewUnpaidVacation() {
+    	Interval unpaidVacation = new Interval(null, null);
+    	unpaidVacationsList.add(unpaidVacation);
+    }
+
+    @FXML
+    private void handleDeleteUnpaidVacation() {
+        int selectedIndex = unpaidVacationsTable.getSelectionModel().getSelectedIndex();
+        if (selectedIndex >= 0) {
+        	unpaidVacationsTable.getItems().remove(selectedIndex);
+        } else {
+      	  // NOTHING SELECTED
+      	  Dialogs.create()
+      	  .owner(dialogStage)
+      	  .title("Information Dialog")
+            .masthead("Pas de période sélectionnée")
+            .message("Merci de sélectionner une période")
+            .showInformation();
+        }
+    }
+
+    @FXML
+    private void handleNewNeededVacation() {
+    	Poste poste = new Poste();
+    	neededVacList.add(poste);
+    }
+
+    @FXML
+    private void handleDeleteNeededVacation() {
+        int selectedIndex = neededVacTable.getSelectionModel().getSelectedIndex();
+        if (selectedIndex >= 0) {
+        	neededVacTable.getItems().remove(selectedIndex);
+        } else {
+      	  // NOTHING SELECTED
+      	  Dialogs.create()
+      	  .owner(dialogStage)
+      	  .title("Information Dialog")
+            .masthead("Pas d'élément sélectionné")
+            .message("Merci de sélectionner un élément")
+            .showInformation();
+        }
     }
 
     public void setDateFormatter(DateTimeFormatter dateFormatter) {
@@ -117,6 +252,17 @@ public class PhysicianEditDialogController {
             physician.setWorkStart(startWorkPicker.getValue());
             physician.setWorkEnd(endWorkPicker.getValue());
             physician.setPaidVacation(new ArrayList<>(paidVacationsTable.getItems()));
+            physician.setUnpaidVacation(new ArrayList<>(unpaidVacationsTable.getItems()));
+            HashMap<LocalDate, ArrayList<String>> workedVacs = new HashMap<>();
+            for (Poste poste : neededVacList) {
+            	ArrayList<String> dateWorkedVacs = null;
+            	if ((dateWorkedVacs = workedVacs.get(poste.getDate())) == null) {
+            		dateWorkedVacs = new ArrayList<>();
+            		workedVacs.put(poste.getDate(), dateWorkedVacs);
+            	}
+            	dateWorkedVacs.add(poste.getPoste());
+            }
+            physician.setWorkedVacs(workedVacs);
 
             okClicked = true;
             dialogStage.close();
@@ -167,5 +313,5 @@ public class PhysicianEditDialogController {
         	return false;
         }
     }
-    
+
 }

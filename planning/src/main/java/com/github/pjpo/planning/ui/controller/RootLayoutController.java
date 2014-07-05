@@ -10,7 +10,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Map.Entry;
 
 import org.controlsfx.dialog.Dialogs;
 
@@ -74,6 +76,20 @@ public class RootLayoutController {
 					 writer.append(':');
 					 writer.append(interval.getEnd() == null ? "N" : interval.getEnd().toString());
 				 }
+				 for (Interval interval : physician.getUnpaidVacation()) {
+					 writer.append("\n07:");
+					 writer.append(interval.getStart() == null ? "N" : interval.getStart().toString());
+					 writer.append(':');
+					 writer.append(interval.getEnd() == null ? "N" : interval.getEnd().toString());
+				 }
+				 for (Entry<LocalDate, ArrayList<String>> entry : physician.getWorkedVacs().entrySet()) {
+					 for (String poste : entry.getValue()) {
+						 writer.append("\n08:");
+						 writer.append(entry.getKey().toString());
+						 writer.append(':');
+						 writer.append(poste);
+					 }
+				 }
 				 writer.append("\n99:END");
 			 }
 			 writer.append('\n');
@@ -128,8 +144,19 @@ public class RootLayoutController {
 					 physicianBuilder.addPaidVacation(new Interval(
 							 start.equals("N") ? null : LocalDate.parse(start),
 							 end.equals("N") ? null : LocalDate.parse(end)));
-				 }
-				 if (readedLine.equals("99:END")) {
+				 } else if (readedLine.startsWith("07:")) {
+					 int splitPosition = readedLine.indexOf(':', 3);
+					 String start = readedLine.substring(3, splitPosition);
+					 String end = readedLine.substring(splitPosition + 1);
+					 physicianBuilder.addUnpaidVacation(new Interval(
+							 start.equals("N") ? null : LocalDate.parse(start),
+							 end.equals("N") ? null : LocalDate.parse(end)));
+				 } else if (readedLine.startsWith("08:")) {
+					 int splitPosition = readedLine.indexOf(':', 3);
+					 LocalDate date = LocalDate.parse(readedLine.substring(3, splitPosition));
+					 String poste = readedLine.substring(splitPosition + 1);
+					 physicianBuilder.addWorkedVac(date, poste);
+				 } else if (readedLine.equals("99:END")) {
 					 physicians.add(physicianBuilder.toPhysician());
 					 physicianBuilder = new PhysicianBuilder();
 				 }
