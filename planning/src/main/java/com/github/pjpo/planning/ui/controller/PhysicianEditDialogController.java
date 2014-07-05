@@ -3,11 +3,13 @@ package com.github.pjpo.planning.ui.controller;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.DatePicker;
-import javafx.scene.control.TableCell; 
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -63,6 +65,11 @@ public class PhysicianEditDialogController {
                 ((DaysPeriod) event.getTableView().getItems().get(
                 		event.getTablePosition().getRow())
                         ).setStart(event.getNewValue()));
+    	paidVacationEndColumn.setCellFactory(cellFactory);
+    	paidVacationEndColumn.setOnEditCommit( (event) ->
+                ((DaysPeriod) event.getTableView().getItems().get(
+                		event.getTablePosition().getRow())
+                        ).setEnd(event.getNewValue()));
     	
     }
 
@@ -174,16 +181,16 @@ public class PhysicianEditDialogController {
                 setText(null);
                 setGraphic(datePicker);
             }
-            // setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+            setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         }
        
         @Override
         public void cancelEdit() {
             super.cancelEdit();
            
-            setText(getItem() == null ? "" : getItem().toString());
+            setText(getItem() == null ? "Pas de limite" : getItem().toString());
             setGraphic(null);
-            //setContentDisplay(ContentDisplay.TEXT_ONLY);
+            setContentDisplay(ContentDisplay.TEXT_ONLY);
         }
    
         @Override
@@ -200,10 +207,10 @@ public class PhysicianEditDialogController {
                     }
                     setText(null);
                     setGraphic(datePicker);
-                    //setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+                    setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
                 } else {
-                	setText(getItem() == null ? "" : getItem().toString());
-                	//setContentDisplay(ContentDisplay.TEXT_ONLY);
+                	setText(getItem() == null ? "Pas de limite" : getItem().toString());
+                	setContentDisplay(ContentDisplay.TEXT_ONLY);
                 }
             }
         }
@@ -211,6 +218,11 @@ public class PhysicianEditDialogController {
         private void createDatePicker() {
             datePicker = new DatePicker(getItem());
             datePicker.setMinWidth(this.getWidth() - this.getGraphicTextGap()*2);
+            datePicker.focusedProperty().addListener(
+            		(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+					if (!newValue)
+						commitEdit(datePicker.getValue());
+			});
         }
        
     }
