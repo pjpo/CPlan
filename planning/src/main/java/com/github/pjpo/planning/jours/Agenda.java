@@ -120,9 +120,15 @@ public class Agenda {
 									newIntVar = VariableFactory.fixed(date.toString() + "_" + key, i, solver);
 								}
 							}
+							// REWORK THE PHYSICIANS WORKING FOR THIS POSTE
+							ArrayList<Integer> workingPhysiciansPoste = new ArrayList<>(workingPhysicians.size());
+							for (Integer physicianNb : workingPhysicians) {
+								if (!physicians.get(physicianNb).getRefusedPostes().contains(key))
+									workingPhysiciansPoste.add(physicianNb);
+							}
 							// IF NO PHYSICIAN WAS PREDEFINED, TEST WITH ANY
 							if (newIntVar == null)
-								newIntVar = VariableFactory.enumerated(date.toString() + "_" + key, toIntArray(workingPhysicians), solver);
+								newIntVar = VariableFactory.enumerated(date.toString() + "_" + key, toIntArray(workingPhysiciansPoste), solver);
 						}
 						newHashMap.put(key, newIntVar);
 					});

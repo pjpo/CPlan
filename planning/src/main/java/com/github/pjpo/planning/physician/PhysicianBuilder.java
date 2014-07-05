@@ -47,6 +47,11 @@ public class PhysicianBuilder extends PhysicianBase {
 		return this;
 	}
 
+	public PhysicianBuilder addRefusedPoste(String poste) {
+		refusedPostes.add(poste);
+		return this;
+	}
+
 	public Physician toPhysician() {
 		Physician physician = new Physician();
 		physician.setName(name);
@@ -56,6 +61,7 @@ public class PhysicianBuilder extends PhysicianBase {
 		physician.setPaidVacation(paidVacation);
 		physician.setUnpaidVacation(unpaidVacation);
 		physician.setWorkedVacs(workedVacs);
+		physician.setRefusedPostes(refusedPostes);
 		return physician;
 	}
 }

@@ -65,4 +65,12 @@ public class Physician extends PhysicianBase {
 		this.workedVacs = workedVacs;
 	}
 
+	public ArrayList<String> getRefusedPostes() {
+		return refusedPostes;
+	}
+
+	public void setRefusedPostes(ArrayList<String> refusedPostes) {
+		this.refusedPostes = refusedPostes;
+	}
+
 }

@@ -90,6 +90,10 @@ public class RootLayoutController {
 						 writer.append(poste);
 					 }
 				 }
+				 for (String poste : physician.getRefusedPostes()) {
+					 writer.append("\n09:");
+					 writer.append(poste);
+				 }
 				 writer.append("\n99:END");
 			 }
 			 writer.append('\n');
@@ -156,6 +160,8 @@ public class RootLayoutController {
 					 LocalDate date = LocalDate.parse(readedLine.substring(3, splitPosition));
 					 String poste = readedLine.substring(splitPosition + 1);
 					 physicianBuilder.addWorkedVac(date, poste);
+				 } else if (readedLine.startsWith("09:")) {
+					 physicianBuilder.addRefusedPoste(readedLine.substring(3));
 				 } else if (readedLine.equals("99:END")) {
 					 physicians.add(physicianBuilder.toPhysician());
 					 physicianBuilder = new PhysicianBuilder();

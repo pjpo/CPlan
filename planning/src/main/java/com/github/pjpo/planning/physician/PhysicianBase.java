@@ -21,5 +21,7 @@ public class PhysicianBase {
 	protected ArrayList<Interval> unpaidVacation = new ArrayList<>();
 
 	protected HashMap<LocalDate, ArrayList<String>> workedVacs = new HashMap<>();
+	
+	protected ArrayList<String> refusedPostes = new ArrayList<>();
 
 }

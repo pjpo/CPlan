@@ -42,6 +42,9 @@ public class PhysicianEditDialogController {
 	private DatePicker endWorkPicker;
 	
 	@FXML
+	private TextField refusedPostes;
+
+	@FXML
     private TableView<Interval> paidVacationsTable;
     @FXML
     private TableColumn<Interval, LocalDate> paidVacationsStartColumn;
@@ -168,6 +171,15 @@ public class PhysicianEditDialogController {
         // LINKS THE COLUMNS
         neededVacDateColumn.setCellValueFactory(new PropertyValueFactory<Poste, LocalDate>("date"));
         neededVacPosteColumn.setCellValueFactory(new PropertyValueFactory<Poste, String>("poste"));
+        
+        // == REFUSED POSTES ==
+        StringBuilder refusedPostesBuilder = new StringBuilder();
+        for (String poste : physician.getRefusedPostes()) {
+        	refusedPostesBuilder.append(poste).append(';');
+        }
+        if (refusedPostesBuilder.length() != 0)
+        	refusedPostesBuilder.deleteCharAt(refusedPostesBuilder.length());
+        refusedPostes.setText(refusedPostesBuilder.toString());
     }
 
     @FXML
@@ -263,7 +275,12 @@ public class PhysicianEditDialogController {
             	dateWorkedVacs.add(poste.getPoste());
             }
             physician.setWorkedVacs(workedVacs);
-
+            ArrayList<String> postes = new ArrayList<>();
+            for (String poste : refusedPostes.getText().split(";")) {
+            	postes.add(poste);
+            }
+            physician.setRefusedPostes(postes);
+            
             okClicked = true;
             dialogStage.close();
         }

@@ -20,6 +20,7 @@
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS" />
                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS" />
                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS" />
               </rowConstraints>
                <children>
                   <Label text="Nom :" GridPane.hgrow="ALWAYS" />
@@ -30,6 +31,8 @@
                   <Label text="Fin :" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" />
                   <DatePicker fx:id="startWorkPicker" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" />
                   <DatePicker fx:id="endWorkPicker" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" />
+                  <Label text="Postes interdits :" GridPane.rowIndex="4" />
+                  <TextField fx:id="refusedPostes" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                </children>
                <VBox.margin>
                   <Insets bottom="10.0" />
