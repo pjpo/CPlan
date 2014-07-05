@@ -10,37 +10,47 @@ import solver.variables.IntVar;
 
 import com.github.pjpo.planning.physician.Physician;
 
+/**
+ * Randomly selects a physician with the chance to select him
+ * depending on its working time
+ * @author jpc
+ *
+ */
 @SuppressWarnings("serial")
 public class MyRandomStrategy implements IntValueSelector {
 
-	final Random rand;
+	/** Random used to select a physician */ 
+	private final Random rand = new Random(new Date().getTime());
 	
-	final ArrayList<Physician> physicians;
+	/** Physicians */
+	private final ArrayList<Physician> physicians;
 
 	public MyRandomStrategy(ArrayList<Physician> physicians) {
-		this.rand = new Random(new Date().getTime());
 		this.physicians = physicians;
 	}
 
 	@Override
 	public int selectValue(IntVar var) {
-		LinkedList<Integer> possiblePhysicians = new LinkedList<>();  
+		// CREATE THE LIST OF WORKING PHYSICIANS IN THIS VAR
+		final LinkedList<Integer> workingPhysicians = new LinkedList<>();
 		for (int i = var.getLB(); i <= var.getUB(); i = var.nextValue(i)) {
-			// LISTS ALL THE POSSIBLE PHYSICIANS
-			possiblePhysicians.add(i);
+			workingPhysicians.add(i);
 		}
-		// SUMS THE WORKING TIME FOR EACH PHYSICIAN
-		int workingTime = 0;
-		for (Integer physicianNb : possiblePhysicians) {
-			workingTime += physicians.get(physicianNb).getTimePart();
+
+		// SUMS THE TOTAL WORKING TIME FOR EACH PHYSICIAN
+		int totalWorkingTime = 0;
+		for (Integer physicianNb : workingPhysicians) {
+			totalWorkingTime += physicians.get(physicianNb).getTimePart();
 		}
-		// FINDS AN INT BETWEEN 0 AND WORKINGTIME - 1 (DEFINES THE WORKER WHO WILL HAVE TO WORK)
-		int workingWorker = rand.nextInt(workingTime - 1);
+		
+		// RANDOMIZES A VALUE BETWEEN 0 AND TOTALWORKINGTIME - 1
+		// USES IT TO RANDOMIZE DEPENDING ON THE WORKING TIME
+		int workingElapsed = rand.nextInt(totalWorkingTime - 1);
 		int workingElapsedTime = 0;
 		
-		for (Integer physicianNb : possiblePhysicians) {
+		for (Integer physicianNb : workingPhysicians) {
 			workingElapsedTime += physicians.get(physicianNb).getTimePart();
-			if (workingElapsedTime > workingWorker)
+			if (workingElapsedTime > workingElapsed)
 				return physicianNb;
 		}
 

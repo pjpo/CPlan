@@ -1,19 +1,22 @@
 package com.github.pjpo.planning.utils;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
-public class Interval implements Comparable<Interval> {
+public class IntervalDateTime implements Comparable<IntervalDateTime> {
 
-	private LocalDate start;
+	private LocalDateTime start;
 	
-	private LocalDate end;
+	private LocalDateTime end;
 	
-	public Interval(LocalDate start, LocalDate end) {
+	public IntervalDateTime() { }
+	
+	public IntervalDateTime(LocalDateTime start, LocalDateTime end) {
+		testInterval(start, end);
 		this.start = start;
 		this.end = end;
 	}
-	
-	public boolean isInPeriod(LocalDate date) {
+
+	public boolean isInPeriod(LocalDateTime date) {
 		if (date == null)
 			throw new IllegalArgumentException("Date is null");
 		else if (start != null && date.isBefore(start))
@@ -24,8 +27,7 @@ public class Interval implements Comparable<Interval> {
 			return true;
 	}
 
-	
-	public boolean isOverlapping(Interval compare) {
+	public boolean isOverlapping(IntervalDateTime compare) {
 		if (
 				((start != null && compare.getEnd() != null && !compare.getEnd().isBefore(start)) || start == null || compare.getEnd() == null)
 				&&
@@ -35,24 +37,26 @@ public class Interval implements Comparable<Interval> {
 			return false;
 	}
 	
-	public LocalDate getStart() {
+	public LocalDateTime getStart() {
 		return start;
 	}
 	
-	public LocalDate getEnd() {
+	public LocalDateTime getEnd() {
 		return end;
 	}
 
-	public void setStart(LocalDate start) {
+	public void setStart(LocalDateTime start) {
+		testInterval(start, end);
 		this.start = start;
 	}
 	
-	public void setEnd(LocalDate end) {
+	public void setEnd(LocalDateTime end) {
+		testInterval(start, end);
 		this.end = end;
 	}
 
 	@Override
-	public int compareTo(Interval compare) {
+	public int compareTo(IntervalDateTime compare) {
 		if (start == compare.getStart() && end == compare.getEnd())
 			return 0;
 		else if (start == null && compare.getStart() != null)
@@ -64,4 +68,10 @@ public class Interval implements Comparable<Interval> {
 		}
 	}
 	
+	private void testInterval(LocalDateTime start, LocalDateTime end) throws IllegalArgumentException {
+		if (start != null && end != null && end.isAfter(start)) {
+			throw new IllegalArgumentException("Start date must be before end date");
+		}
+	}
+
 }

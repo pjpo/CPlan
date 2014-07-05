@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map.Entry;
+import java.util.Random;
 
 import solver.Solver;
 import solver.search.strategy.IntStrategyFactory;
@@ -20,16 +21,24 @@ import com.github.pjpo.planning.jours.Jour;
 import com.github.pjpo.planning.jours.JourChuMtp;
 import com.github.pjpo.planning.physician.Physician;
 import com.github.pjpo.planning.physician.PhysicianBuilder;
+import com.github.pjpo.planning.utils.IntervalDate;
 
+/**
+ * Classe principale de planning
+ * @author jpc
+ *
+ */
 public class Planning {
 
-	private ArrayList<Physician> physicians;
-	private Agenda agenda;
+	/** List of used physicians */
+	private final ArrayList<Physician> physicians;
 	
-	public Planning(LocalDate startDate, LocalDate endDate, ArrayList<Physician> physicians, Jour typeJour) {
+	/** Agenda */
+	private final Agenda agenda;
+	
+	public Planning(final IntervalDate intervalDate, final ArrayList<Physician> physicians, final Jour typeJour) {
 		this.physicians = physicians;
-		this.agenda = new Agenda(typeJour);
-		this.agenda.setBounds(startDate, endDate);
+		this.agenda = new Agenda(typeJour, intervalDate);
 		this.agenda.calculateWorkingPeriods();
 	}
 
@@ -43,10 +52,7 @@ public class Planning {
 
 		// FILLS THE SOLVER
 		HashMap<LocalDate, HashMap<String, IntVar>> allIntVars;
-		if (solution != null)
-			 allIntVars = agenda.fillSolver(solver, physicians, solution.lightenWorkBurden(shake));
-		else
-			 allIntVars = agenda.fillSolver(solver, physicians);
+		allIntVars = agenda.fillSolver(solver, physicians, solution.lightenWorkBurden(shake));
 		
 		// GETS AN ARRAY OF EACH INTVAR
 		LinkedList<IntVar> allDays = new LinkedList<>();
@@ -101,6 +107,10 @@ public class Planning {
 			}
 		}
 		
+		// IN 10% OF CASES, INCREASES THE SHAKER EXPONENT (TRY TO JUMP BETWEEN TWO MINIMAS SOLUTIONS LIKE ENTROPY)
+		if (new Random(new Date().getTime()).nextInt(10) == 0)
+			idem = idem * 2;
+		
 		// GENERATES A NEW SOLVER FROM THE LAST SOLUTION (IF WE HAVE ONE)
 		// THE MORE WE HAVE IDEM SOLUTIONS, THE MORE WE HAVE TO SHAKE THE SOLUTION
 		Entry<Solver, HashMap<LocalDate, HashMap<String, IntVar>>> entry = generateSolver(
@@ -113,9 +123,7 @@ public class Planning {
 		if (entry.getKey().isFeasible() != ESat.TRUE && previousAcceptedSolutions.size() == 0) {
 				throw new SolutionException("No solution");
 		} else {
-			Solution solution = new Solution();
-			solution.setPhysicians(physicians);
-			solution.setWorkingPeriodsMap(getAgenda().getWorkingPeriods());
+			Solution solution = new Solution(getAgenda().getWorkingPeriods(), physicians);
 			solution.setSolutionMedIndicesMap(entry.getValue());
 			// IF WE HAVE AT LEAST 1 SOLUTIONS IN SOLUTIONS LIST, COMPARE IT WITH THE PRECEDENT
 			System.out.println("Diff : " + (solution.getMaxWorkLoad() - solution.getMinWorkLoad()));
@@ -161,7 +169,7 @@ public class Planning {
 		physicians.add(new PhysicianBuilder().setName("Med19").setTimePart(100).toPhysician());
 	
 		// PLANNING
-		Planning planning = new Planning(START_DATE, START_DATE.plusDays(DAYS), physicians, new JourChuMtp());
+		Planning planning = new Planning(new IntervalDate(START_DATE, START_DATE.plusDays(DAYS)), physicians, new JourChuMtp());
 
 		// LIST OF SOLUTIONS
 		LinkedList<Solution> solutions = new LinkedList<>();

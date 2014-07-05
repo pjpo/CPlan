@@ -3,7 +3,7 @@ package com.github.pjpo.planning.physician;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
-import com.github.pjpo.planning.utils.Interval;
+import com.github.pjpo.planning.utils.IntervalDate;
 
 public class PhysicianBuilder extends PhysicianBase {
 	
@@ -17,22 +17,12 @@ public class PhysicianBuilder extends PhysicianBase {
 		return this;
 	}
 	
-	public PhysicianBuilder setWorkStart(LocalDate workStart) {
-		this.workStart = workStart;
-		return this;
-	}
-	
-	public PhysicianBuilder setWorkEnd(LocalDate workEnd) {
-		this.workEnd = workEnd;
-		return this;
-	}
-	
-	public PhysicianBuilder addPaidVacation(Interval period) {
+	public PhysicianBuilder addPaidVacation(IntervalDate period) {
 		paidVacation.add(period);
 		return this;
 	}
 	
-	public PhysicianBuilder addUnpaidVacation(Interval period) {
+	public PhysicianBuilder addUnpaidVacation(IntervalDate period) {
 		unpaidVacation.add(period);
 		return this;
 	}
@@ -56,8 +46,6 @@ public class PhysicianBuilder extends PhysicianBase {
 		Physician physician = new Physician();
 		physician.setName(name);
 		physician.setTimePart(timePart);
-		physician.setWorkStart(workStart);
-		physician.setWorkEnd(workEnd);
 		physician.setPaidVacation(paidVacation);
 		physician.setUnpaidVacation(unpaidVacation);
 		physician.setWorkedVacs(workedVacs);

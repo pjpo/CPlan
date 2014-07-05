@@ -16,12 +16,12 @@ import com.github.pjpo.planning.lignes.FmcLigne;
 import com.github.pjpo.planning.lignes.GangesLigne;
 import com.github.pjpo.planning.lignes.Ligne;
 import com.github.pjpo.planning.lignes.LunelLigne;
-import com.github.pjpo.planning.lignes.Plage;
 import com.github.pjpo.planning.lignes.RegulLigne;
 import com.github.pjpo.planning.lignes.SILigne;
 import com.github.pjpo.planning.lignes.SmurLigne;
 import com.github.pjpo.planning.lignes.UHCDLigne;
 import com.github.pjpo.planning.lignes.UtecLigne;
+import com.github.pjpo.planning.utils.IntervalDateTime;
 
 public class JourChuMtp implements Jour {
 
@@ -41,9 +41,9 @@ public class JourChuMtp implements Jour {
 	};
 	
 	@Override
-	public HashMap<String, Plage> getPlages(LocalDate date) {
+	public HashMap<String, IntervalDateTime> getPlages(LocalDate date) {
 		// THE MAP
-		HashMap<String, Plage> plages = new HashMap<>();
+		HashMap<String, IntervalDateTime> plages = new HashMap<>();
 		// GET PLAGES FROM LIGNES AND CONCATS THEM INTO HASHMAP
 		for (Ligne ligne : lignes) {
 			ligne.getPlages(date).forEach(

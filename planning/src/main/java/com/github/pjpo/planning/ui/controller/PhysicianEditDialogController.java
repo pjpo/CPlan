@@ -9,7 +9,6 @@ import java.util.HashMap;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.DatePicker;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -25,7 +24,7 @@ import com.github.pjpo.planning.physician.Physician;
 import com.github.pjpo.planning.ui.controller.utils.DateEditingCell;
 import com.github.pjpo.planning.ui.controller.utils.DefaultDatePickerConverter;
 import com.github.pjpo.planning.ui.model.Poste;
-import com.github.pjpo.planning.utils.Interval;
+import com.github.pjpo.planning.utils.IntervalDate;
 
 public class PhysicianEditDialogController {
 
@@ -36,29 +35,23 @@ public class PhysicianEditDialogController {
 	private TextField timePartField;
 	
 	@FXML
-	private DatePicker startWorkPicker;
-	
-	@FXML
-	private DatePicker endWorkPicker;
-	
-	@FXML
 	private TextField refusedPostes;
 
 	@FXML
-    private TableView<Interval> paidVacationsTable;
+    private TableView<IntervalDate> paidVacationsTable;
     @FXML
-    private TableColumn<Interval, LocalDate> paidVacationsStartColumn;
+    private TableColumn<IntervalDate, LocalDate> paidVacationsStartColumn;
     @FXML
-    private TableColumn<Interval, LocalDate> paidVacationEndColumn;
-	private ObservableList<Interval> paidVacationsList = FXCollections.observableArrayList();
+    private TableColumn<IntervalDate, LocalDate> paidVacationEndColumn;
+	private ObservableList<IntervalDate> paidVacationsList = FXCollections.observableArrayList();
     
 	@FXML
-    private TableView<Interval> unpaidVacationsTable;
+    private TableView<IntervalDate> unpaidVacationsTable;
     @FXML
-    private TableColumn<Interval, LocalDate> unpaidVacationsStartColumn;
+    private TableColumn<IntervalDate, LocalDate> unpaidVacationsStartColumn;
     @FXML
-    private TableColumn<Interval, LocalDate> unpaidVacationEndColumn;
-	private ObservableList<Interval> unpaidVacationsList = FXCollections.observableArrayList();
+    private TableColumn<IntervalDate, LocalDate> unpaidVacationEndColumn;
+	private ObservableList<IntervalDate> unpaidVacationsList = FXCollections.observableArrayList();
 	
 	@FXML
     private TableView<Poste> neededVacTable;
@@ -78,32 +71,32 @@ public class PhysicianEditDialogController {
     
     @FXML
     private void initialize() {
-    	Callback<TableColumn<Interval, LocalDate>, 
-    		TableCell<Interval, LocalDate>> intervalCellFactory
-    		= (TableColumn<Interval, LocalDate> p) -> new DateEditingCell<Interval>(new DefaultDatePickerConverter(dateFormatter, null, null));
+    	Callback<TableColumn<IntervalDate, LocalDate>, 
+    		TableCell<IntervalDate, LocalDate>> intervalCellFactory
+    		= (TableColumn<IntervalDate, LocalDate> p) -> new DateEditingCell<IntervalDate>(new DefaultDatePickerConverter(dateFormatter, null, null));
     	Callback<TableColumn<Poste, LocalDate>, 
     		TableCell<Poste, LocalDate>> posteCellFactory
     		= (TableColumn<Poste, LocalDate> p) -> new DateEditingCell<Poste>(new DefaultDatePickerConverter(dateFormatter, null, null));
 
         paidVacationsStartColumn.setCellFactory(intervalCellFactory);
     	paidVacationsStartColumn.setOnEditCommit( (event) ->
-                ((Interval) event.getTableView().getItems().get(
+                ((IntervalDate) event.getTableView().getItems().get(
                 		event.getTablePosition().getRow())
                         ).setStart(event.getNewValue()));
     	paidVacationEndColumn.setCellFactory(intervalCellFactory);
     	paidVacationEndColumn.setOnEditCommit( (event) ->
-                ((Interval) event.getTableView().getItems().get(
+                ((IntervalDate) event.getTableView().getItems().get(
                 		event.getTablePosition().getRow())
                         ).setEnd(event.getNewValue()));
     	
         unpaidVacationsStartColumn.setCellFactory(intervalCellFactory);
     	unpaidVacationsStartColumn.setOnEditCommit( (event) ->
-                ((Interval) event.getTableView().getItems().get(
+                ((IntervalDate) event.getTableView().getItems().get(
                 		event.getTablePosition().getRow())
                         ).setStart(event.getNewValue()));
     	unpaidVacationEndColumn.setCellFactory(intervalCellFactory);
     	unpaidVacationEndColumn.setOnEditCommit( (event) ->
-                ((Interval) event.getTableView().getItems().get(
+                ((IntervalDate) event.getTableView().getItems().get(
                 		event.getTablePosition().getRow())
                         ).setEnd(event.getNewValue()));
 
@@ -129,8 +122,6 @@ public class PhysicianEditDialogController {
 
         nameField.setText(physician.getName() == null ? "" : physician.getName());
         timePartField.setText(physician.getTimePart() == null ? "" : physician.getTimePart().toString());
-        startWorkPicker.setValue(physician.getWorkStart());
-        endWorkPicker.setValue(physician.getWorkEnd());
         
         // == PAID VACATIONS ==
         // LINKS OBSERVABLE WITH PHYSICIAN
@@ -138,8 +129,8 @@ public class PhysicianEditDialogController {
         // LINKS TABLE WITH OBSERVABLE
         paidVacationsTable.setItems(paidVacationsList);
         // LINKS THE COLUMNS
-        paidVacationsStartColumn.setCellValueFactory(new PropertyValueFactory<Interval, LocalDate>("start"));
-        paidVacationEndColumn.setCellValueFactory(new PropertyValueFactory<Interval, LocalDate>("end"));
+        paidVacationsStartColumn.setCellValueFactory(new PropertyValueFactory<IntervalDate, LocalDate>("start"));
+        paidVacationEndColumn.setCellValueFactory(new PropertyValueFactory<IntervalDate, LocalDate>("end"));
     
         // == UNPAID VACATIONS ==
         // LINKS OBSERVABLE WITH PHYSICIAN
@@ -147,8 +138,8 @@ public class PhysicianEditDialogController {
         // LINKS TABLE WITH OBSERVABLE
         unpaidVacationsTable.setItems(unpaidVacationsList);
         // LINKS THE COLUMNS
-        unpaidVacationsStartColumn.setCellValueFactory(new PropertyValueFactory<Interval, LocalDate>("start"));
-        unpaidVacationEndColumn.setCellValueFactory(new PropertyValueFactory<Interval, LocalDate>("end"));
+        unpaidVacationsStartColumn.setCellValueFactory(new PropertyValueFactory<IntervalDate, LocalDate>("start"));
+        unpaidVacationEndColumn.setCellValueFactory(new PropertyValueFactory<IntervalDate, LocalDate>("end"));
 
         // == NEEDED VACS LIST ==
         // FILLS THE OBSERVABLE ASSOCIATED LIST
@@ -184,7 +175,7 @@ public class PhysicianEditDialogController {
 
     @FXML
     private void handleNewPaidVacation() {
-    	Interval paidVacation = new Interval(null, null);
+    	IntervalDate paidVacation = new IntervalDate();
     	paidVacationsList.add(paidVacation);
     }
 
@@ -206,7 +197,7 @@ public class PhysicianEditDialogController {
 
     @FXML
     private void handleNewUnpaidVacation() {
-    	Interval unpaidVacation = new Interval(null, null);
+    	IntervalDate unpaidVacation = new IntervalDate();
     	unpaidVacationsList.add(unpaidVacation);
     }
 
@@ -261,8 +252,6 @@ public class PhysicianEditDialogController {
         if (isInputValid()) {
             physician.setName(nameField.getText());
             physician.setTimePart(Integer.decode(timePartField.getText()));
-            physician.setWorkStart(startWorkPicker.getValue());
-            physician.setWorkEnd(endWorkPicker.getValue());
             physician.setPaidVacation(new ArrayList<>(paidVacationsTable.getItems()));
             physician.setUnpaidVacation(new ArrayList<>(unpaidVacationsTable.getItems()));
             HashMap<LocalDate, ArrayList<String>> workedVacs = new HashMap<>();
@@ -309,13 +298,6 @@ public class PhysicianEditDialogController {
             } catch (NumberFormatException e) {
             	errorMessageBuilder.append("Proportion de temps invalide (doit être un entier entre 1 et 100)!\n"); 
             }
-        }
-        
-        if (startWorkPicker.getValue() != null && endWorkPicker.getValue() != null) {
-        	// CHECK IF END OF WORK IS GREATER THAN START OF WORK
-        	if (!endWorkPicker.getValue().isAfter(startWorkPicker.getValue())) {
-        		errorMessageBuilder.append("Fin de période de travail doit être supérieur à début de période de travail!\n");
-        	}
         }
         
         if (errorMessageBuilder.length() == 0) {

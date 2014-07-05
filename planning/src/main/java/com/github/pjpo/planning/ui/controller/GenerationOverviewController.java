@@ -34,9 +34,10 @@ import com.github.pjpo.planning.Planning;
 import com.github.pjpo.planning.Solution;
 import com.github.pjpo.planning.SolutionException;
 import com.github.pjpo.planning.jours.JourChuMtp;
-import com.github.pjpo.planning.lignes.Plage;
 import com.github.pjpo.planning.ui.PlanningMainUIApp;
 import com.github.pjpo.planning.ui.controller.utils.DefaultDatePickerConverter;
+import com.github.pjpo.planning.utils.IntervalDate;
+import com.github.pjpo.planning.utils.IntervalDateTime;
 
 public class GenerationOverviewController {
 
@@ -115,9 +116,9 @@ public class GenerationOverviewController {
     	continueGeneration = true;
     	
     	// INIT PLANNING
-    	Planning planning = new Planning(
+    	Planning planning = new Planning(new IntervalDate(
     			startPeriodPicker.getValue(),
-    			endPeriodPicker.getValue(),
+    			endPeriodPicker.getValue()),
     			new ArrayList<>(mainApp.getPhysicians()),
     			new JourChuMtp());
 
@@ -233,7 +234,7 @@ public class GenerationOverviewController {
 			 // SEARCHES THE LIST OF POSTES AND LIST OF DATES
 			 HashSet<String> postes = new HashSet<>();
 			 ArrayList<LocalDate> dates = new ArrayList<>();
-			 for (Entry<LocalDate, HashMap<String, Plage>> entry : solution.getWorkingPeriodsMap().entrySet()) {
+			 for (Entry<LocalDate, HashMap<String, IntervalDateTime>> entry : solution.getWorkingPeriodsMap().entrySet()) {
 				 dates.add(entry.getKey());
 				 for (String poste : entry.getValue().keySet()) {
 					 postes.add(poste);

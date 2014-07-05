@@ -27,13 +27,10 @@ public class PhysicianOverviewController {
     private Label nameLabel;
     @FXML
     private Label parttimeLabel;
-    @FXML
-    private Label startWorkLabel;
-    @FXML
-    private Label endWorkLabel;
     
     /** Date Formatter */
-    private DateTimeFormatter dateFormatter;
+    @SuppressWarnings("unused")
+	private DateTimeFormatter dateFormatter;
     
     /** Reference to the main application */
     private PlanningMainUIApp mainApp;
@@ -55,8 +52,6 @@ public class PhysicianOverviewController {
     private void showPhysicianDetails(Physician physician) {
     	nameLabel.setText(physician == null ? "" : (physician.getName() == null ? "Non défini" : physician.getName()));
     	parttimeLabel.setText(physician == null ? "" : (physician.getTimePart() == null ? "Non défini" : physician.getTimePart().toString()));
-    	startWorkLabel.setText(physician == null ? "" : (physician.getWorkStart() == null ? "Non défini" : physician.getWorkStart().format(dateFormatter)));
-    	endWorkLabel.setText(physician == null ? "" : (physician.getWorkEnd() == null ? "Non défini" : physician.getWorkEnd().format(dateFormatter)));
     }
     
     @FXML
