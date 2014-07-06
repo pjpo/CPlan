@@ -152,7 +152,7 @@ public class PhysicianEditDialogController {
         for (LocalDate date : neededVacDates) {
         	for (String posteName : physician.getWorkedVacs().get(date)) {
         		Poste poste = new Poste();
-        		poste.setDate(null);
+        		poste.setDate(date);
         		poste.setPoste(posteName);
         		neededVacList.add(poste);
         	}
@@ -169,7 +169,7 @@ public class PhysicianEditDialogController {
         	refusedPostesBuilder.append(poste).append(';');
         }
         if (refusedPostesBuilder.length() != 0)
-        	refusedPostesBuilder.deleteCharAt(refusedPostesBuilder.length());
+        	refusedPostesBuilder.deleteCharAt(refusedPostesBuilder.length() - 1);
         refusedPostes.setText(refusedPostesBuilder.toString());
     }
 
@@ -265,8 +265,10 @@ public class PhysicianEditDialogController {
             }
             physician.setWorkedVacs(workedVacs);
             ArrayList<String> postes = new ArrayList<>();
-            for (String poste : refusedPostes.getText().split(";")) {
-            	postes.add(poste);
+            if (refusedPostes.getText() != null && refusedPostes.getText().length() != 0) {
+	            for (String poste : refusedPostes.getText().split(";")) {
+	            	postes.add(poste);
+	            }
             }
             physician.setRefusedPostes(postes);
             
