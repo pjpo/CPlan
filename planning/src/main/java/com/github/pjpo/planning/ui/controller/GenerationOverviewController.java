@@ -13,12 +13,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.Map.Entry;
-import java.util.concurrent.locks.ReentrantLock;
-
-import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.DateCell;
@@ -36,6 +31,7 @@ import com.github.pjpo.planning.SolutionException;
 import com.github.pjpo.planning.jours.JourChuMtp;
 import com.github.pjpo.planning.ui.PlanningMainUIApp;
 import com.github.pjpo.planning.ui.controller.utils.DefaultDatePickerConverter;
+import com.github.pjpo.planning.ui.controller.utils.PlanningGenerationTask;
 import com.github.pjpo.planning.utils.IntervalDate;
 import com.github.pjpo.planning.utils.IntervalDateTime;
 
@@ -63,18 +59,14 @@ public class GenerationOverviewController {
     /** Reference to the main application */
     private PlanningMainUIApp mainApp;
 
-    /** Locks multithreaded variables */
-    private ReentrantLock lock = new ReentrantLock();
-    
-    /** Indicates if the calculation have to stop */
-    private boolean continueGeneration = false;
-    	
 	/** Date formatter */
 	@SuppressWarnings("unused")
 	private DateTimeFormatter dateFormatter;
 	
 	private Solution solution = null;
 
+	private PlanningGenerationTask task = null; 
+	
 	@FXML
     private void initialize() {
     	// INITIALIZES THE BUTTONS VISIBILITY
@@ -109,11 +101,6 @@ public class GenerationOverviewController {
     }
     
     public void handleGenerateButton() {
-    	// ADAPTS BUTTONS VISIBILITY
-    	setButtonsStatus(false, true, false);
-    	
-    	// SETS THE GENERATION CONTINUATION POLICY
-    	continueGeneration = true;
     	
     	// INIT PLANNING
     	Planning planning = new Planning(new IntervalDate(
@@ -122,44 +109,8 @@ public class GenerationOverviewController {
     			new ArrayList<>(mainApp.getPhysicians()),
     			new JourChuMtp());
 
-    	Task<LinkedList<Solution>> task = new Task<LinkedList<Solution>>() {
+    	task = new PlanningGenerationTask(planning, this);
 
-			@Override protected LinkedList<Solution> call() throws Exception {
-				// INIT VARS
-				LinkedList<Solution> solutions = new LinkedList<>();
-				Integer retrys = 0;
-				
-				for (;;) {
-					// FIRST CHECK GENERATION STATUS
-					try {
-						lock.lock();
-						if (!continueGeneration || isCancelled())
-							break;
-					} finally {
-						lock.unlock();
-					}
-					
-	    			// GENERATION STATUS OK, SEARCHES A SOLUTION
-    				retrys++;
-    				final Solution solution = planning.findSolution(solutions);
-    				final Integer nbRetrys = new Integer(retrys);
-    				
-    				if (solution != null) {
-    					// UPDATES VALUES IN LABELS
-    					Platform.runLater(() -> {
-    						showFeedBack(nbRetrys, solution.getMaxWorkLoad(), solution.getMinWorkLoad());
-    					});
-    					// ADDS THIS SOLUTION AS LAST SOLUTION
-    					solutions.add(solution);
-    				} else {
-    					Platform.runLater(() -> nbTestsLabel.setText(nbRetrys.toString()));
-    				}
-	    		}
-				// HERE, RETURN SOLUTIONS
-				return solutions;
-			}
-    	};
-    	
     	task.setOnFailed( (event) -> {
     		Throwable exception  =
     				event.getSource().getException() == null ?
@@ -196,34 +147,33 @@ public class GenerationOverviewController {
     	});
     	
     	new Thread(task).start();
+
+    	// ADAPTS BUTTONS VISIBILITY
+    	setButtonsStatus(false, true, false);
     }	
     
     public void handlePauseButton() {
-    	try {
-    		lock.lock();
-    		continueGeneration = false;
-    	} finally {
-    		lock.unlock();
+    	// TASK MUST BE NON NULL (ELSE THE PAUSE BUTTON SHOULD NOT APPEAR)
+    	task.stopProcessing("Stopped by user");
+    }
+    
+    public void handleSaveButton() {
+    	FileChooser fileChooser = new FileChooser();
+    	fileChooser.setTitle("Save Planning");
+    	
+    	File saveFile = fileChooser.showSaveDialog(mainApp.getPrimaryStage());
+    	if (saveFile != null) {
+    		try {
+    			saveConfiguration(saveFile);
+    		} catch (IOException e) {
+    			Dialogs.create()
+    			.owner(mainApp.getPrimaryStage())
+    			.showException(e);
+    		}
     	}
     }
     
-	 public void handleSaveButton() {
-		 FileChooser fileChooser = new FileChooser();
-		 fileChooser.setTitle("Save Planning");
-		 
-		 File saveFile = fileChooser.showSaveDialog(mainApp.getPrimaryStage());
-		 if (saveFile != null) {
-			 try {
-				 saveConfiguration(saveFile);
-			 } catch (IOException e) {
-				 Dialogs.create()
-				 .owner(mainApp.getPrimaryStage())
-				 .showException(e);
-			 }
-		 }
-	 }
-    
-	 public void saveConfiguration(File file) throws IOException {
+    public void saveConfiguration(File file) throws IOException {
 		 Path saveFile = Paths.get(file.toURI());
 		 try (CSVWriter csvWriter = new CSVWriter(Files.newBufferedWriter(
 				 saveFile, Charset.forName("UTF-8"),
@@ -264,7 +214,7 @@ public class GenerationOverviewController {
 		 }
 	 }
 
-	 private void showFeedBack(Integer nbTests, Long maxIndice, Long minIndice) {
+	 public void showFeedBack(Integer nbTests, Long maxIndice, Long minIndice) {
 		nbTestsLabel.setText(nbTests == null ? "" : nbTests.toString());
 		maxIndiceLabel.setText(maxIndice == null ? "" : maxIndice.toString());
 		minIndiceLabel.setText(minIndice == null ? "" : minIndice.toString());

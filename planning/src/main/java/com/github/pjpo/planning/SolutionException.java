@@ -7,20 +7,20 @@ public class SolutionException extends Exception {
 
 	public SolutionException() { }
 
-	public SolutionException(String message) {
+	public SolutionException(final String message) {
 		super(message);
 	}
 
-	public SolutionException(Throwable cause) {
+	public SolutionException(final Throwable cause) {
 		super(cause);
 	}
 
-	public SolutionException(String message, Throwable cause) {
+	public SolutionException(final String message, final Throwable cause) {
 		super(message, cause);
 	}
 
-	public SolutionException(String message, Throwable cause,
-			boolean enableSuppression, boolean writableStackTrace) {
+	public SolutionException(final String message, final Throwable cause,
+			final boolean enableSuppression, final boolean writableStackTrace) {
 		super(message, cause, enableSuppression, writableStackTrace);
 	}
 

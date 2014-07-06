@@ -1,8 +1,9 @@
 package com.github.pjpo.planning.jours;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -15,6 +16,11 @@ import com.github.pjpo.planning.physician.Physician;
 import com.github.pjpo.planning.utils.IntervalDate;
 import com.github.pjpo.planning.utils.IntervalDateTime;
 
+/**
+ * Creates and keeps in memory the working periods for an interval and a day configuration
+ * @author jpc
+ *
+ */
 public class Agenda {
 
 	/** List of days and worked periods */
@@ -56,9 +62,9 @@ public class Agenda {
 	 * @return
 	 */
 	public HashMap<LocalDate, HashMap<String, IntVar>> fillSolver(
-			Solver solver,
-			List<Physician> physicians,
-			HashMap<LocalDate, HashMap<String, Integer>> preFill) {
+			final Solver solver,
+			final List<Physician> physicians,
+			final HashMap<LocalDate, HashMap<String, Integer>> preFill) {
 		// WORKING PERIODS HAVE TO BE CALCULATED BEFOER
 		if (workingPeriods == null)
 			throw new IllegalArgumentException("Agenda has not been calculated");
@@ -74,18 +80,18 @@ public class Agenda {
 			workers.put(intervalsForDay.getKey(), workingConstraintsVars);
 			
 			// == 1 - CREATES THE LIST OF PHYSICIANS WORKING THIS DAY ==
-			final ArrayList<Integer> workingPhysiciansForDay = new ArrayList<>();
+			final LinkedList<Integer> workingPhysiciansForDay = new LinkedList<>();
 			eachPhysician : for (int i = 0 ; i < physicians.size() ; i++) {
 
-				Physician physician = physicians.get(i);
+				final Physician physician = physicians.get(i);
 				
 				// CHECK IF PHYSICIAN IS IN PAID VACATIONS
-				for (IntervalDate vacation : physician.getPaidVacation()) {
+				for (final IntervalDate vacation : physician.getPaidVacation()) {
 					if (vacation.isInPeriod(intervalsForDay.getKey())) continue eachPhysician;
 				}
 				
 				// CHECK IF PHYSICIAN IS IN UNPAID VACATIONS
-				for (IntervalDate vacation : physician.getUnpaidVacation()) {
+				for (final IntervalDate vacation : physician.getUnpaidVacation()) {
 					if (vacation.isInPeriod(intervalsForDay.getKey())) continue eachPhysician;
 				}
 		
@@ -93,7 +99,7 @@ public class Agenda {
 				workingPhysiciansForDay.add(i);
 			}
 			
-			// == 2 - FOR EACH INTERVAL IN THIS DAY IN AGENDA, TEST IF SOME OVERRIDES EXIST ==
+			// == 2 - FOR EACH PLAGE IN THIS DAY IN AGENDA, TEST IF SOME PHYSICIANS ARE PREDEFINED AS BEING WORKING ==
 			eachInterval : for (final Entry<String, IntervalDateTime> intervalForDay : intervalsForDay.getValue().entrySet()) {
 
 				// a - SEE IF WE HAVE A PRESET VALUE IN PREFILL
@@ -116,7 +122,7 @@ public class Agenda {
 						}
 					}
 					// c(1) - IF NO PHYSICIAN FOR THIS DAY, ONLY KEEP THE PHYSICIANS WORKING FOR THIS POSTE
-					final ArrayList<Integer> workingPhysiciansForDayAndInterval = new ArrayList<>(workingPhysiciansForDay.size());
+					final LinkedList<Integer> workingPhysiciansForDayAndInterval = new LinkedList<>();
 					for (final Integer physicianNb : workingPhysiciansForDay) {
 						if (!physicians.get(physicianNb).getRefusedPostes().contains(intervalForDay.getKey()))
 							workingPhysiciansForDayAndInterval.add(physicianNb);
@@ -152,14 +158,15 @@ public class Agenda {
 	}
 
 	/**
-	 * Transforms an array of Integer to array of int
+	 * Transforms a collection of Integer to array of int
 	 * @param array
 	 * @return
 	 */
-	private int[] toIntArray(ArrayList<Integer> array) {
-		int[] newArray = new int[array.size()];
-		for (int i = 0 ; i < array.size() ; i++) {
-			newArray[i] = array.get(i);
+	private int[] toIntArray(Collection<Integer> collection) {
+		final int[] newArray = new int[collection.size()];
+		int i = 0;
+		for (final Integer integer: collection) {
+			newArray[i++] = integer;
 		}
 		return newArray;
 	}

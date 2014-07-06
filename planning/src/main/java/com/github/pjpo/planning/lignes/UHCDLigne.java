@@ -27,7 +27,6 @@ public class UHCDLigne implements Ligne {
 		return plages;
 	}
 
-	@Override
 	public String getName() {
 		return "Uhcd";
 	}

@@ -5,7 +5,7 @@ import java.util.HashMap;
 
 import com.github.pjpo.planning.utils.IntervalDateTime;
 
+@FunctionalInterface
 public interface Ligne {
 	public HashMap<String, IntervalDateTime> getPlages(final LocalDate date);
-	public String getName();
 }

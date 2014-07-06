@@ -19,7 +19,6 @@ public class UtecLigne implements Ligne {
 		return plages;
 	}
 
-	@Override
 	public String getName() {
 		return "Utec";
 	}

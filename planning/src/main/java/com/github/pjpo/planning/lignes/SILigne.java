@@ -19,7 +19,6 @@ public class SILigne implements Ligne {
 		return plages;
 	}
 
-	@Override
 	public String getName() {
 		return "Si";
 	}

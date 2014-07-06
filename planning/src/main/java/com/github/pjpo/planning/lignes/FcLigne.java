@@ -27,7 +27,6 @@ public class FcLigne implements Ligne {
 		return plages;
 	}
 
-	@Override
 	public String getName() {
 		return "Fc";
 	}

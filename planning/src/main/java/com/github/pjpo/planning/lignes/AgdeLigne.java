@@ -21,7 +21,6 @@ public class AgdeLigne implements Ligne {
 		return plages;
 	}
 
-	@Override
 	public String getName() {
 		return "Agde";
 	}

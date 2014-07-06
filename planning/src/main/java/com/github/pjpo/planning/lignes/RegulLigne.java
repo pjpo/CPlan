@@ -21,7 +21,6 @@ public class RegulLigne implements Ligne {
 		return plages;
 	}
 
-	@Override
 	public String getName() {
 		return "Regul";
 	}

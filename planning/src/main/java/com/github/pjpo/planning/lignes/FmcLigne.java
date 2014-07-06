@@ -19,7 +19,6 @@ public class FmcLigne implements Ligne {
 		return plages;
 	}
 
-	@Override
 	public String getName() {
 		return "Fmc";
 	}

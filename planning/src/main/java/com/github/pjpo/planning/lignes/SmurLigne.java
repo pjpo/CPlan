@@ -25,7 +25,6 @@ public class SmurLigne implements Ligne {
 		return plages;
 	}
 
-	@Override
 	public String getName() {
 		return "Smur" + ligne;
 	}
