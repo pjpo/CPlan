@@ -57,6 +57,14 @@ public class IntervalDate implements Comparable<IntervalDate> {
 		return end;
 	}
 
+	public BoundedLocalDate getBoundedStart() {
+		return new BoundedLocalDate(end, start);
+	}
+	
+	public BoundedLocalDate getBoundedEnd() {
+		return new BoundedLocalDate(start, end);
+	}
+
 	public void setStart(LocalDate start) {
 		testInterval(start, end);
 		this.start = start;
@@ -65,6 +73,16 @@ public class IntervalDate implements Comparable<IntervalDate> {
 	public void setEnd(LocalDate end) {
 		testInterval(start, end);
 		this.end = end;
+	}
+
+	public void setBoundedStart(BoundedLocalDate start) {
+		testInterval(start.getDate(), end);
+		this.start = start.getDate();
+	}
+	
+	public void setBoundedEnd(BoundedLocalDate end) {
+		testInterval(start, end.getDate());
+		this.end = end.getDate();
 	}
 
 	@Override
@@ -84,6 +102,10 @@ public class IntervalDate implements Comparable<IntervalDate> {
 		if (start != null && end != null && start.isAfter(end)) {
 			throw new IllegalArgumentException("Start date must be before end date");
 		}
+	}
+	
+	public String toString() {
+		return (start == null ? "null" : start.toString()) + " - " +(end == null ? "null" : end.toString()); 
 	}
 
 }

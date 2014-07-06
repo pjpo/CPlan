@@ -47,7 +47,6 @@ public class Planning {
 	}
 	
 	public Entry<Solver, HashMap<LocalDate, HashMap<String, IntVar>>> generateSolver(Solution solution, int shake) {
-		System.out.println("Shaker : " + shake);
 		Solver solver = new Solver();
 
 		// FILLS THE SOLVER
@@ -126,7 +125,6 @@ public class Planning {
 			Solution solution = new Solution(getAgenda().getWorkingPeriods(), physicians);
 			solution.setSolutionMedIndicesMap(entry.getValue());
 			// IF WE HAVE AT LEAST 1 SOLUTIONS IN SOLUTIONS LIST, COMPARE IT WITH THE PRECEDENT
-			System.out.println("Diff : " + (solution.getMaxWorkLoad() - solution.getMinWorkLoad()));
 			if (previousAcceptedSolutions.size() > 0 &&
 					(solution.getMaxWorkLoad() - solution.getMinWorkLoad()) > (previousAcceptedSolutions.getLast().getMaxWorkLoad() - previousAcceptedSolutions.getLast().getMinWorkLoad())) {
 					// REJECTED SOLUTION
@@ -203,7 +201,6 @@ public class Planning {
 		
 	public static void prettyPrintInteger(HashMap<LocalDate, HashMap<String, Integer>> solution, ArrayList<Physician> physicians) {
 		for (Entry<LocalDate, HashMap<String, Integer>> oneDay : solution.entrySet()) {
-			System.out.println("date : " + oneDay.getKey());
 			for (Entry<String, Integer> var : oneDay.getValue().entrySet()) {
 				System.out.println(var.getKey() + " : " + (var.getValue() == null ? "null" : var.getValue()));
 			}

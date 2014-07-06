@@ -8,6 +8,7 @@ import java.util.HashMap;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -23,7 +24,10 @@ import org.controlsfx.dialog.Dialogs;
 import com.github.pjpo.planning.physician.Physician;
 import com.github.pjpo.planning.ui.controller.utils.DateEditingCell;
 import com.github.pjpo.planning.ui.controller.utils.DefaultDatePickerConverter;
+import com.github.pjpo.planning.ui.controller.utils.IntervalDateEditingCell;
+import com.github.pjpo.planning.ui.controller.utils.IntervalDateEditingCell.IntervalPosition;
 import com.github.pjpo.planning.ui.model.Poste;
+import com.github.pjpo.planning.utils.BoundedLocalDate;
 import com.github.pjpo.planning.utils.IntervalDate;
 
 public class PhysicianEditDialogController {
@@ -40,17 +44,17 @@ public class PhysicianEditDialogController {
 	@FXML
     private TableView<IntervalDate> paidVacationsTable;
     @FXML
-    private TableColumn<IntervalDate, LocalDate> paidVacationsStartColumn;
+    private TableColumn<IntervalDate, BoundedLocalDate> paidVacationsStartColumn;
     @FXML
-    private TableColumn<IntervalDate, LocalDate> paidVacationEndColumn;
+    private TableColumn<IntervalDate, BoundedLocalDate> paidVacationEndColumn;
 	private ObservableList<IntervalDate> paidVacationsList = FXCollections.observableArrayList();
     
 	@FXML
     private TableView<IntervalDate> unpaidVacationsTable;
     @FXML
-    private TableColumn<IntervalDate, LocalDate> unpaidVacationsStartColumn;
+    private TableColumn<IntervalDate, BoundedLocalDate> unpaidVacationsStartColumn;
     @FXML
-    private TableColumn<IntervalDate, LocalDate> unpaidVacationEndColumn;
+    private TableColumn<IntervalDate, BoundedLocalDate> unpaidVacationEndColumn;
 	private ObservableList<IntervalDate> unpaidVacationsList = FXCollections.observableArrayList();
 	
 	@FXML
@@ -71,34 +75,45 @@ public class PhysicianEditDialogController {
     
     @FXML
     private void initialize() {
-    	Callback<TableColumn<IntervalDate, LocalDate>, 
-    		TableCell<IntervalDate, LocalDate>> intervalCellFactory
-    		= (TableColumn<IntervalDate, LocalDate> p) -> new DateEditingCell<IntervalDate>(new DefaultDatePickerConverter(dateFormatter, null, null));
+    	
+    	Callback<TableColumn<IntervalDate, BoundedLocalDate>, 
+    		TableCell<IntervalDate, BoundedLocalDate>> startIntervalCellFactory
+    		= (TableColumn<IntervalDate, BoundedLocalDate> p) -> new IntervalDateEditingCell(dateFormatter, IntervalPosition.START);
+
+        	Callback<TableColumn<IntervalDate, BoundedLocalDate>, 
+    		TableCell<IntervalDate, BoundedLocalDate>> endIntervalCellFactory
+    		= (TableColumn<IntervalDate, BoundedLocalDate> p) -> new IntervalDateEditingCell(dateFormatter, IntervalPosition.END);
+    		
     	Callback<TableColumn<Poste, LocalDate>, 
     		TableCell<Poste, LocalDate>> posteCellFactory
     		= (TableColumn<Poste, LocalDate> p) -> new DateEditingCell<Poste>(new DefaultDatePickerConverter(dateFormatter, null, null));
 
-        paidVacationsStartColumn.setCellFactory(intervalCellFactory);
-    	paidVacationsStartColumn.setOnEditCommit( (event) ->
-                ((IntervalDate) event.getTableView().getItems().get(
-                		event.getTablePosition().getRow())
-                        ).setStart(event.getNewValue()));
-    	paidVacationEndColumn.setCellFactory(intervalCellFactory);
-    	paidVacationEndColumn.setOnEditCommit( (event) ->
-                ((IntervalDate) event.getTableView().getItems().get(
-                		event.getTablePosition().getRow())
-                        ).setEnd(event.getNewValue()));
+   		EventHandler<TableColumn.CellEditEvent<IntervalDate,BoundedLocalDate>> startEventHandler = (event) -> {
+   			try {
+   				event.getRowValue().setStart(event.getNewValue().getDate());
+   			} catch (IllegalArgumentException e) {
+   				// RESHOW OLD VALUE
+   				refreshTable(event.getTableView());
+   			}
+   		};
+   		EventHandler<TableColumn.CellEditEvent<IntervalDate,BoundedLocalDate>> endEventHandler = (event) -> {
+   			try {
+   				event.getRowValue().setEnd(event.getNewValue().getDate());
+   			} catch (IllegalArgumentException e) {
+   				// RESHOW OLD VALUE
+   				refreshTable(event.getTableView());
+   			}
+   		};
+    		
+        paidVacationsStartColumn.setCellFactory(startIntervalCellFactory);
+    	paidVacationsStartColumn.setOnEditCommit(startEventHandler);
+    	paidVacationEndColumn.setCellFactory(endIntervalCellFactory);
+    	paidVacationEndColumn.setOnEditCommit(endEventHandler);
     	
-        unpaidVacationsStartColumn.setCellFactory(intervalCellFactory);
-    	unpaidVacationsStartColumn.setOnEditCommit( (event) ->
-                ((IntervalDate) event.getTableView().getItems().get(
-                		event.getTablePosition().getRow())
-                        ).setStart(event.getNewValue()));
-    	unpaidVacationEndColumn.setCellFactory(intervalCellFactory);
-    	unpaidVacationEndColumn.setOnEditCommit( (event) ->
-                ((IntervalDate) event.getTableView().getItems().get(
-                		event.getTablePosition().getRow())
-                        ).setEnd(event.getNewValue()));
+        unpaidVacationsStartColumn.setCellFactory(startIntervalCellFactory);
+    	unpaidVacationsStartColumn.setOnEditCommit(startEventHandler);
+    	unpaidVacationEndColumn.setCellFactory(endIntervalCellFactory);
+    	unpaidVacationEndColumn.setOnEditCommit(endEventHandler);
 
         neededVacDateColumn.setCellFactory(posteCellFactory);
         neededVacDateColumn.setOnEditCommit( (event) ->
@@ -129,8 +144,8 @@ public class PhysicianEditDialogController {
         // LINKS TABLE WITH OBSERVABLE
         paidVacationsTable.setItems(paidVacationsList);
         // LINKS THE COLUMNS
-        paidVacationsStartColumn.setCellValueFactory(new PropertyValueFactory<IntervalDate, LocalDate>("start"));
-        paidVacationEndColumn.setCellValueFactory(new PropertyValueFactory<IntervalDate, LocalDate>("end"));
+        paidVacationsStartColumn.setCellValueFactory(new PropertyValueFactory<IntervalDate, BoundedLocalDate>("boundedStart"));
+        paidVacationEndColumn.setCellValueFactory(new PropertyValueFactory<IntervalDate, BoundedLocalDate>("boundedEnd"));
     
         // == UNPAID VACATIONS ==
         // LINKS OBSERVABLE WITH PHYSICIAN
@@ -138,8 +153,8 @@ public class PhysicianEditDialogController {
         // LINKS TABLE WITH OBSERVABLE
         unpaidVacationsTable.setItems(unpaidVacationsList);
         // LINKS THE COLUMNS
-        unpaidVacationsStartColumn.setCellValueFactory(new PropertyValueFactory<IntervalDate, LocalDate>("start"));
-        unpaidVacationEndColumn.setCellValueFactory(new PropertyValueFactory<IntervalDate, LocalDate>("end"));
+        unpaidVacationsStartColumn.setCellValueFactory(new PropertyValueFactory<IntervalDate, BoundedLocalDate>("boundedStart"));
+        unpaidVacationEndColumn.setCellValueFactory(new PropertyValueFactory<IntervalDate, BoundedLocalDate>("boundedEnd"));
 
         // == NEEDED VACS LIST ==
         // FILLS THE OBSERVABLE ASSOCIATED LIST
@@ -281,6 +296,16 @@ public class PhysicianEditDialogController {
     private void handleCancel() {
         dialogStage.close();
     }
+
+    private <T> void refreshTable(TableView<T> tableView) {
+    	int selectedIndex = tableView.getSelectionModel().getSelectedIndex();
+    	ObservableList<T> observableList = tableView.getItems();
+    	tableView.setItems(null);
+    	tableView.layout();
+    	tableView.setItems(observableList);
+    	tableView.getSelectionModel().select(selectedIndex);
+    }
+
 
     private boolean isInputValid() {
         StringBuilder errorMessageBuilder = new StringBuilder();
