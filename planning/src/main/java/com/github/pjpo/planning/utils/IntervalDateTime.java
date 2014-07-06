@@ -69,7 +69,7 @@ public class IntervalDateTime implements Comparable<IntervalDateTime> {
 	}
 	
 	private void testInterval(LocalDateTime start, LocalDateTime end) throws IllegalArgumentException {
-		if (start != null && end != null && end.isAfter(start)) {
+		if (start != null && end != null && start.isAfter(end)) {
 			throw new IllegalArgumentException("Start date must be before end date");
 		}
 	}

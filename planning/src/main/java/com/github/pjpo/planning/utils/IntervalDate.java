@@ -81,7 +81,7 @@ public class IntervalDate implements Comparable<IntervalDate> {
 	}
 	
 	private void testInterval(LocalDate start, LocalDate end) throws IllegalArgumentException {
-		if (start != null && end != null && end.isAfter(start)) {
+		if (start != null && end != null && start.isAfter(end)) {
 			throw new IllegalArgumentException("Start date must be before end date");
 		}
 	}

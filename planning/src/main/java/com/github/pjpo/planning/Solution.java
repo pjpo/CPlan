@@ -146,9 +146,9 @@ public class Solution {
 						break;
 					}
 				}
-				// 4 - DIVIDE THE WORKLOAD
-				workLoads.set(i, Long.divideUnsigned(workLoads.get(i), clonedWorkedDays.size()));
 			}
+			// 4 - DIVIDE THE WORKLOAD
+			workLoads.set(i, Long.divideUnsigned(workLoads.get(i), clonedWorkedDays.size()));
 		}
 	}
 
@@ -162,37 +162,37 @@ public class Solution {
 			throw new IllegalArgumentException("No solution has been set");
 
 		// GETS THE MAX WORKER
-		int maxWorker = getMaxWorkerPhysician();
+		final int maxWorker = getMaxWorkerPhysician();
 		// GET MIN AND MAX WORKLOAD
-		long minWorkLoad = getMinWorkLoad();
-		long maxWorkLoad = getMaxWorkLoad();
+		final long minWorkLoad = getMinWorkLoad();
+		final long maxWorkLoad = getMaxWorkLoad();
 		
-		// CREATES THE NEW INDICES MAP
-		final HashMap<LocalDate, HashMap<String, Integer>> newSolutionMap = new HashMap<>();
-		solutionMedIndicesMap.forEach(
-				(LocalDate localDate, HashMap<String, Integer> content) -> {
-					// NEW LOCALDATE
-					newSolutionMap.put(localDate, new HashMap<>());
-					// FILLS THE NEW LOCAL DATE
-					content.forEach(
-							(String key, Integer value) -> {
-								// RANDOMLY REMOVES THIS WORK PERIOD IF WORKER WORKS TOO MUCH
-								// IF DIFFERENCE BETWEEN MAX AND MIN WORKLOAD IS LOW, WE WILL NOT REMOVE A LOT OF THEM
-								if (value == maxWorker && nextLong(randomLongs, maxWorkLoad) > minWorkLoad) {
-									newSolutionMap.get(localDate).put(key, null);
-								}
-								// ELSE REMOVE THE PHYSICIAN DEPENDING ON RANDOM
-								else if (nextLong(randomLongs, 10 + shake) > 10) {
-									newSolutionMap.get(localDate).put(key, null);
-								} else {
-									newSolutionMap.get(localDate).put(key, value);
-								}
-					});
-		});
+		// CREATES THE NEW INDICES MAP WITH LIGHTEN BURDEN
+		final HashMap<LocalDate, HashMap<String, Integer>> lightenSolution = new HashMap<>();
+		for (final Entry<LocalDate, HashMap<String, Integer>> actualSolution : solutionMedIndicesMap.entrySet()) {
+			// TAKES THIS DATE INTO ACCOUNT
+			lightenSolution.put(actualSolution.getKey(), new HashMap<>());
+			
+			// LIGHTEN BURDEN
+			for(final Entry<String, Integer> actualSolutionForPlage : actualSolution.getValue().entrySet()) {
+				
+				// RANDOMLY REMOVES THIS WORK PERIOD IF WORKER WORKS TOO MUCH
+				// IF DIFFERENCE BETWEEN MAX AND MIN WORKLOAD IS LOW, WE WILL NOT REMOVE A LOT OF THEM
+				if (actualSolutionForPlage.getValue() == maxWorker && nextLong(randomLongs, maxWorkLoad) > minWorkLoad) {
+					lightenSolution.get(actualSolution.getKey()).put(actualSolutionForPlage.getKey(), null);
+				}
+				// ELSE REMOVE THE PHYSICIAN DEPENDING ON RANDOM
+				else if (nextLong(randomLongs, 10 + shake) > 10) {
+					lightenSolution.get(actualSolution.getKey()).put(actualSolutionForPlage.getKey(), null);
+				} else {
+					lightenSolution.get(actualSolution.getKey()).put(actualSolutionForPlage.getKey(), actualSolutionForPlage.getValue());
+				}
+			}
+		}
 		
 		//Planning.prettyPrintInteger(newSolutionMap, physicians);
 		
-		return newSolutionMap;
+		return lightenSolution;
 	}
 	
 	/**

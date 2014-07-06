@@ -52,7 +52,7 @@ public class Planning {
 
 		// FILLS THE SOLVER
 		HashMap<LocalDate, HashMap<String, IntVar>> allIntVars;
-		allIntVars = agenda.fillSolver(solver, physicians, solution.lightenWorkBurden(shake));
+		allIntVars = agenda.fillSolver(solver, physicians, solution == null ? null : solution.lightenWorkBurden(shake));
 		
 		// GETS AN ARRAY OF EACH INTVAR
 		LinkedList<IntVar> allDays = new LinkedList<>();
