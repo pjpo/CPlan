@@ -50,7 +50,7 @@ public class PlanningGenerationTask extends Task<LinkedList<Solution>> {
 			final Solution solution = solver.findSolution();
 			final Integer finalRetrys = new Integer(retrys);
 
-			if (solution == null && !solver.hasSolution() && !solver.isUndefined()) {
+			if (solutions.size() == 0 && solution == null && !solver.hasSolution() && !solver.isUndefined()) {
 				throw new SolutionException("No solution");
 			} else if (solution != null) {
 				// UPDATES VALUES IN LABELS

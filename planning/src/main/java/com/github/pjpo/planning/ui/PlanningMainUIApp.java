@@ -79,7 +79,7 @@ public class PlanningMainUIApp extends Application {
         // SETS THE TAB PANES
         TabPane tabPane = (TabPane) borderPane.getCenter();
         tabPane.getTabs().get(0).setContent(physicianOverview);
-        tabPane.getTabs().get(1).setContent(generationOverview);
+        tabPane.getTabs().get(2).setContent(generationOverview);
         
         return borderPane;
 	}
