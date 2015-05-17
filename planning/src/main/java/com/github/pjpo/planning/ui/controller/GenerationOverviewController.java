@@ -14,16 +14,26 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
+
+
+
+
+
+
+
+
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.stage.FileChooser;
-
-import org.controlsfx.dialog.Dialogs;
-
 import au.com.bytecode.opencsv.CSVWriter;
+
+
+
 
 import com.github.pjpo.planning.Planning;
 import com.github.pjpo.planning.Solution;
@@ -116,17 +126,19 @@ public class GenerationOverviewController {
     				event.getSource().getException() == null ?
     						new Exception("Erreur inconnue") :
     							event.getSource().getException();
-    		if (exception instanceof SolutionException) 
-    			Dialogs.create()
-    			.owner(mainApp.getPrimaryStage())
-    			.masthead("Pas de solution")
-    			.message(exception.getMessage())
-    			.showError();
-    		else
-    			Dialogs.create()
-    			.owner(mainApp.getPrimaryStage())
-    			.masthead("Erreur")
-    			.showException(exception);
+    		if (exception instanceof SolutionException) {
+    			Alert alert = new Alert(AlertType.INFORMATION);
+    			alert.setTitle("Information");
+    			alert.setHeaderText("Pas de solution");
+    			alert.setContentText(exception.getMessage());
+    			alert.showAndWait();
+    		} else {
+    			Alert alert = new Alert(AlertType.INFORMATION);
+    			alert.setTitle("Information");
+    			alert.setHeaderText("Erreur");
+    			alert.setContentText(exception.getMessage());
+    			alert.showAndWait();
+    		}
 			setButtonsStatus(true, false, false);
 		});
 
@@ -139,10 +151,11 @@ public class GenerationOverviewController {
 					solution = task.get().getLast();
 				}
 			} catch (Exception e) {
-    			Dialogs.create()
-    			.owner(mainApp.getPrimaryStage())
-    			.masthead("Erreur")
-    			.showException(e);
+    			Alert alert = new Alert(AlertType.INFORMATION);
+    			alert.setTitle("Information");
+    			alert.setHeaderText("Erreur");
+    			alert.setContentText(e.getMessage());
+    			alert.showAndWait();
 			}
     	});
     	
@@ -166,9 +179,11 @@ public class GenerationOverviewController {
     		try {
     			saveConfiguration(saveFile);
     		} catch (IOException e) {
-    			Dialogs.create()
-    			.owner(mainApp.getPrimaryStage())
-    			.showException(e);
+    			Alert alert = new Alert(AlertType.INFORMATION);
+    			alert.setTitle("Information");
+    			alert.setHeaderText("Erreur");
+    			alert.setContentText(e.getMessage());
+    			alert.showAndWait();
     		}
     	}
     }

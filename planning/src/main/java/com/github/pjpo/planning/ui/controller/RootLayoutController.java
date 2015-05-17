@@ -15,9 +15,9 @@ import java.util.LinkedList;
 import java.util.Map.Entry;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.stage.FileChooser;
-
-import org.controlsfx.dialog.Dialogs;
 
 import com.github.pjpo.planning.physician.Physician;
 import com.github.pjpo.planning.physician.PhysicianBuilder;
@@ -45,9 +45,11 @@ public class RootLayoutController {
 			 try {
 				 saveConfiguration(saveFile);
 			 } catch (IOException e) {
-				 Dialogs.create()
-				 .owner(mainApp.getPrimaryStage())
-				 .showException(e);
+		    	  Alert alert = new Alert(AlertType.INFORMATION);
+		    	  alert.setTitle("Information");
+		    	  alert.setHeaderText("Erreur");
+		    	  alert.setContentText(e.getMessage());
+		    	  alert.showAndWait();
 			 }
 		 }
 	 }
@@ -105,9 +107,11 @@ public class RootLayoutController {
 			 try {
 				 loadConfiguration(saveFile);
 			 } catch (IOException e) {
-				 Dialogs.create()
-				 .owner(mainApp.getPrimaryStage())
-				 .showException(e);
+		    	  Alert alert = new Alert(AlertType.INFORMATION);
+		    	  alert.setTitle("Information");
+		    	  alert.setHeaderText("Erreur");
+		    	  alert.setContentText(e.getMessage());
+		    	  alert.showAndWait();
 			 }
 		 }
 	 }

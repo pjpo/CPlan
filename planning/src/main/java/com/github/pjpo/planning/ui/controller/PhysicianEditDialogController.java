@@ -10,16 +10,16 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-
-import org.controlsfx.dialog.Dialogs;
 
 import com.github.pjpo.planning.physician.Physician;
 import com.github.pjpo.planning.ui.controller.utils.DateEditingCell;
@@ -200,13 +200,12 @@ public class PhysicianEditDialogController {
         if (selectedIndex >= 0) {
         	paidVacationsTable.getItems().remove(selectedIndex);
         } else {
-      	  // NOTHING SELECTED
-      	  Dialogs.create()
-      	  .owner(dialogStage)
-      	  .title("Information Dialog")
-            .masthead("Pas de période sélectionnée")
-            .message("Merci de sélectionner une période")
-            .showInformation();
+        	// NOTHING SELECTED
+			Alert alert = new Alert(AlertType.INFORMATION);
+			alert.setTitle("Information");
+			alert.setHeaderText("Pas de période sélectionnée");
+			alert.setContentText("Merci de sélectionner une période");
+			alert.showAndWait();
         }
     }
 
@@ -223,12 +222,11 @@ public class PhysicianEditDialogController {
         	unpaidVacationsTable.getItems().remove(selectedIndex);
         } else {
       	  // NOTHING SELECTED
-      	  Dialogs.create()
-      	  .owner(dialogStage)
-      	  .title("Information Dialog")
-            .masthead("Pas de période sélectionnée")
-            .message("Merci de sélectionner une période")
-            .showInformation();
+			Alert alert = new Alert(AlertType.INFORMATION);
+			alert.setTitle("Information");
+			alert.setHeaderText("Pas de période sélectionnée");
+			alert.setContentText("Merci de sélectionner une période");
+			alert.showAndWait();
         }
     }
 
@@ -244,13 +242,12 @@ public class PhysicianEditDialogController {
         if (selectedIndex >= 0) {
         	neededVacTable.getItems().remove(selectedIndex);
         } else {
-      	  // NOTHING SELECTED
-      	  Dialogs.create()
-      	  .owner(dialogStage)
-      	  .title("Information Dialog")
-            .masthead("Pas d'élément sélectionné")
-            .message("Merci de sélectionner un élément")
-            .showInformation();
+        	// NOTHING SELECTED
+			Alert alert = new Alert(AlertType.INFORMATION);
+			alert.setTitle("Information");
+			alert.setHeaderText("Pas d'élément sélectionné");
+			alert.setContentText("Merci de sélectionner un élément");
+			alert.showAndWait();
         }
     }
 
@@ -330,12 +327,11 @@ public class PhysicianEditDialogController {
         if (errorMessageBuilder.length() == 0) {
         	return true;
         } else {
-        	Dialogs.create()
-        	.owner(dialogStage)
-        	.title("Information Dialog")
-            .masthead("Invalid fields")
-            .message(errorMessageBuilder.toString())
-            .showError();
+			Alert alert = new Alert(AlertType.INFORMATION);
+			alert.setTitle("Information");
+			alert.setHeaderText("Invalid fields");
+			alert.setContentText(errorMessageBuilder.toString());
+			alert.showAndWait();
         	return false;
         }
     }

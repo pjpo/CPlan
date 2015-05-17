@@ -3,12 +3,12 @@ package com.github.pjpo.planning.ui.controller;
 import java.time.format.DateTimeFormatter;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.PropertyValueFactory;
-
-import org.controlsfx.dialog.Dialogs;
 
 import com.github.pjpo.planning.physician.Physician;
 import com.github.pjpo.planning.physician.PhysicianBuilder;
@@ -61,12 +61,11 @@ public class PhysicianOverviewController {
     	  physicianTable.getItems().remove(selectedIndex);
       } else {
     	  // NOTHING SELECTED
-    	  Dialogs.create()
-    	  .owner(mainApp.getPrimaryStage())
-    	  .title("Information Dialog")
-          .masthead("No person selected")
-          .message("Please select a physician in the table")
-          .showInformation();
+    	  Alert alert = new Alert(AlertType.INFORMATION);
+    	  alert.setTitle("Information");
+    	  alert.setHeaderText("No person selected");
+    	  alert.setContentText("Please select a physician in the table");
+    	  alert.showAndWait();
       }
     }
     
@@ -94,13 +93,12 @@ public class PhysicianOverviewController {
         }
 
       } else {
-        // Nothing selected
-        Dialogs.create()
-        .owner(mainApp.getPrimaryStage())
-        .title("Information dialog")
-        .masthead("No physician selected")
-        .message("Select a physician")
-        .showInformation();
+    	  // Nothing selected
+    	  Alert alert = new Alert(AlertType.INFORMATION);
+    	  alert.setTitle("Information");
+    	  alert.setHeaderText("No physician selected");
+    	  alert.setContentText("Select a physician");
+    	  alert.showAndWait();
       }
     }
     
