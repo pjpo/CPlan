@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+import com.github.pjpo.planning.lignes.Position;
 import com.github.pjpo.planning.physician.Physician;
-import com.github.pjpo.planning.utils.IntervalDateTime;
 
 import solver.Solver;
 import solver.variables.IntVar;
@@ -17,7 +17,7 @@ public class PlanningSolver {
 	private final Solver solver;
 	
 	/** List of days and worked periods */
-	private final HashMap<LocalDate, HashMap<String, IntervalDateTime>> workingPeriods;
+	private final HashMap<LocalDate, HashMap<String, Position>> workingPositions;
 
 	private final HashMap<LocalDate, HashMap<String, IntVar>> constraintVariables;
 	
@@ -26,7 +26,7 @@ public class PlanningSolver {
 	private final LinkedList<Solution> previousAcceptedSolutions;
 		
 	public PlanningSolver(final Solver solver,
-			final HashMap<LocalDate, HashMap<String, IntervalDateTime>> workingPeriods,
+			final HashMap<LocalDate, HashMap<String, Position>> workingPositions,
 			final HashMap<LocalDate, HashMap<String, IntVar>> constraintVariables,
 			final LinkedList<Solution> previousAcceptedSolutions,
 			final ArrayList<Physician> physicians) throws IllegalArgumentException {
@@ -38,7 +38,7 @@ public class PlanningSolver {
 		this.solver = solver;
 		this.constraintVariables = constraintVariables;
 		this.physicians = physicians;
-		this.workingPeriods = workingPeriods;
+		this.workingPositions = workingPositions;
 		this.previousAcceptedSolutions = previousAcceptedSolutions;
 	}
 	
@@ -51,7 +51,7 @@ public class PlanningSolver {
 		if (solver.isFeasible() != ESat.TRUE && previousAcceptedSolutions.size() == 0) {
 			return null;
 		} else {
-			Solution solution = new Solution(workingPeriods, physicians);
+			Solution solution = new Solution(workingPositions, physicians);
 			solution.setSolutionMedIndicesMap(constraintVariables);
 			// IF WE HAVE AT LEAST 1 SOLUTIONS IN SOLUTIONS LIST, COMPARE IT WITH THE PRECEDENT
 			if (previousAcceptedSolutions.size() > 0 &&

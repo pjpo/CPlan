@@ -15,7 +15,6 @@ import solver.search.strategy.selectors.IntValueSelector;
 import solver.variables.IntVar;
 
 import com.github.pjpo.planning.jours.Agenda;
-import com.github.pjpo.planning.jours.Jour;
 import com.github.pjpo.planning.physician.Physician;
 import com.github.pjpo.planning.utils.IntervalDate;
 
@@ -34,9 +33,9 @@ public class Planning {
 	
 	private final Random random = new Random(new Date().getTime());
 	
-	public Planning(final IntervalDate intervalDate, final ArrayList<Physician> physicians, final Jour typeJour) {
+	public Planning(final IntervalDate intervalDate, final ArrayList<Physician> physicians) {
 		this.physicians = physicians;
-		this.agenda = new Agenda(typeJour, intervalDate);
+		this.agenda = new Agenda(intervalDate);
 		this.agenda.calculateWorkingPeriods();
 	}
 
@@ -91,7 +90,7 @@ public class Planning {
 		SearchMonitorFactory.limitTime(solver, 600000);
 		
 		// RETURN SOLVER AND VARS
-		return new PlanningSolver(solver, agenda.getWorkingPeriods(), allIntVars, previousAcceptedSolutions, physicians);
+		return new PlanningSolver(solver, agenda.getWorkingPositions(), allIntVars, previousAcceptedSolutions, physicians);
 	}
 	
 }

@@ -22,6 +22,7 @@ import java.util.Map.Entry;
 
 
 
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -35,15 +36,15 @@ import au.com.bytecode.opencsv.CSVWriter;
 
 
 
+
 import com.github.pjpo.planning.Planning;
 import com.github.pjpo.planning.Solution;
 import com.github.pjpo.planning.SolutionException;
-import com.github.pjpo.planning.jours.JourChuMtp;
+import com.github.pjpo.planning.lignes.Position;
 import com.github.pjpo.planning.ui.PlanningMainUIApp;
 import com.github.pjpo.planning.ui.controller.utils.DefaultDatePickerConverter;
 import com.github.pjpo.planning.ui.controller.utils.PlanningGenerationTask;
 import com.github.pjpo.planning.utils.IntervalDate;
-import com.github.pjpo.planning.utils.IntervalDateTime;
 
 public class GenerationOverviewController {
 
@@ -116,8 +117,7 @@ public class GenerationOverviewController {
     	Planning planning = new Planning(new IntervalDate(
     			startPeriodPicker.getValue(),
     			endPeriodPicker.getValue()),
-    			new ArrayList<>(mainApp.getPhysicians()),
-    			new JourChuMtp());
+    			new ArrayList<>(mainApp.getPhysicians()));
 
     	task = new PlanningGenerationTask(planning, this);
 
@@ -199,7 +199,7 @@ public class GenerationOverviewController {
 			 // SEARCHES THE LIST OF POSTES AND LIST OF DATES
 			 HashSet<String> postes = new HashSet<>();
 			 ArrayList<LocalDate> dates = new ArrayList<>();
-			 for (Entry<LocalDate, HashMap<String, IntervalDateTime>> entry : solution.getWorkingPeriodsMap().entrySet()) {
+			 for (Entry<LocalDate, HashMap<String, Position>> entry : solution.getWorkingPositions().entrySet()) {
 				 dates.add(entry.getKey());
 				 for (String poste : entry.getValue().keySet()) {
 					 postes.add(poste);

@@ -1,5 +1,9 @@
 package com.github.pjpo.planning.jours;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,51 +14,56 @@ import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
 import solver.variables.IntVar;
 
-import com.github.pjpo.planning.lignes.AgdeLigne;
-import com.github.pjpo.planning.lignes.FcLigne;
-import com.github.pjpo.planning.lignes.FmcLigne;
-import com.github.pjpo.planning.lignes.GangesLigne;
-import com.github.pjpo.planning.lignes.Ligne;
-import com.github.pjpo.planning.lignes.LunelLigne;
-import com.github.pjpo.planning.lignes.RegulLigne;
-import com.github.pjpo.planning.lignes.SILigne;
-import com.github.pjpo.planning.lignes.SmurLigne;
-import com.github.pjpo.planning.lignes.UHCDLigne;
-import com.github.pjpo.planning.lignes.UtecLigne;
-import com.github.pjpo.planning.utils.IntervalDateTime;
+import com.github.pjpo.planning.lignes.Position;
 
-public class JourChuMtp implements Jour {
+public class JourChuMtp {
 
-	private Ligne[] lignes = new Ligne[] {
-			new LunelLigne(),
-			new GangesLigne(),
-			new AgdeLigne(),
-			new RegulLigne(),
-			new SmurLigne(1),
-			new SmurLigne(2),
-			new UHCDLigne(),
-			new SILigne(),
-			new FmcLigne(),
-			new FcLigne(),
-			new UtecLigne()
-			
-	};
 	
-	@Override
-	public HashMap<String, IntervalDateTime> getPlages(LocalDate date) {
-		// THE MAP
-		HashMap<String, IntervalDateTime> plages = new HashMap<>();
-		// GET PLAGES FROM LIGNES AND CONCATS THEM INTO HASHMAP
-		for (Ligne ligne : lignes) {
-			ligne.getPlages(date).forEach(
-					(key, value) -> plages.put(key, value));
+	public static HashMap<String, Position> getPositions(LocalDate date) {
+		
+		HashMap<String, Position> positions = new HashMap<>();
+		
+		// GET POSITIONS DEFINITIONS AND GENERATE A LIST OF ACCEPTABLE POSITIONS FOR THIS LOCALDATE
+		try (
+				InputStream resource = JourChuMtp.class.getResourceAsStream("/com/github/pjpo/planning/positions.cfg");
+				InputStreamReader isr = new InputStreamReader(resource);
+				BufferedReader br = new BufferedReader(isr);) {
+			String positionName = null;
+			String separator = null;
+			StringBuilder script = new StringBuilder();
+			String readed = null;
+			while ((readed = br.readLine()) != null) {
+				// positionName not defined => define it
+				if (positionName == null) {
+					positionName = readed;
+				}
+				// positionName has been defined ; if separator has not been defined, define it
+				else if (separator == null) {
+					separator = readed;
+				}
+				// positionName and separator have been defined, see if we reached end of script
+				else if (readed.equals(separator)) {
+					// We have a new position defined, store it
+					Position position = new Position(positionName, date, script.toString());
+					positions.put(positionName, position);
+					// Clean state
+					positionName = separator = null;
+					script = new StringBuilder();
+				}
+				// WE ARE IN SCRIPT, STORE IT
+				else {
+					script.append(readed);
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		return plages;
+		return positions;
 	}
 
-	@Override
-	public List<Constraint> getConstraints(
-			LocalDate date, HashMap<LocalDate, HashMap<String, IntVar>> workers) {
+	public static List<Constraint> getConstraints(
+			LocalDate date,
+			HashMap<LocalDate, HashMap<String, IntVar>> workers) {
 
 		List<Constraint> constraints = new ArrayList<>();
 

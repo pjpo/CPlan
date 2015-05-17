@@ -11,9 +11,9 @@ import java.util.Random;
 
 import solver.variables.IntVar;
 
+import com.github.pjpo.planning.lignes.Position;
 import com.github.pjpo.planning.physician.Physician;
 import com.github.pjpo.planning.utils.IntervalDate;
-import com.github.pjpo.planning.utils.IntervalDateTime;
 
 /**
  * A solution, with a list of periods,
@@ -25,7 +25,7 @@ import com.github.pjpo.planning.utils.IntervalDateTime;
 public class Solution {
 	
 	/** Stores the configuration for time working periods */
-	private final HashMap<LocalDate, HashMap<String, IntervalDateTime>> workingPeriodsMap;
+	private final HashMap<LocalDate, HashMap<String, Position>> workingPositions;
 	
 	/** Stores the physicians definitions */
 	private final ArrayList<Physician> physicians;
@@ -44,14 +44,14 @@ public class Solution {
 	 * @param workingPeriodsMap
 	 * @param physicians
 	 */
-	public Solution(final HashMap<LocalDate, HashMap<String, IntervalDateTime>> workingPeriodsMap,
+	public Solution(final HashMap<LocalDate, HashMap<String, Position>> workingPositions,
 			ArrayList<Physician> physicians) {
-		this.workingPeriodsMap = workingPeriodsMap;
+		this.workingPositions = workingPositions;
 		this.physicians = physicians;
 	}
 	
-	public HashMap<LocalDate, HashMap<String, IntervalDateTime>> getWorkingPeriodsMap() {
-		return workingPeriodsMap;
+	public HashMap<LocalDate, HashMap<String, Position>> getWorkingPositions() {
+		return workingPositions;
 	}
 
 	public HashMap<LocalDate, HashMap<String, Integer>> getSolutionMedIndicesMap() {
@@ -78,7 +78,7 @@ public class Solution {
 		
 		for (final Entry<LocalDate, HashMap<String, IntVar>> solutionMedIndiceEntry : solutionMedIndicesIntVarMap.entrySet()) {
 			// WERIFY THAT THIS LOCALDATE EXISTS IN WORKINGPERIODSMAP
-			if (!workingPeriodsMap.containsKey(solutionMedIndiceEntry.getKey()))
+			if (!workingPositions.containsKey(solutionMedIndiceEntry.getKey()))
 				throw new IllegalArgumentException("Solution does not meet working periods configuration");
 
 			// CREATES THIS NEW LOCALDATE IN SOLUTION
@@ -89,7 +89,7 @@ public class Solution {
 			// COPY INTVARS FOR THIS LOCALDATE
 			for (final Entry<String, IntVar> solutionMedIndiceEntryForInterval : solutionMedIndiceEntry.getValue().entrySet()) {
 				// VERIFY THAT THIS POSTE EXISTS IN WORKINGPERIODSMAP
-				if (!workingPeriodsMap.get(solutionMedIndiceEntry.getKey()).containsKey(solutionMedIndiceEntryForInterval.getKey()))
+				if (!workingPositions.get(solutionMedIndiceEntry.getKey()).containsKey(solutionMedIndiceEntryForInterval.getKey()))
 					throw new IllegalArgumentException("Solution does not meet working periods configuration");
 				// VERIFY THAT THIS PHYSICIAN EXISTS
 				if ((solutionMedIndiceEntryForInterval.getValue().getValue() < 0)
@@ -102,11 +102,11 @@ public class Solution {
 			}
 
 			// VERIFY THAT WE DID NOT HAD SOME DEFINED WORKING PLACES IN WORKINGPERIODMAPS THAT ARE NOT IN THE SOLUTION
-			if (workingPeriodsMap.get(solutionMedIndiceEntry.getKey()).size() != solutionMedIndicesMap.get(solutionMedIndiceEntry.getKey()).size())
+			if (workingPositions.get(solutionMedIndiceEntry.getKey()).size() != solutionMedIndicesMap.get(solutionMedIndiceEntry.getKey()).size())
 				throw new IllegalArgumentException("Solution does not meet working periods configuration");
 		}
 		// VERIFY THAT WE DID NOT HAD SOME DEFINED WORKING DATES IN WORKINGPERIODMAPS THAT ARE NOT IN THE SOLUTION
-		if (workingPeriodsMap.size() != solutionMedIndicesMap.size())
+		if (workingPositions.size() != solutionMedIndicesMap.size())
 			throw new IllegalArgumentException("Solution does not meet working periods configuration");
 		
 		// INITS THE WORK LOAD
