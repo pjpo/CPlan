@@ -43,9 +43,9 @@ public class JourChuMtp {
 				}
 				// positionName and separator have been defined, see if we reached end of script
 				else if (readed.equals(separator)) {
-					// We have a new position defined, store it
+					// We have a new position defined, store it if position is active
 					Position position = new Position(positionName, date, script.toString());
-					positions.put(positionName, position);
+					if (position.isWorking()) positions.put(positionName, position);
 					// Clean state
 					positionName = separator = null;
 					script = new StringBuilder();

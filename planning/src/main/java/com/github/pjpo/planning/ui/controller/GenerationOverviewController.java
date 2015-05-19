@@ -166,8 +166,9 @@ public class GenerationOverviewController {
     }	
     
     public void handlePauseButton() {
-    	// TASK MUST BE NON NULL (ELSE THE PAUSE BUTTON SHOULD NOT APPEAR)
-    	task.stopProcessing("Stopped by user");
+    	// If task is null, it means the window has been closed
+    	if (task != null)
+    		task.stopProcessing("Stopped by user");
     }
     
     public void handleSaveButton() {
