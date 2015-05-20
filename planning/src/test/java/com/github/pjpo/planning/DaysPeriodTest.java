@@ -1,4 +1,4 @@
-package com.github.pjpo.jclud;
+package com.github.pjpo.planning;
 
 import java.time.LocalDate;
 
