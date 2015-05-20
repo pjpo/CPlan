@@ -68,12 +68,46 @@ public class Agenda {
 		// CREATES THE MAP OF WORKING
 		final HashMap<LocalDate, HashMap<String, IntVar>> workers = new HashMap<>(workingPositions.size());
 		
-		// DEFINES THE POSSIBLE PHYSICIANS FOR EACH WORKING PERIOD
-		for (final Entry<LocalDate, HashMap<String, Position>> intervalsForDay : workingPositions.entrySet()) {
+		// == 1 - Check for each day
+		for (final Entry<LocalDate, HashMap<String, Position>> positionsInDayEntry : workingPositions.entrySet()) {
 						
 			// CREATES THE CONSTRAINTS PROGRAMMING VARIABLES FOR THIS DAY
 			final HashMap<String, IntVar> workingConstraintsVars = new HashMap<>();
-			workers.put(intervalsForDay.getKey(), workingConstraintsVars);
+			workers.put(positionsInDayEntry.getKey(), workingConstraintsVars);
+			
+			// == 2 - Check each position of this day
+			eachposition : for (final Entry<String, Position> positionEntry : positionsInDayEntry.getValue().entrySet()) {
+
+				// == a - Check if we have already a person positioned at this day in prefill
+				if (preFill != null && preFill.get(positionsInDayEntry.getKey()) != null
+						&& preFill.get(positionsInDayEntry.getKey()).get(positionEntry.getKey()) != null) {
+					// Add the constraint for the solver
+					workingConstraintsVars.put(
+							positionEntry.getKey(),
+							VariableFactory.fixed(
+									positionsInDayEntry.getKey().toString() + "_" + positionEntry.getKey(),
+									preFill.get(positionsInDayEntry.getKey()).get(positionEntry.getKey()),
+									solver
+							));
+					// look for next position in day
+					continue eachposition;
+				}
+				
+					
+				// ==> continue here
+				// == 2 - Check for each physician if he MUST work at this position this day
+				for (int i = 0 ; i < physicians.size() ; i++) {
+					
+					if (preFill != null && preFill.get(intervalsForDay.getKey()) != null
+							&& preFill.get(intervalsForDay.getKey()).get(position.getName()) != null) {
+						workingConstraintsVars.put(position.getName(),
+								VariableFactory.fixed(
+										intervalsForDay.getKey().toString() + "_" + position.getName(),
+										preFill.get(intervalsForDay.getKey()).get(position.getName()),
+										solver));
+
+				}
+			}
 			
 			// == 1 - CREATES THE LIST OF PHYSICIANS WORKING THIS DAY ==
 			final LinkedList<Integer> workingPhysiciansForDay = new LinkedList<>();

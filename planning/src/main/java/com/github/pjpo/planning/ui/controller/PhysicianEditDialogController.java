@@ -1,34 +1,25 @@
 package com.github.pjpo.planning.ui.controller;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
-import javafx.util.Callback;
 
 import com.github.pjpo.planning.physician.Physician;
-import com.github.pjpo.planning.ui.controller.utils.DateEditingCell;
-import com.github.pjpo.planning.ui.controller.utils.DefaultDatePickerConverter;
-import com.github.pjpo.planning.ui.controller.utils.IntervalDateEditingCell;
-import com.github.pjpo.planning.ui.controller.utils.IntervalDateEditingCell.IntervalPosition;
 import com.github.pjpo.planning.ui.model.Poste;
-import com.github.pjpo.planning.utils.BoundedLocalDate;
-import com.github.pjpo.planning.utils.IntervalDate;
+import com.github.pjpo.planning.utils.IntervalDateTime;
 
 public class PhysicianEditDialogController {
 
@@ -42,20 +33,20 @@ public class PhysicianEditDialogController {
 	private TextField refusedPostes;
 
 	@FXML
-    private TableView<IntervalDate> paidVacationsTable;
+    private TableView<IntervalDateTime> paidVacationsTable;
     @FXML
-    private TableColumn<IntervalDate, BoundedLocalDate> paidVacationsStartColumn;
+    private TableColumn<IntervalDateTime, LocalDateTime> paidVacationsStartColumn;
     @FXML
-    private TableColumn<IntervalDate, BoundedLocalDate> paidVacationEndColumn;
-	private ObservableList<IntervalDate> paidVacationsList = FXCollections.observableArrayList();
+    private TableColumn<IntervalDateTime, LocalDateTime> paidVacationEndColumn;
+	private ObservableList<IntervalDateTime> paidVacationsList = FXCollections.observableArrayList();
     
 	@FXML
-    private TableView<IntervalDate> unpaidVacationsTable;
+    private TableView<IntervalDateTime> unpaidVacationsTable;
     @FXML
-    private TableColumn<IntervalDate, BoundedLocalDate> unpaidVacationsStartColumn;
+    private TableColumn<IntervalDateTime, LocalDateTime> unpaidVacationsStartColumn;
     @FXML
-    private TableColumn<IntervalDate, BoundedLocalDate> unpaidVacationEndColumn;
-	private ObservableList<IntervalDate> unpaidVacationsList = FXCollections.observableArrayList();
+    private TableColumn<IntervalDateTime, LocalDateTime> unpaidVacationEndColumn;
+	private ObservableList<IntervalDateTime> unpaidVacationsList = FXCollections.observableArrayList();
 	
 	@FXML
     private TableView<Poste> neededVacTable;
@@ -64,8 +55,6 @@ public class PhysicianEditDialogController {
     @FXML
     private TableColumn<Poste, String> neededVacPosteColumn;
 	private ObservableList<Poste> neededVacList = FXCollections.observableArrayList();
-
-	private DateTimeFormatter dateFormatter;
 	
 	private Stage dialogStage;
     
@@ -76,56 +65,17 @@ public class PhysicianEditDialogController {
     @FXML
     private void initialize() {
     	
-    	Callback<TableColumn<IntervalDate, BoundedLocalDate>, 
-    		TableCell<IntervalDate, BoundedLocalDate>> startIntervalCellFactory
-    		= (TableColumn<IntervalDate, BoundedLocalDate> p) -> new IntervalDateEditingCell(dateFormatter, IntervalPosition.START);
+    	// Initialize the paid vacations
+    	paidVacationsStartColumn.setCellValueFactory(new PropertyValueFactory<IntervalDateTime, LocalDateTime>("start"));
+        paidVacationEndColumn.setCellValueFactory(new PropertyValueFactory<IntervalDateTime, LocalDateTime>("end"));
 
-        	Callback<TableColumn<IntervalDate, BoundedLocalDate>, 
-    		TableCell<IntervalDate, BoundedLocalDate>> endIntervalCellFactory
-    		= (TableColumn<IntervalDate, BoundedLocalDate> p) -> new IntervalDateEditingCell(dateFormatter, IntervalPosition.END);
-    		
-    	Callback<TableColumn<Poste, LocalDate>, 
-    		TableCell<Poste, LocalDate>> posteCellFactory
-    		= (TableColumn<Poste, LocalDate> p) -> new DateEditingCell<Poste>(new DefaultDatePickerConverter(dateFormatter, null, null));
+    	// Initialize the non paid vacations
+    	unpaidVacationsStartColumn.setCellValueFactory(new PropertyValueFactory<IntervalDateTime, LocalDateTime>("start"));
+        unpaidVacationEndColumn.setCellValueFactory(new PropertyValueFactory<IntervalDateTime, LocalDateTime>("end"));
 
-   		EventHandler<TableColumn.CellEditEvent<IntervalDate,BoundedLocalDate>> startEventHandler = (event) -> {
-   			try {
-   				event.getRowValue().setStart(event.getNewValue().getDate());
-   			} catch (IllegalArgumentException e) {
-   				// RESHOW OLD VALUE
-   				refreshTable(event.getTableView());
-   			}
-   		};
-   		EventHandler<TableColumn.CellEditEvent<IntervalDate,BoundedLocalDate>> endEventHandler = (event) -> {
-   			try {
-   				event.getRowValue().setEnd(event.getNewValue().getDate());
-   			} catch (IllegalArgumentException e) {
-   				// RESHOW OLD VALUE
-   				refreshTable(event.getTableView());
-   			}
-   		};
-    		
-        paidVacationsStartColumn.setCellFactory(startIntervalCellFactory);
-    	paidVacationsStartColumn.setOnEditCommit(startEventHandler);
-    	paidVacationEndColumn.setCellFactory(endIntervalCellFactory);
-    	paidVacationEndColumn.setOnEditCommit(endEventHandler);
-    	
-        unpaidVacationsStartColumn.setCellFactory(startIntervalCellFactory);
-    	unpaidVacationsStartColumn.setOnEditCommit(startEventHandler);
-    	unpaidVacationEndColumn.setCellFactory(endIntervalCellFactory);
-    	unpaidVacationEndColumn.setOnEditCommit(endEventHandler);
-
-        neededVacDateColumn.setCellFactory(posteCellFactory);
-        neededVacDateColumn.setOnEditCommit( (event) ->
-        		((Poste) event.getTableView().getItems().get(
-        				event.getTablePosition().getRow())
-        				).setDate(event.getNewValue()));
-        
-        neededVacPosteColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        neededVacPosteColumn.setOnEditCommit( (event) ->
-        		((Poste) event.getTableView().getItems().get(
-        				event.getTablePosition().getRow())
-                        ).setPoste(event.getNewValue()));
+        // Initialize the needed positions
+        neededVacPosteColumn.setCellValueFactory(new PropertyValueFactory<Poste, String>("poste"));
+        neededVacDateColumn.setCellValueFactory(new PropertyValueFactory<Poste, LocalDate>("date"));
     }
 
     public void setDialogStage(Stage dialogStage) {
@@ -143,18 +93,12 @@ public class PhysicianEditDialogController {
         paidVacationsList.setAll(physician.getPaidVacation());
         // LINKS TABLE WITH OBSERVABLE
         paidVacationsTable.setItems(paidVacationsList);
-        // LINKS THE COLUMNS
-        paidVacationsStartColumn.setCellValueFactory(new PropertyValueFactory<IntervalDate, BoundedLocalDate>("boundedStart"));
-        paidVacationEndColumn.setCellValueFactory(new PropertyValueFactory<IntervalDate, BoundedLocalDate>("boundedEnd"));
     
         // == UNPAID VACATIONS ==
         // LINKS OBSERVABLE WITH PHYSICIAN
         unpaidVacationsList.setAll(physician.getUnpaidVacation());
         // LINKS TABLE WITH OBSERVABLE
         unpaidVacationsTable.setItems(unpaidVacationsList);
-        // LINKS THE COLUMNS
-        unpaidVacationsStartColumn.setCellValueFactory(new PropertyValueFactory<IntervalDate, BoundedLocalDate>("boundedStart"));
-        unpaidVacationEndColumn.setCellValueFactory(new PropertyValueFactory<IntervalDate, BoundedLocalDate>("boundedEnd"));
 
         // == NEEDED VACS LIST ==
         // FILLS THE OBSERVABLE ASSOCIATED LIST
@@ -174,9 +118,6 @@ public class PhysicianEditDialogController {
         }
         // LINKS TABLE WITH OBSERVABLE
         neededVacTable.setItems(neededVacList);
-        // LINKS THE COLUMNS
-        neededVacDateColumn.setCellValueFactory(new PropertyValueFactory<Poste, LocalDate>("date"));
-        neededVacPosteColumn.setCellValueFactory(new PropertyValueFactory<Poste, String>("poste"));
         
         // == REFUSED POSTES ==
         StringBuilder refusedPostesBuilder = new StringBuilder();
@@ -190,10 +131,31 @@ public class PhysicianEditDialogController {
 
     @FXML
     private void handleNewPaidVacation() {
-    	IntervalDate paidVacation = new IntervalDate();
-    	paidVacationsList.add(paidVacation);
+    	IntervalDateTime tempPaidVacation = new IntervalDateTime();
+    	paidVacationsList.add(tempPaidVacation);
     }
 
+    @FXML
+    private void handleModifyPaidVacation() {
+    	// GETS THE SELECTED ITEM
+        int selectedIndex = paidVacationsTable.getSelectionModel().getSelectedIndex();
+        if (selectedIndex >= 0) {
+        	IntervalDateTime toModify = paidVacationsTable.getItems().get(selectedIndex);
+        	DateTimeIntervalEditDialogController controller =
+        			DateTimeIntervalEditDialogController.showDialog(dialogStage, "Congés payés", toModify);
+        	if (controller.isOkClicked()) {
+        		paidVacationsTable.getItems().set(selectedIndex, toModify);
+        	}
+        } else {
+        	// NOTHING SELECTED
+			Alert alert = new Alert(AlertType.INFORMATION);
+			alert.setTitle("Information");
+			alert.setHeaderText("Pas de période sélectionnée");
+			alert.setContentText("Merci de sélectionner une période à modifier");
+			alert.showAndWait();
+        }
+    }
+    
     @FXML
     private void handleDeletePaidVacation() {
         int selectedIndex = paidVacationsTable.getSelectionModel().getSelectedIndex();
@@ -204,15 +166,36 @@ public class PhysicianEditDialogController {
 			Alert alert = new Alert(AlertType.INFORMATION);
 			alert.setTitle("Information");
 			alert.setHeaderText("Pas de période sélectionnée");
-			alert.setContentText("Merci de sélectionner une période");
+			alert.setContentText("Merci de sélectionner une période à  supprimer");
 			alert.showAndWait();
         }
     }
 
     @FXML
     private void handleNewUnpaidVacation() {
-    	IntervalDate unpaidVacation = new IntervalDate();
-    	unpaidVacationsList.add(unpaidVacation);
+    	IntervalDateTime tempUnPaidVacation = new IntervalDateTime();
+    	unpaidVacationsList.add(tempUnPaidVacation);
+    }
+
+    @FXML
+    private void handleModifyUnpaidVacation() {
+    	// GETS THE SELECTED ITEM
+        int selectedIndex = unpaidVacationsTable.getSelectionModel().getSelectedIndex();
+        if (selectedIndex >= 0) {
+        	IntervalDateTime toModify = unpaidVacationsTable.getItems().get(selectedIndex);
+        	DateTimeIntervalEditDialogController controller =
+        			DateTimeIntervalEditDialogController.showDialog(dialogStage, "Congés non payés", toModify);
+        	if (controller.isOkClicked()) {
+        		unpaidVacationsTable.getItems().set(selectedIndex, toModify);
+        	}
+        } else {
+        	// NOTHING SELECTED
+			Alert alert = new Alert(AlertType.INFORMATION);
+			alert.setTitle("Information");
+			alert.setHeaderText("Pas de période sélectionnée");
+			alert.setContentText("Merci de sélectionner une période à modifier");
+			alert.showAndWait();
+        }
     }
 
     @FXML
@@ -225,7 +208,7 @@ public class PhysicianEditDialogController {
 			Alert alert = new Alert(AlertType.INFORMATION);
 			alert.setTitle("Information");
 			alert.setHeaderText("Pas de période sélectionnée");
-			alert.setContentText("Merci de sélectionner une période");
+			alert.setContentText("Merci de sélectionner une période à supprimer");
 			alert.showAndWait();
         }
     }
@@ -250,10 +233,6 @@ public class PhysicianEditDialogController {
 			alert.showAndWait();
         }
     }
-
-    public void setDateFormatter(DateTimeFormatter dateFormatter) {
-		this.dateFormatter = dateFormatter;
-	}
 
 	public boolean isOkClicked() {
         return okClicked;
@@ -293,16 +272,6 @@ public class PhysicianEditDialogController {
     private void handleCancel() {
         dialogStage.close();
     }
-
-    private <T> void refreshTable(TableView<T> tableView) {
-    	int selectedIndex = tableView.getSelectionModel().getSelectedIndex();
-    	ObservableList<T> observableList = tableView.getItems();
-    	tableView.setItems(null);
-    	tableView.layout();
-    	tableView.setItems(observableList);
-    	tableView.getSelectionModel().select(selectedIndex);
-    }
-
 
     private boolean isInputValid() {
         StringBuilder errorMessageBuilder = new StringBuilder();

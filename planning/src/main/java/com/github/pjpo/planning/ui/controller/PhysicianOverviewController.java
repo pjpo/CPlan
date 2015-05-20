@@ -27,11 +27,11 @@ public class PhysicianOverviewController {
     private Label nameLabel;
     @FXML
     private Label parttimeLabel;
-    
+
     /** Date Formatter */
     @SuppressWarnings("unused")
 	private DateTimeFormatter dateFormatter;
-    
+
     /** Reference to the main application */
     private PlanningMainUIApp mainApp;
 

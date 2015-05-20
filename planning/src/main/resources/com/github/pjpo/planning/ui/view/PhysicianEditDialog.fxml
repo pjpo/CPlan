@@ -50,6 +50,11 @@
                               <Insets bottom="10.0" />
                            </VBox.margin>
                         </Button>
+                        <Button mnemonicParsing="false" onAction="#handleModifyPaidVacation" prefWidth="90.0" text="Modifier ...">
+                           <VBox.margin>
+                              <Insets bottom="10.0" />
+                           </VBox.margin>
+                        </Button>
                         <Button layoutX="407.0" layoutY="225.0" mnemonicParsing="false" onAction="#handleDeletePaidVacation" prefWidth="90.0" text="Supprimer" />
                      </children>
                   </VBox>
@@ -76,6 +81,11 @@
                               <Insets bottom="10.0" />
                            </VBox.margin>
                         </Button>
+                        <Button mnemonicParsing="false" onAction="#handleModifyUnpaidVacation" prefWidth="90.0" text="Modifier ...">
+                           <VBox.margin>
+                              <Insets bottom="10.0" />
+                           </VBox.margin>
+                        </Button>
                         <Button layoutX="407.0" layoutY="225.0" mnemonicParsing="false" onAction="#handleDeleteUnpaidVacation" prefWidth="90.0" text="Supprimer" />
                      </children>
                   </VBox>
@@ -98,6 +108,11 @@
                   <VBox alignment="CENTER_RIGHT" layoutX="407.0" layoutY="150.0">
                      <children>
                         <Button layoutX="407.0" layoutY="150.0" mnemonicParsing="false" onAction="#handleNewNeededVacation" prefWidth="90.0" text="Ajouter ...">
+                           <VBox.margin>
+                              <Insets bottom="10.0" />
+                           </VBox.margin>
+                        </Button>
+                        <Button mnemonicParsing="false" onAction="#handleModifyNeededVacation" prefWidth="90.0" text="Modifier ...">
                            <VBox.margin>
                               <Insets bottom="10.0" />
                            </VBox.margin>

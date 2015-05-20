@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import com.github.pjpo.planning.utils.IntervalDate;
+import com.github.pjpo.planning.utils.IntervalDateTime;
 
 public class PhysicianBase {
 
@@ -12,9 +12,9 @@ public class PhysicianBase {
 	
 	protected Integer timePart = null;
 		
-	protected ArrayList<IntervalDate> paidVacation = new ArrayList<>();
+	protected ArrayList<IntervalDateTime> paidVacation = new ArrayList<>();
 	
-	protected ArrayList<IntervalDate> unpaidVacation = new ArrayList<>();
+	protected ArrayList<IntervalDateTime> unpaidVacation = new ArrayList<>();
 
 	protected HashMap<LocalDate, ArrayList<String>> workedVacs = new HashMap<>();
 	

@@ -138,7 +138,6 @@ public class PlanningMainUIApp extends Application {
   	    PhysicianEditDialogController controller = loader.getController();
   	    controller.setDialogStage(dialogStage);
   	    controller.setPhysician(physician);
-  	    controller.setDateFormatter(dateFormatter);
 
   	    // Show the dialog and wait until the user closes it
   	    dialogStage.showAndWait();
