@@ -13,7 +13,7 @@ import solver.variables.IntVar;
 
 import com.github.pjpo.planning.lignes.Position;
 import com.github.pjpo.planning.physician.Physician;
-import com.github.pjpo.planning.utils.IntervalDate;
+import com.github.pjpo.planning.utils.IntervalDateTime;
 
 /**
  * A solution, with a list of periods,
@@ -135,12 +135,12 @@ public class Solution {
 			// 2 - FINDS THE PHYSICIAN
 			Physician physician = physicians.get(i);
 			
-			// 3 - REMOVES THE NOT WORKED DAYS
-			Iterator<LocalDate> localDateIt = clonedWorkedDays.iterator();
+			// 3 - REMOVES THE NOT WORKED DAYS (PAID VACATIONS)
+			final Iterator<LocalDate> localDateIt = clonedWorkedDays.iterator();
 			while (localDateIt.hasNext()) {
 				LocalDate localDate = localDateIt.next();
-				for (IntervalDate vacation : physician.getPaidVacation()) {
-					if (vacation.isInPeriod(localDate)) {
+				for (IntervalDateTime vacation : physician.getPaidVacation()) {
+					if (vacation.isOverlapping(new IntervalDateTime(localDate.atTime(12, 00), localDate.atTime(12, 30)))) {
 						// DATE IS OUTSIDE WORK RANGE, REMOVE IT FROM WORKED DAYS FOR THIS PHYSICIAN
 						localDateIt.remove();
 						break;

@@ -15,6 +15,7 @@ import solver.variables.VariableFactory;
 import com.github.pjpo.planning.lignes.Position;
 import com.github.pjpo.planning.physician.Physician;
 import com.github.pjpo.planning.utils.IntervalDate;
+import com.github.pjpo.planning.utils.IntervalDateTime;
 
 /**
  * Creates and keeps in memory the working periods for an interval and a day configuration
@@ -93,79 +94,60 @@ public class Agenda {
 					continue eachposition;
 				}
 				
-					
-				// ==> continue here
-				// == 2 - Check for each physician if he MUST work at this position this day
+				// == b - check if a physician is predefined to work at this position this day
 				for (int i = 0 ; i < physicians.size() ; i++) {
-					
-					if (preFill != null && preFill.get(intervalsForDay.getKey()) != null
-							&& preFill.get(intervalsForDay.getKey()).get(position.getName()) != null) {
-						workingConstraintsVars.put(position.getName(),
+					if (physicians.get(i).getWorkedVacs().containsKey(positionsInDayEntry.getKey())
+							&& physicians.get(i).getWorkedVacs().get(positionsInDayEntry.getKey()).contains(positionEntry.getKey())) {
+						workingConstraintsVars.put(
+								positionEntry.getValue().getName(),
 								VariableFactory.fixed(
-										intervalsForDay.getKey().toString() + "_" + position.getName(),
-										preFill.get(intervalsForDay.getKey()).get(position.getName()),
-										solver));
-
-				}
-			}
-			
-			// == 1 - CREATES THE LIST OF PHYSICIANS WORKING THIS DAY ==
-			final LinkedList<Integer> workingPhysiciansForDay = new LinkedList<>();
-			eachPhysician : for (int i = 0 ; i < physicians.size() ; i++) {
-
-				final Physician physician = physicians.get(i);
-				
-				// CHECK IF PHYSICIAN IS IN PAID VACATIONS
-				for (final IntervalDate vacation : physician.getPaidVacation()) {
-					if (vacation.isInPeriod(intervalsForDay.getKey())) continue eachPhysician;
+										positionsInDayEntry.getKey().toString() + "_" + positionEntry.getKey(),
+										i,
+										solver
+								));
+						// look for next position in day
+						continue eachposition;
+					}
 				}
 				
-				// CHECK IF PHYSICIAN IS IN UNPAID VACATIONS
-				for (final IntervalDate vacation : physician.getUnpaidVacation()) {
-					if (vacation.isInPeriod(intervalsForDay.getKey())) continue eachPhysician;
-				}
-		
-				// IF WE ARE THERE, PHYSICIAN IS WORKING THIS DATE
-				workingPhysiciansForDay.add(i);
-			}
-			
-			// == 2 - FOR EACH POSITION FOR THIS DAY, TEST IF SOME PHYSICIANS ARE PREDEFINED AS BEING WORKING ==
-			eachInterval : for (final Position position : intervalsForDay.getValue().values()) {
+				// == c - inserts the possibility that any physician (not in vacation) works
+				final LinkedList<Integer> workingPhysicians = new LinkedList<>();
+				eachPhysician : for (int i = 0 ; i < physicians.size() ; i++) {
 
-				// a - SEE IF WE HAVE A PRESET VALUE IN PREFILL
-				if (preFill != null && preFill.get(intervalsForDay.getKey()) != null
-						&& preFill.get(intervalsForDay.getKey()).get(position.getName()) != null) {
-					workingConstraintsVars.put(position.getName(),
-							VariableFactory.fixed(
-									intervalsForDay.getKey().toString() + "_" + position.getName(),
-									preFill.get(intervalsForDay.getKey()).get(position.getName()),
-									solver));
-					continue eachInterval;
-				} else {
-					// b - CHECK IF A PHYSICIAN WAS PREDEFINED FOR THIS INTERVAL
-					for (int i = 0 ; i < physicians.size() ; i++) {
-						if (physicians.get(i).getWorkedVacs().containsKey(intervalsForDay.getKey())
-								&& physicians.get(i).getWorkedVacs().get(intervalsForDay.getKey()).contains(position.getName())) {
-							workingConstraintsVars.put(position.getName(),
-									VariableFactory.fixed(intervalsForDay.getKey().toString() + "_" + position.getName(), i, solver));
-							continue eachInterval;
-						}
+					final Physician physician = physicians.get(i);
+					
+					// CHECK IF THIS PHYSICIAN HAS THE RIGHT TO WORK AT THIS POSITION
+					if (physicians.get(i).getRefusedPostes().contains(positionEntry.getKey()))
+						continue eachPhysician;					
+					
+					// CHECK IF PHYSICIAN IS IN PAID VACATIONS
+					for (final IntervalDateTime vacation : physician.getPaidVacation()) {
+						if (vacation.isOverlapping(positionEntry.getValue().getPlage()))
+							continue eachPhysician;
 					}
-					// c(1) - IF NO PHYSICIAN FOR THIS DAY, ONLY KEEP THE PHYSICIANS WORKING FOR THIS POSTE
-					final LinkedList<Integer> workingPhysiciansForDayAndInterval = new LinkedList<>();
-					for (final Integer physicianNb : workingPhysiciansForDay) {
-						if (!physicians.get(physicianNb).getRefusedPostes().contains(position.getName()))
-							workingPhysiciansForDayAndInterval.add(physicianNb);
+					
+					// CHECK IF PHYSICIAN IS IN UNPAID VACATIONS
+					for (final IntervalDateTime vacation : physician.getUnpaidVacation()) {
+						if (vacation.isOverlapping(positionEntry.getValue().getPlage()))
+							continue eachPhysician;
 					}
-					// c(2) - TEST WITH THESE PHYSICIANS
-					workingConstraintsVars.put(position.getName(),
-							VariableFactory.enumerated(intervalsForDay.getKey().toString() + "_" + position.getName(),
-									toIntArray(workingPhysiciansForDayAndInterval), solver));
+					
+					// THIS PHYSICIAN CAN WORK AT THIS POSITION AT THIS DAY
+					workingPhysicians.add(i);
+					
 				}
+				
+				// c(2) - TEST WITH THESE PHYSICIANS
+				workingConstraintsVars.put(
+						positionEntry.getValue().getName(),
+						VariableFactory.enumerated(
+								positionsInDayEntry.getKey().toString() + "_" + positionEntry.getKey(),
+								toIntArray(workingPhysicians), solver));
+
 			}
 			
 			// ADDS THESE CONSTRAINT VARS FOR FEEDBACK
-			workers.put(intervalsForDay.getKey(), workingConstraintsVars);
+			workers.put(positionsInDayEntry.getKey(), workingConstraintsVars);
 		}
 		
 		// CREATES THE GENERAL CONSTRAINTS AND APPLY THEM TO THE SOLVER

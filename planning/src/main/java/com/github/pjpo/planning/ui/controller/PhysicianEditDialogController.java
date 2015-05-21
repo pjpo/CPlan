@@ -220,6 +220,27 @@ public class PhysicianEditDialogController {
     }
 
     @FXML
+    private void handleModifyNeededVacation() {
+    	// GETS THE SELECTED ITEM
+        int selectedIndex = neededVacTable.getSelectionModel().getSelectedIndex();
+        if (selectedIndex >= 0) {
+        	Poste toModify = neededVacTable.getItems().get(selectedIndex);
+        	NeededVacationDialog controller =
+        			NeededVacationDialog.showDialog(dialogStage, "Congés non payés", toModify);
+        	if (controller.isOkClicked()) {
+        		neededVacTable.getItems().set(selectedIndex, toModify);
+        	}
+        } else {
+        	// NOTHING SELECTED
+			Alert alert = new Alert(AlertType.INFORMATION);
+			alert.setTitle("Information");
+			alert.setHeaderText("Pas de poste sélcetionné");
+			alert.setContentText("Merci de sélectionner un poste");
+			alert.showAndWait();
+        }
+    }
+
+    @FXML
     private void handleDeleteNeededVacation() {
         int selectedIndex = neededVacTable.getSelectionModel().getSelectedIndex();
         if (selectedIndex >= 0) {
