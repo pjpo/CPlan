@@ -29,11 +29,13 @@ public class NeededVacationDialog {
 	@FXML
 	private void handleOk() {
 		setOkClicked(true);
+		stage.close();
 	}
 	
 	@FXML
 	private void handleCancel() {
 		setOkClicked(false);
+		stage.close();
 	}
 
 	public boolean isOkClicked() {

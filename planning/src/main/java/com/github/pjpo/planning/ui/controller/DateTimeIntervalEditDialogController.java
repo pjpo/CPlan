@@ -39,11 +39,13 @@ public class DateTimeIntervalEditDialogController {
 	@FXML
 	private void handleOk() {
 		setOkClicked(true);
+		stage.close();
 	}
 	
 	@FXML
 	private void handleCancel() {
 		setOkClicked(false);
+		stage.close();
 	}
 
 	public boolean isOkClicked() {
@@ -72,7 +74,7 @@ public class DateTimeIntervalEditDialogController {
 		}
 		if (endDatePicker.getValue() != null && endTimeField.getText().length() !=0) {
 			LocalDateTime endInterval = LocalDateTime.of(endDatePicker.getValue(), LocalTime.parse(endTimeField.getText()));
-			interval.setStart(endInterval);
+			interval.setEnd(endInterval);
 		}
 		return interval;
 	}
@@ -85,7 +87,7 @@ public class DateTimeIntervalEditDialogController {
 			startTimeField.setText(interval.getStart().toLocalTime().toString());
 		}
 		// SETS THE END OF INTERVAL
-		if (interval.getStart() != null) {
+		if (interval.getEnd() != null) {
 			endDatePicker.setValue(interval.getEnd().toLocalDate());
 			endTimeField.setText(interval.getEnd().toLocalTime().toString());
 		}

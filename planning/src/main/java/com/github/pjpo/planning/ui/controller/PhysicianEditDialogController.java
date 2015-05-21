@@ -1,21 +1,25 @@
 package com.github.pjpo.planning.ui.controller;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 
 import com.github.pjpo.planning.physician.Physician;
 import com.github.pjpo.planning.ui.model.Poste;
@@ -35,17 +39,17 @@ public class PhysicianEditDialogController {
 	@FXML
     private TableView<IntervalDateTime> paidVacationsTable;
     @FXML
-    private TableColumn<IntervalDateTime, LocalDateTime> paidVacationsStartColumn;
+    private TableColumn<IntervalDateTime, String> paidVacationsStartColumn;
     @FXML
-    private TableColumn<IntervalDateTime, LocalDateTime> paidVacationEndColumn;
+    private TableColumn<IntervalDateTime, String> paidVacationEndColumn;
 	private ObservableList<IntervalDateTime> paidVacationsList = FXCollections.observableArrayList();
     
 	@FXML
     private TableView<IntervalDateTime> unpaidVacationsTable;
     @FXML
-    private TableColumn<IntervalDateTime, LocalDateTime> unpaidVacationsStartColumn;
+    private TableColumn<IntervalDateTime, String> unpaidVacationsStartColumn;
     @FXML
-    private TableColumn<IntervalDateTime, LocalDateTime> unpaidVacationEndColumn;
+    private TableColumn<IntervalDateTime, String> unpaidVacationEndColumn;
 	private ObservableList<IntervalDateTime> unpaidVacationsList = FXCollections.observableArrayList();
 	
 	@FXML
@@ -62,16 +66,48 @@ public class PhysicianEditDialogController {
 
     private boolean okClicked = false;
     
+    private class StartCellFormat implements Callback<CellDataFeatures<IntervalDateTime, String>, ObservableValue<String>> {
+
+		@Override
+		public ObservableValue<String> call(
+				CellDataFeatures<IntervalDateTime, String> param) {
+			SimpleStringProperty property = new SimpleStringProperty();
+			DateTimeFormatter sdf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+			if (param.getValue().getStart() != null)
+				property.setValue(sdf.format(param.getValue().getStart()));
+			else
+				property.setValue("Non déterminé");
+			return property;
+		}
+    	
+    }
+    
+    private class EndCellFormat implements Callback<CellDataFeatures<IntervalDateTime, String>, ObservableValue<String>> {
+
+		@Override
+		public ObservableValue<String> call(
+				CellDataFeatures<IntervalDateTime, String> param) {
+			SimpleStringProperty property = new SimpleStringProperty();
+			DateTimeFormatter sdf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+			if (param.getValue().getStart() != null)
+				property.setValue(sdf.format(param.getValue().getEnd()));
+			else
+				property.setValue("Non déterminé");
+			return property;
+		}
+    	
+    }
+
     @FXML
     private void initialize() {
     	
     	// Initialize the paid vacations
-    	paidVacationsStartColumn.setCellValueFactory(new PropertyValueFactory<IntervalDateTime, LocalDateTime>("start"));
-        paidVacationEndColumn.setCellValueFactory(new PropertyValueFactory<IntervalDateTime, LocalDateTime>("end"));
+    	paidVacationsStartColumn.setCellValueFactory(new StartCellFormat());
+        paidVacationEndColumn.setCellValueFactory(new EndCellFormat());
 
     	// Initialize the non paid vacations
-    	unpaidVacationsStartColumn.setCellValueFactory(new PropertyValueFactory<IntervalDateTime, LocalDateTime>("start"));
-        unpaidVacationEndColumn.setCellValueFactory(new PropertyValueFactory<IntervalDateTime, LocalDateTime>("end"));
+    	unpaidVacationsStartColumn.setCellValueFactory(new StartCellFormat());
+        unpaidVacationEndColumn.setCellValueFactory(new EndCellFormat());
 
         // Initialize the needed positions
         neededVacPosteColumn.setCellValueFactory(new PropertyValueFactory<Poste, String>("poste"));
@@ -144,7 +180,7 @@ public class PhysicianEditDialogController {
         	DateTimeIntervalEditDialogController controller =
         			DateTimeIntervalEditDialogController.showDialog(dialogStage, "Congés payés", toModify);
         	if (controller.isOkClicked()) {
-        		paidVacationsTable.getItems().set(selectedIndex, toModify);
+        		paidVacationsTable.getItems().set(selectedIndex, controller.getInterval());
         	}
         } else {
         	// NOTHING SELECTED
@@ -186,7 +222,7 @@ public class PhysicianEditDialogController {
         	DateTimeIntervalEditDialogController controller =
         			DateTimeIntervalEditDialogController.showDialog(dialogStage, "Congés non payés", toModify);
         	if (controller.isOkClicked()) {
-        		unpaidVacationsTable.getItems().set(selectedIndex, toModify);
+        		unpaidVacationsTable.getItems().set(selectedIndex, controller.getInterval());
         	}
         } else {
         	// NOTHING SELECTED
