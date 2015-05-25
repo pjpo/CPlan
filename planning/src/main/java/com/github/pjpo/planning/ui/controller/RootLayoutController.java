@@ -73,20 +73,20 @@ public class RootLayoutController {
 				for (IntervalDateTime interval : physician.getPaidVacation()) {
 					writer.append("\n06:");
 					writer.append(interval.getStart() == null ? "N" : interval.getStart().toString());
-					writer.append(':');
+					writer.append(';');
 					writer.append(interval.getEnd() == null ? "N" : interval.getEnd().toString());
 				}
 				for (IntervalDateTime interval : physician.getUnpaidVacation()) {
 					writer.append("\n07:");
 					writer.append(interval.getStart() == null ? "N" : interval.getStart().toString());
-					writer.append(':');
+					writer.append(';');
 					writer.append(interval.getEnd() == null ? "N" : interval.getEnd().toString());
 				}
 				for (Entry<LocalDate, ArrayList<String>> entry : physician.getWorkedVacs().entrySet()) {
 					for (String poste : entry.getValue()) {
 						writer.append("\n08:");
 						writer.append(entry.getKey().toString());
-						writer.append(':');
+						writer.append(';');
 						writer.append(poste);
 					}
 				}
@@ -141,21 +141,21 @@ public class RootLayoutController {
 				} else if (readedLine.startsWith("03:") && readedLine.charAt(3) == ':') {
 					physicianBuilder.setTimePart(Integer.decode(readedLine.substring(4)));
 				} else if (readedLine.startsWith("06:")) {
-					int splitPosition = readedLine.indexOf(':', 3);
+					int splitPosition = readedLine.indexOf(';', 3);
 					String start = readedLine.substring(3, splitPosition);
 					String end = readedLine.substring(splitPosition + 1);
 					physicianBuilder.addPaidVacation(new IntervalDateTime(
 							start.equals("N") ? null : LocalDateTime.parse(start),
 									end.equals("N") ? null : LocalDateTime.parse(end)));
 				} else if (readedLine.startsWith("07:")) {
-					int splitPosition = readedLine.indexOf(':', 3);
+					int splitPosition = readedLine.indexOf(';', 3);
 					String start = readedLine.substring(3, splitPosition);
 					String end = readedLine.substring(splitPosition + 1);
 					physicianBuilder.addUnpaidVacation(new IntervalDateTime(
 							start.equals("N") ? null : LocalDateTime.parse(start),
 									end.equals("N") ? null : LocalDateTime.parse(end)));
 				} else if (readedLine.startsWith("08:")) {
-					int splitPosition = readedLine.indexOf(':', 3);
+					int splitPosition = readedLine.indexOf(';', 3);
 					LocalDate date = LocalDate.parse(readedLine.substring(3, splitPosition));
 					String poste = readedLine.substring(splitPosition + 1);
 					physicianBuilder.addWorkedVac(date, poste);

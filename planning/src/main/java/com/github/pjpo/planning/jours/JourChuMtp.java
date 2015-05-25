@@ -7,8 +7,13 @@ import java.io.InputStreamReader;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
+
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.Recognizer;
+import org.antlr.v4.runtime.RecognitionException;
 
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraintFactory;
@@ -71,8 +76,40 @@ public class JourChuMtp {
 			LocalDate date,
 			HashMap<LocalDate, HashMap<String, IntVar>> workers) {
 
-		List<Constraint> constraints = new ArrayList<>();
+		try (
+				final InputStream is = JourChuMtp.class.getResourceAsStream("/com/github/pjpo/planning/conditions.cfg");
+				) {
+			ANTLRInputStream ais = new ANTLRInputStream(is);
+			ExprLexer l = new ExprLexer(ais);
+			ExprParser p = new ExprParser(new CommonTokenStream(l));
+			p.addErrorListener(new BaseErrorListener() {
+				@Override
+				public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
+					throw new IllegalStateException("failed to parse at line " + line + " due to " + msg, e);
+				}
+			});
+			p.addParseListener(new ExprBaseListener());
+			p.file();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
+		/**
+	    		
+		try (
+				InputStream resource = JourChuMtp.class.getResourceAsStream("/com/github/pjpo/planning/conditions.cfg");
+				InputStreamReader isr = new InputStreamReader(resource);
+				BufferedReader br = new BufferedReader(isr);) {
+			String readed = null;
+			while ((readed = br.readLine()) != null) {
+				
+			}			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		 **/
+		List<Constraint> constraints = new ArrayList<>();
 		HashMap<String, IntVar> toDay = workers.get(date);
 		if (toDay == null) {
 			throw new IllegalArgumentException("date " + date + " does not exist in agenda");
@@ -104,7 +141,7 @@ public class JourChuMtp {
 					constraints.add(IntConstraintFactory.arithm(agde1, "=", agde2));
 				}
 			}
-			
+			/*
 			// EQUALITY BETWEEN DRIVE_DIMANCHE AND DRIVE_SAMEDI DAY BEFORE
 			{
 				HashMap<String, IntVar> yesterday = workers.get(date.minusDays(1));
@@ -395,7 +432,7 @@ public class JourChuMtp {
 				if (concurrent.size() >= 2)
 					constraints.add(IntConstraintFactory.alldifferent(concurrent.toArray(new IntVar[concurrent.size()])));
 			}
-			
+			*/
 			return constraints;
 		}
 	}

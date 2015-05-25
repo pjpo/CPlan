@@ -1,8 +1,8 @@
 package com.github.pjpo.planning.ui.controller;
 
 import java.io.IOException;
-import com.github.pjpo.planning.ui.PlanningMainUIApp;
-import com.github.pjpo.planning.ui.model.Poste;
+import java.net.URL;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -11,6 +11,9 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+
+import com.github.pjpo.planning.ui.PlanningMainUIApp;
+import com.github.pjpo.planning.ui.model.Poste;
 
 public class NeededVacationDialog {
 
@@ -84,7 +87,8 @@ public class NeededVacationDialog {
 	
 		try {
 			// Loads the fxml file and create a new stage for the popup
-			FXMLLoader loader = new FXMLLoader(PlanningMainUIApp.class.getResource("view/NeededVacatioinDialog.fxml"));
+			URL is = PlanningMainUIApp.class.getResource("view/NeededVacationDialog.fxml");
+			FXMLLoader loader = new FXMLLoader(is);
 			AnchorPane page = (AnchorPane) loader.load();
 			Stage dialogStage = new Stage();
 			dialogStage.setTitle(title);

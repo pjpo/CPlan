@@ -264,7 +264,7 @@ public class PhysicianEditDialogController {
         	NeededVacationDialog controller =
         			NeededVacationDialog.showDialog(dialogStage, "Congés non payés", toModify);
         	if (controller.isOkClicked()) {
-        		neededVacTable.getItems().set(selectedIndex, toModify);
+        		neededVacTable.getItems().set(selectedIndex, controller.getPoste());
         	}
         } else {
         	// NOTHING SELECTED
