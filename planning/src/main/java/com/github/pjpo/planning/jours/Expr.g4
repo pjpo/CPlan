@@ -22,10 +22,15 @@ rulei returns [List<ChocoRule> rules]
   }:
   first=rule_element {chocoRules.add($first.rule);}
   (COMMA next=rule_element {chocoRules.add($next.rule);})*;
-rule_element returns [ChocoRule rule]:
-  name=(WORD | NUMBER)+ value=index {
+rule_element returns [ChocoRule rule]
+  @init {
+  	StringBuilder name = new StringBuilder();
   	$rule = new ChocoRule();
-  	$rule.setName($name.text);
+  }
+  @after {
+  	$rule.setName(name.toString());
+  }:
+  (wd=WORD {name.append($wd.text);} | nb=NUMBER {name.append($nb.text);})+ value=index {
   	$rule.setValue($value.n);
   };
 
@@ -45,7 +50,7 @@ indexpos returns [Integer n]:
   };
 indexneg returns [Integer n]:
    MINUS num=NUMBER {
-  	$n = Integer.parseInt($num.text);
+  	$n = -Integer.parseInt($num.text);
   };
 
 

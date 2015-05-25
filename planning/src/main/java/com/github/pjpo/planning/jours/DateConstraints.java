@@ -13,13 +13,12 @@ import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.RecognitionException;
-
-import solver.constraints.Constraint;
-import solver.variables.IntVar;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.variables.IntVar;
 
 import com.github.pjpo.planning.lignes.Position;
 
-public class JourChuMtp {
+public class DateConstraints {
 
 	
 	public static HashMap<String, Position> getPositions(LocalDate date) {
@@ -28,7 +27,7 @@ public class JourChuMtp {
 		
 		// GET POSITIONS DEFINITIONS AND GENERATE A LIST OF ACCEPTABLE POSITIONS FOR THIS LOCALDATE
 		try (
-				InputStream resource = JourChuMtp.class.getResourceAsStream("/com/github/pjpo/planning/positions.cfg");
+				InputStream resource = DateConstraints.class.getResourceAsStream("/com/github/pjpo/planning/positions.cfg");
 				InputStreamReader isr = new InputStreamReader(resource);
 				BufferedReader br = new BufferedReader(isr);) {
 			String positionName = null;
@@ -75,7 +74,7 @@ public class JourChuMtp {
 			HashMap<LocalDate, HashMap<String, IntVar>> workers) {
 
 		try (
-				final InputStream is = JourChuMtp.class.getResourceAsStream("/com/github/pjpo/planning/conditions.cfg");
+				final InputStream is = DateConstraints.class.getResourceAsStream("/com/github/pjpo/planning/conditions.cfg");
 				) {
 			ANTLRInputStream ais = new ANTLRInputStream(is);
 			ExprLexer l = new ExprLexer(ais);

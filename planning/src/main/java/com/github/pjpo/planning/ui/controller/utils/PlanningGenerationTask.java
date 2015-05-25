@@ -7,8 +7,8 @@ import com.github.pjpo.planning.PlanningSolver;
 import com.github.pjpo.planning.Solution;
 import com.github.pjpo.planning.SolutionException;
 import com.github.pjpo.planning.ui.controller.GenerationOverviewController;
-import javafx.application.Platform;
 
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 
 public class PlanningGenerationTask extends Task<LinkedList<Solution>> {
@@ -46,7 +46,7 @@ public class PlanningGenerationTask extends Task<LinkedList<Solution>> {
 				if (isCancelled() || !isAlive)
 					break;
 			}
-
+			
 			final Solution solution = solver.findSolution();
 			final Integer finalRetrys = new Integer(retrys);
 

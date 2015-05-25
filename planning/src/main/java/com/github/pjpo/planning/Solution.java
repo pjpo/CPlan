@@ -9,7 +9,7 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Random;
 
-import solver.variables.IntVar;
+import org.chocosolver.solver.variables.IntVar;
 
 import com.github.pjpo.planning.lignes.Position;
 import com.github.pjpo.planning.physician.Physician;

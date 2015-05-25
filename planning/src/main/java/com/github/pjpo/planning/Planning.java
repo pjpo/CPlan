@@ -8,11 +8,11 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Random;
 
-import solver.Solver;
-import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.strategy.IntStrategyFactory;
-import solver.search.strategy.selectors.IntValueSelector;
-import solver.variables.IntVar;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
+import org.chocosolver.solver.search.strategy.IntStrategyFactory;
+import org.chocosolver.solver.search.strategy.selectors.IntValueSelector;
+import org.chocosolver.solver.variables.IntVar;
 
 import com.github.pjpo.planning.jours.Agenda;
 import com.github.pjpo.planning.physician.Physician;

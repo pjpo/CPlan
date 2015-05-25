@@ -5,8 +5,8 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.Random;
 
-import solver.search.strategy.selectors.IntValueSelector;
-import solver.variables.IntVar;
+import org.chocosolver.solver.search.strategy.selectors.IntValueSelector;
+import org.chocosolver.solver.variables.IntVar;
 
 import com.github.pjpo.planning.physician.Physician;
 

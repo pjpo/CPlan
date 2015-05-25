@@ -5,12 +5,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.ESat;
+
 import com.github.pjpo.planning.lignes.Position;
 import com.github.pjpo.planning.physician.Physician;
-
-import solver.Solver;
-import solver.variables.IntVar;
-import util.ESat;
 
 public class PlanningSolver {
 
@@ -46,7 +46,7 @@ public class PlanningSolver {
 
 		// FINDS A SOLUTION
 		solver.findSolution();
-		
+				
 		// IF NO SOLUTION, RETRY IF A SOLUTION ALREADY EXISTS
 		if (solver.isFeasible() != ESat.TRUE && previousAcceptedSolutions.size() == 0) {
 			return null;

@@ -7,10 +7,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VariableFactory;
 
 import com.github.pjpo.planning.lignes.Position;
 import com.github.pjpo.planning.physician.Physician;
@@ -47,7 +47,7 @@ public class Agenda {
 	public void calculateWorkingPeriods() {
 		workingPositions.clear();
 		for (LocalDate date = interval.getStart() ; !date.isAfter(interval.getEnd()) ; date = date.plusDays(1L)) {
-			workingPositions.put(date, JourChuMtp.getPositions(date));
+			workingPositions.put(date, DateConstraints.getPositions(date));
 		}
 	}
 
@@ -152,7 +152,7 @@ public class Agenda {
 		
 		// CREATES THE GENERAL CONSTRAINTS AND APPLY THEM TO THE SOLVER
 		for (LocalDate date = interval.getStart() ; !date.isAfter(interval.getEnd()) ; date = date.plusDays(1L)) {
-			for (final Constraint constraint : JourChuMtp.getConstraints(date, workers)) {
+			for (final Constraint constraint : DateConstraints.getConstraints(date, workers)) {
 				solver.post(constraint);
 			}
 		}
