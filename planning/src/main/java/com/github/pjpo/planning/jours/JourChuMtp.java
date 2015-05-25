@@ -88,7 +88,7 @@ public class JourChuMtp {
 					throw new IllegalStateException("failed to parse at line " + line + " due to " + msg, e);
 				}
 			});
-			p.addParseListener(new ExprBaseListener());
+			p.addParseListener(new ExprCPlanListener());
 			p.file();
 		} catch (IOException e) {
 			e.printStackTrace();
