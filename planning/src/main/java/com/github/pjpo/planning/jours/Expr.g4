@@ -23,7 +23,7 @@ rulei returns [List<ChocoRule> rules]
   first=rule_element {chocoRules.add($first.rule);}
   (COMMA next=rule_element {chocoRules.add($next.rule);})*;
 rule_element returns [ChocoRule rule]:
-  name=(WORD | NUMBER)* value=index {
+  name=(WORD | NUMBER)+ value=index {
   	$rule = new ChocoRule();
   	$rule.setName($name.text);
   	$rule.setValue($value.n);
