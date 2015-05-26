@@ -230,9 +230,9 @@ public class GenerationOverviewController {
 		 }
 	 }
 
-	 public void showFeedBack(Integer nbTests, Long maxIndice, Long minIndice) {
+	 public void showFeedBack(Integer nbTests, Double sdIndice, Long minIndice) {
 		nbTestsLabel.setText(nbTests == null ? "" : nbTests.toString());
-		maxIndiceLabel.setText(maxIndice == null ? "" : maxIndice.toString());
+		maxIndiceLabel.setText(sdIndice == null ? "" : sdIndice.toString());
 		minIndiceLabel.setText(minIndice == null ? "" : minIndice.toString());
     }
     

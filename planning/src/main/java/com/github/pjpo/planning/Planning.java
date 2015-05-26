@@ -45,17 +45,17 @@ public class Planning {
 
 	public PlanningSolver generateSolver(final LinkedList<Solution> previousAcceptedSolutions) {
 		// == 1 - SELECTS THE SHAKER ==
-		// FINDS HOW MANY SOLUTIONS WE HAVE WITH IDEM MAX WORK INDICE
+		// FINDS HOW MANY SOLUTIONS WE HAVE WITH THE SAME STANDARD DEVIATION OF WORKLOAD
 		int idem = 1;
-		long maxWorks = -1;
+		double workSD = -1;
 		
 		// DESCENDS SOLUTIONS FROM LAST TO FIRST
 		final Iterator<Solution> lastSolutions =  previousAcceptedSolutions.descendingIterator();
 		while (lastSolutions.hasNext()) {
 			final Solution lastSolution = lastSolutions.next();
-			if (maxWorks == -1 || lastSolution.getMaxWorkLoad() == maxWorks) {
+			if (workSD == -1 || lastSolution.getWorkLoadSD() == workSD) {
 				idem++;
-				maxWorks = lastSolution.getMaxWorkLoad();
+				workSD = lastSolution.getWorkLoadSD();
 			} else {
 				break;
 			}

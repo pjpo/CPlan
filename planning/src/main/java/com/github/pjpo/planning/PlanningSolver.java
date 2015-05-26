@@ -55,7 +55,7 @@ public class PlanningSolver {
 			solution.setSolutionMedIndicesMap(constraintVariables);
 			// IF WE HAVE AT LEAST 1 SOLUTIONS IN SOLUTIONS LIST, COMPARE IT WITH THE PRECEDENT
 			if (previousAcceptedSolutions.size() > 0 &&
-					(solution.getMaxWorkLoad() - solution.getMinWorkLoad()) > (previousAcceptedSolutions.getLast().getMaxWorkLoad() - previousAcceptedSolutions.getLast().getMinWorkLoad())) {
+					solution.getWorkLoadSD() > previousAcceptedSolutions.getLast().getWorkLoadSD()) {
 					// REJECTED SOLUTION
 					return null;
 			}

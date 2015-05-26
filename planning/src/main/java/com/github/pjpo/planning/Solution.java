@@ -161,11 +161,8 @@ public class Solution {
 		if (workLoads.size() == 0)
 			throw new IllegalArgumentException("No solution has been set");
 
-		// GETS THE MAX WORKER
-		final int maxWorker = getMaxWorkerPhysician();
-		// GET MIN AND MAX WORKLOAD
-		final long minWorkLoad = getMinWorkLoad();
-		final long maxWorkLoad = getMaxWorkLoad();
+		// GET MEAN OF workload 
+		final double meanWorkLoad = getMeanWorkLoad();
 		
 		// CREATES THE NEW INDICES MAP WITH LIGHTEN BURDEN
 		final HashMap<LocalDate, HashMap<String, Integer>> lightenSolution = new HashMap<>();
@@ -176,14 +173,10 @@ public class Solution {
 			// LIGHTEN BURDEN
 			for(final Entry<String, Integer> actualSolutionForPlage : actualSolution.getValue().entrySet()) {
 				
-				// RANDOMLY REMOVES THIS WORK PERIOD IF WORKER WORKS TOO MUCH
-				// IF DIFFERENCE BETWEEN MAX AND MIN WORKLOAD IS LOW, WE WILL NOT REMOVE A LOT OF THEM
-				if (actualSolutionForPlage.getValue() == maxWorker && nextLong(randomLongs, maxWorkLoad) > minWorkLoad) {
-					lightenSolution.get(actualSolution.getKey()).put(actualSolutionForPlage.getKey(), null);
-				}
-				// ELSE REMOVE THE PHYSICIAN DEPENDING ON RANDOM
-				else if (nextLong(randomLongs, 10 + shake) > 10) {
-					lightenSolution.get(actualSolution.getKey()).put(actualSolutionForPlage.getKey(), null);
+				// REMOVE THE PHYSICIAN DEPENDING ON DIFFERENCE BETWEEN HIS WORKLOAD AND THE MEAN WORKLOAD IF HE WORKS TOO MUCH
+				if (workLoads.get(actualSolutionForPlage.getValue()).doubleValue() > meanWorkLoad &&
+						nextDouble(randomLongs, workLoads.get(actualSolutionForPlage.getValue()) + (double) shake) > meanWorkLoad) {
+					lightenSolution.get(actualSolution.getKey()).put(actualSolutionForPlage.getKey(), null);					
 				} else {
 					lightenSolution.get(actualSolution.getKey()).put(actualSolutionForPlage.getKey(), actualSolutionForPlage.getValue());
 				}
@@ -196,58 +189,49 @@ public class Solution {
 	}
 	
 	/**
-	 * Gets the minimum work load
+	 * Gets the Standard Deviation of workload
 	 * @return
 	 */
-	public long getMinWorkLoad() {
-		if (workLoads.size() == 0)
-			throw new IllegalArgumentException("No solution has been set");
-		return workLoads.stream().min(Long::compare).get();
+	public double getWorkLoadSD() {
+		// Mean value
+		Double mean = getMeanWorkLoad();
+		// Now, sum of square difference to mean
+		Double sumSquare = 0D;
+		for (Long value : workLoads) {
+			sumSquare += Math.pow(value.doubleValue() - mean, 2D);
+		}
+		// Divide it by num of element - 1
+		sumSquare = sumSquare / ((double) workLoads.size() - 1D);
+		// return the sqrt
+		return Math.sqrt(sumSquare);
 	}
 
 	/**
-	 * Gets the maximum work load
+	 * Gets the mean workLoad
 	 * @return
 	 */
-	public long getMaxWorkLoad() {
+	public double getMeanWorkLoad() {
 		if (workLoads.size() == 0)
 			throw new IllegalArgumentException("No solution has been set");
-		return workLoads.stream().max(Long::compare).get();
-	}
-	
-	/**
-	 * Returns the max worker
-	 * @return
-	 */
-	public int getMaxWorkerPhysician() {
-		if (workLoads.size() == 0)
-			throw new IllegalArgumentException("No solution has been set");
-		long maxLoad = -1;
-		int maxWorker = -1;
-		for (int i = 0 ; i < physicians.size() ; i++) {
-			if (workLoads.get(i) > maxLoad) {
-				maxWorker = i;
-				maxLoad = workLoads.get(i);
-			}
+		// Calculation sum value
+		Long sum = 0L;
+		for (Long value : workLoads) {
+			sum += value;
 		}
-		return maxWorker;
+		// Now, mean value
+		return sum.doubleValue() / (double) workLoads.size();
 	}
-	
+
 	/**
 	 * Returns a new random in range
 	 * @param rng
 	 * @param n
 	 * @return
 	 */
-	private long nextLong(Random rng, long n) {
+	private double nextDouble(Random rng, double n) {
 		if (n<=0)
             throw new IllegalArgumentException("n must be positive");
 
-		long bits, val;
-		do {
-			bits = (rng.nextLong() << 1) >>> 1;
-			val = bits % n;
-		} while (bits-val+(n-1) < 0L);
-		return val;
+		return rng.nextDouble() * n;
 	}
 }

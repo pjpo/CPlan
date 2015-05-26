@@ -87,6 +87,11 @@ public class ExprCPlanListener extends ExprBaseListener {
 	}		
 
 	public List<Constraint> getConstraints() {
+		return constraints;
+	}
+	
+	@SuppressWarnings("unused")
+	private void debugConstraints(List<Constraint> constraints) {
 		System.out.println("<<< Date : " + currentDate.toString() + " >>>");
 		for (Constraint cstr : constraints) {
 			if (cstr instanceof AllDifferent) {
@@ -118,7 +123,6 @@ public class ExprCPlanListener extends ExprBaseListener {
 			}
 		}
 		System.out.println("<<< >>>");
-		return constraints;
 	}
 	
 	private String debugGetAllDefined(Variable var) {
