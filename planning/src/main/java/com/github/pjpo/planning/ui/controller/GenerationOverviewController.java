@@ -58,9 +58,7 @@ public class GenerationOverviewController {
     @FXML
     private Label nbTestsLabel;
     @FXML
-    private Label maxIndiceLabel;
-    @FXML
-    private Label minIndiceLabel;
+    private Label optimizeIndexLabel;
     
     @FXML
     private Button pauseButton;
@@ -107,7 +105,7 @@ public class GenerationOverviewController {
     				});
 
     	// CLEARS THE TESTS LABELS
-    	showFeedBack(null, null, null);
+    	showFeedBack(null, null);
 
     }
     
@@ -230,10 +228,9 @@ public class GenerationOverviewController {
 		 }
 	 }
 
-	 public void showFeedBack(Integer nbTests, Double sdIndice, Long minIndice) {
+	 public void showFeedBack(Integer nbTests, Double optimizeIndice) {
 		nbTestsLabel.setText(nbTests == null ? "" : nbTests.toString());
-		maxIndiceLabel.setText(sdIndice == null ? "" : sdIndice.toString());
-		minIndiceLabel.setText(minIndice == null ? "" : minIndice.toString());
+		optimizeIndexLabel.setText(optimizeIndice == null ? "" : optimizeIndice.toString());
     }
     
     private void setButtonsStatus(boolean generateStatus, boolean pauseStatus, boolean saveStatus) {

@@ -55,14 +55,13 @@ public class PlanningGenerationTask extends Task<LinkedList<Solution>> {
 			} else if (solution != null) {
 				// UPDATES VALUES IN LABELS
 				Platform.runLater( () ->
-				controller.showFeedBack(new Integer(finalRetrys), solution.getWorkLoadSD(), 0L));
+				controller.showFeedBack(new Integer(finalRetrys), solution.getWorkLoadSD()));
 				// ADDS THIS SOLUTION AS LAST SOLUTION
 				solutions.add(solution);
 			} else {
 				Platform.runLater( () ->
 				controller.showFeedBack(new Integer(finalRetrys),
-						solutions.size() == 0 ? null : solutions.getLast().getWorkLoadSD(),
-								solutions.size() == 0 ? null : 0L));
+						solutions.size() == 0 ? null : solutions.getLast().getWorkLoadSD()));
 			}
 		}
 		// HERE, RETURN SOLUTIONS
