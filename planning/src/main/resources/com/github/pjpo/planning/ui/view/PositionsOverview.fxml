@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.pjpo.planning.ui.controller.PositionsOverviewController">
+   <children>
+      <HBox layoutX="76.0" layoutY="100.0" prefHeight="100.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <AnchorPane prefHeight="400.0" prefWidth="230.0">
+               <children>
+                  <TableView fx:id="positionNamesTable" layoutX="15.0" layoutY="40.0" prefHeight="200.0" prefWidth="230.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <columns>
+                      <TableColumn fx:id="positionNameColumn" prefWidth="230.0" resizable="false" text="Nom" />
+                    </columns>
+                  </TableView>
+               </children></AnchorPane>
+            <VBox prefHeight="400.0" prefWidth="370.0">
+               <children>
+                  <HBox prefHeight="50.0" prefWidth="370.0">
+                     <children>
+                        <Label prefHeight="35.0" prefWidth="60.0" text="Nom :">
+                           <HBox.margin>
+                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                           </HBox.margin>
+                        </Label>
+                        <TextField fx:id="positionName" prefHeight="35.0" prefWidth="185.0">
+                           <HBox.margin>
+                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                           </HBox.margin>
+                        </TextField>
+                     </children>
+                  </HBox>
+                  <TextArea fx:id="codeArea" prefHeight="281.0" prefWidth="370.0" />
+                  <HBox prefHeight="60.0" prefWidth="370.0">
+                     <children>
+                        <Button mnemonicParsing="false" onAction="#newHandler" text="Nouveau">
+                           <HBox.margin>
+                              <Insets bottom="5.0" left="5.0" right="5.0" top="25.0" />
+                           </HBox.margin>
+                        </Button>
+                        <Button mnemonicParsing="false" onAction="#deleteHandler" text="Supprimer">
+                           <HBox.margin>
+                              <Insets bottom="5.0" left="5.0" right="5.0" top="25.0" />
+                           </HBox.margin>
+                        </Button>
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+   </children>
+</AnchorPane>
