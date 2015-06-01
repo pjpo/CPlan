@@ -10,8 +10,8 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.PropertyValueFactory;
 
-import com.github.pjpo.planning.physician.Physician;
-import com.github.pjpo.planning.physician.PhysicianBuilder;
+import com.github.pjpo.planning.model.Physician;
+import com.github.pjpo.planning.model.PhysicianBuilder;
 import com.github.pjpo.planning.ui.PlanningMainUIApp;
 
 public class PhysicianOverviewController {
@@ -47,7 +47,7 @@ public class PhysicianOverviewController {
         // Listen for selection changes
         physicianTable.getSelectionModel().selectedItemProperty().addListener(
         		(observable, oldValue, newValue) -> showPhysicianDetails(newValue));
-        }
+    }
     
     private void showPhysicianDetails(Physician physician) {
     	nameLabel.setText(physician == null ? "" : (physician.getName() == null ? "Non défini" : physician.getName()));

@@ -15,7 +15,7 @@ import org.chocosolver.solver.search.strategy.selectors.IntValueSelector;
 import org.chocosolver.solver.variables.IntVar;
 
 import com.github.pjpo.planning.jours.Agenda;
-import com.github.pjpo.planning.physician.Physician;
+import com.github.pjpo.planning.model.Physician;
 import com.github.pjpo.planning.utils.IntervalDate;
 
 /**

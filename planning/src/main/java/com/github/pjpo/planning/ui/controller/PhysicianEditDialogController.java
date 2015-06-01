@@ -21,7 +21,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
-import com.github.pjpo.planning.physician.Physician;
+import com.github.pjpo.planning.model.Physician;
 import com.github.pjpo.planning.ui.model.Poste;
 import com.github.pjpo.planning.utils.IntervalDateTime;
 

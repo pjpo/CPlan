@@ -16,7 +16,7 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.variables.IntVar;
 
-import com.github.pjpo.planning.lignes.Position;
+import com.github.pjpo.planning.model.Position;
 
 public class DateConstraints {
 

@@ -4,7 +4,10 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.charset.Charset;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -12,7 +15,9 @@ import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import javafx.fxml.FXML;
@@ -20,8 +25,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.FileChooser;
 
-import com.github.pjpo.planning.physician.Physician;
-import com.github.pjpo.planning.physician.PhysicianBuilder;
+import com.github.pjpo.planning.model.Physician;
+import com.github.pjpo.planning.model.PhysicianBuilder;
 import com.github.pjpo.planning.ui.PlanningMainUIApp;
 import com.github.pjpo.planning.utils.IntervalDateTime;
 
@@ -57,7 +62,23 @@ public class RootLayoutController {
 	}
 
 	public void saveConfiguration(File file) throws IOException {
-		Path saveFile = Paths.get(file.toURI());
+		// Select the zip file to write into
+		final URI uri = URI.create("jar:file:" + file.toURI().getPath());
+		// Select the env parameters
+		final Map<String, String> env = new HashMap<>();
+		env.put("create", "true");
+		
+		try (FileSystem zipFile = FileSystems.newFileSystem(uri, env)) {
+			Path physicians = zipFile.getPath("/", "physicians");
+			try (BufferedWriter writer = Files.newBufferedWriter(
+				physicians, Charset.forName("UTF-8"),
+				StandardOpenOption.WRITE,
+				StandardOpenOption.CREATE,
+				StandardOpenOption.TRUNCATE_EXISTING)) {
+				
+			}
+		}
+		Path saveFile = Paths.get(file.toURI().);
 		try (BufferedWriter writer = Files.newBufferedWriter(
 				saveFile, Charset.forName("UTF-8"),
 				StandardOpenOption.WRITE,

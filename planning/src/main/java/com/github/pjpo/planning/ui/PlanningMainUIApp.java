@@ -14,7 +14,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import com.github.pjpo.planning.physician.Physician;
+import com.github.pjpo.planning.model.Physician;
+import com.github.pjpo.planning.model.PositionCode;
 import com.github.pjpo.planning.ui.controller.GenerationOverviewController;
 import com.github.pjpo.planning.ui.controller.PhysicianEditDialogController;
 import com.github.pjpo.planning.ui.controller.PhysicianOverviewController;
@@ -24,7 +25,9 @@ public class PlanningMainUIApp extends Application {
 
 	private Stage primaryStage;
     
-	private ObservableList<Physician> physicians = FXCollections.observableArrayList();
+	final private ObservableList<Physician> physicians = FXCollections.observableArrayList();
+	
+	final private ObservableList<PositionCode> positions = FXCollections.observableArrayList();
 	
 	private GenerationOverviewController generationOverviewController;
 	
@@ -157,5 +160,9 @@ public class PlanningMainUIApp extends Application {
 
 	public static void main(String[] args) {
 		launch(args);
+	}
+
+	public ObservableList<PositionCode> getPositions() {
+		return positions;
 	}
 }

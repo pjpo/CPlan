@@ -1,4 +1,4 @@
-package com.github.pjpo.planning.lignes;
+package com.github.pjpo.planning.model;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

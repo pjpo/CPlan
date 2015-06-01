@@ -1,4 +1,4 @@
-package com.github.pjpo.planning.physician;
+package com.github.pjpo.planning.model;
 
 import java.time.LocalDate;
 import java.util.ArrayList;

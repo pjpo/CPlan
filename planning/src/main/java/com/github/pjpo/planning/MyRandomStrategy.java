@@ -8,7 +8,7 @@ import java.util.Random;
 import org.chocosolver.solver.search.strategy.selectors.IntValueSelector;
 import org.chocosolver.solver.variables.IntVar;
 
-import com.github.pjpo.planning.physician.Physician;
+import com.github.pjpo.planning.model.Physician;
 
 /**
  * Randomly selects a physician with the chance to select him

@@ -9,8 +9,8 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 
-import com.github.pjpo.planning.lignes.Position;
-import com.github.pjpo.planning.physician.Physician;
+import com.github.pjpo.planning.model.Physician;
+import com.github.pjpo.planning.model.Position;
 
 public class PlanningSolver {
 
