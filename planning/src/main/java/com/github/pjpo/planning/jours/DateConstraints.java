@@ -19,7 +19,6 @@ import org.chocosolver.solver.variables.IntVar;
 import com.github.pjpo.planning.model.Position;
 
 public class DateConstraints {
-
 	
 	public static HashMap<String, Position> getPositions(LocalDate date) {
 		
