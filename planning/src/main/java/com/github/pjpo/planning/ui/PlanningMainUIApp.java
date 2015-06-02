@@ -19,6 +19,7 @@ import com.github.pjpo.planning.model.PositionCode;
 import com.github.pjpo.planning.ui.controller.GenerationOverviewController;
 import com.github.pjpo.planning.ui.controller.PhysicianEditDialogController;
 import com.github.pjpo.planning.ui.controller.PhysicianOverviewController;
+import com.github.pjpo.planning.ui.controller.PositionsOverviewController;
 import com.github.pjpo.planning.ui.controller.RootLayoutController;
 
 public class PlanningMainUIApp extends Application {
@@ -76,12 +77,16 @@ public class PlanningMainUIApp extends Application {
         // LOADS THE PHYSICIAN OVERVIEW
         AnchorPane physicianOverview = loadPhysicianOverview();
         
+        // LOADS THE POSITIONS CODE
+        AnchorPane positionsOverview = loadPositionsOverview();
+        
         // LOADS THE GENERATION OVERVIEW
         AnchorPane generationOverview = loadGenerationOverview();
 
         // SETS THE TAB PANES
         TabPane tabPane = (TabPane) borderPane.getCenter();
         tabPane.getTabs().get(0).setContent(physicianOverview);
+        tabPane.getTabs().get(1).setContent(positionsOverview);
         tabPane.getTabs().get(2).setContent(generationOverview);
         
         return borderPane;
@@ -102,6 +107,22 @@ public class PlanningMainUIApp extends Application {
     	controller.setDateFormatter(dateFormatter);
     	
     	return overviewPage;
+    }
+    
+    public AnchorPane loadPositionsOverview() throws IOException {
+    	// LOADS UI DEFINITION
+    	FXMLLoader loader = new FXMLLoader(PlanningMainUIApp.class.getResource("view/PositionsOverview.fxml"));
+    	
+    	// LOADS LAYOUT
+    	AnchorPane positionsOverview = (AnchorPane) loader.load();
+    	
+    	// RETRIEVES THE CONTROLLER
+    	PositionsOverviewController controller = loader.getController();
+    	
+    	// SETS CONTROLLER DEFINITIONS
+    	controller.setMainApp(this);
+    	
+    	return positionsOverview;
     }
     
     public AnchorPane loadGenerationOverview() throws IOException {

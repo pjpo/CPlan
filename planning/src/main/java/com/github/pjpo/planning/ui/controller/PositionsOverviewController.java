@@ -19,9 +19,9 @@ public class PositionsOverviewController {
     private TextArea codeArea;
     
 	@FXML
-    private TableView<PositionCode> positionsTable;
+    private TableView<PositionCode> positionNamesTable;
     @FXML
-    private TableColumn<PositionCode, String> nameColumn;
+    private TableColumn<PositionCode, String> positionNameColumn;
 
     /** Reference to the main application */
     private PlanningMainUIApp mainApp;
@@ -29,16 +29,20 @@ public class PositionsOverviewController {
 	@FXML
     private void initialize() {
 		// Initialize the person table
-		nameColumn.setCellValueFactory(new PropertyValueFactory<PositionCode, String>("name"));
+		positionNameColumn.setCellValueFactory(new PropertyValueFactory<PositionCode, String>("name"));
         
         // clear code
         showPositionDetails(null);
 
         // Listen for selection changes
-        positionsTable.getSelectionModel().selectedItemProperty().addListener(
+        positionNamesTable.getSelectionModel().selectedItemProperty().addListener(
         		(observable, oldValue, newValue) -> showPositionDetails(newValue));
 
     }
+	
+	public void setMainApp(PlanningMainUIApp mainApp) {
+		this.mainApp = mainApp;
+	}
 	
     private void showPositionDetails(PositionCode position) {
     	positionName.setText(position == null ? "" : (position.getName() == null ? "Non défini" : position.getName()));
@@ -56,9 +60,9 @@ public class PositionsOverviewController {
     
     @FXML
     public void deleteHandler() {
-    	int selectedIndex = positionsTable.getSelectionModel().getSelectedIndex();
+    	int selectedIndex = positionNamesTable.getSelectionModel().getSelectedIndex();
         if (selectedIndex >= 0) {
-        	positionsTable.getItems().remove(selectedIndex);
+        	positionNamesTable.getItems().remove(selectedIndex);
         } else {
       	  // NOTHING SELECTED
       	  Alert alert = new Alert(AlertType.INFORMATION);
@@ -71,9 +75,9 @@ public class PositionsOverviewController {
 
     @FXML
     public void saveHandler() {
-    	int selectedIndex = positionsTable.getSelectionModel().getSelectedIndex();
+    	int selectedIndex = positionNamesTable.getSelectionModel().getSelectedIndex();
         if (selectedIndex >= 0) {
-        	final PositionCode positionCode = positionsTable.getItems().get(selectedIndex);
+        	final PositionCode positionCode = positionNamesTable.getItems().get(selectedIndex);
         	positionCode.setName(positionName.getText());
         	positionCode.setCode(codeArea.getText());
         } else {
