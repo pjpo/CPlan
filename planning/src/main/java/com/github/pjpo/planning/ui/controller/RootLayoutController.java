@@ -15,13 +15,16 @@ import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.FileChooser;
 
 import com.github.pjpo.planning.model.DaoPhysician;
+import com.github.pjpo.planning.model.DaoPositionCode;
 import com.github.pjpo.planning.model.Physician;
+import com.github.pjpo.planning.model.PositionCode;
 import com.github.pjpo.planning.ui.PlanningMainUIApp;
 
 public class RootLayoutController {
@@ -80,7 +83,21 @@ public class RootLayoutController {
 				}
 			}
 		}
-	}
+
+		try (final FileSystem zipFile = FileSystems.newFileSystem(uri, env)) {
+			final Path positionsCodesFile = zipFile.getPath("/", "positions");
+			try (final BufferedWriter writer = Files.newBufferedWriter(
+					positionsCodesFile, Charset.forName("UTF-8"),
+					StandardOpenOption.WRITE,
+					StandardOpenOption.CREATE,
+					StandardOpenOption.TRUNCATE_EXISTING)) {
+				final DaoPositionCode daoPositionCode = new DaoPositionCode(writer);
+				for (final PositionCode positionCode : mainApp.getPositions()) {
+					daoPositionCode.store(positionCode);
+				}
+			}
+		}
+}
 
 	@FXML
 	public void handleLoadConfiguration() {
@@ -132,6 +149,31 @@ public class RootLayoutController {
 		for (Physician physician : physicians) {
 			mainApp.getPhysicians().add(physician);
 		}
+
+		// Récupération du fichier des positions dans l'archive
+		final Path positionsFile = fs.getPath("/", "positions");
+
+		// READED LIST OF POSITIONS CODES
+		final LinkedList<PositionCode> positionCodes = new LinkedList<>();
+		
+		try (final BufferedReader reader = Files.newBufferedReader(
+				positionsFile, Charset.forName("UTF-8"))) {
+			
+			final DaoPositionCode daoPositionCode = new DaoPositionCode(reader);
+
+			PositionCode readedPositionCode = null;
+			
+			while ((readedPositionCode = daoPositionCode.load()) != null) {
+				positionCodes.add(readedPositionCode);
+			}
+		}
+
+		// READING WAS FINE, CHANGE DATAS IN tHE UI
+		mainApp.getPositions().clear();
+		for (PositionCode positionCode : positionCodes) {
+			mainApp.getPositions().add(positionCode);
+		}
+
 	}
 
 }
