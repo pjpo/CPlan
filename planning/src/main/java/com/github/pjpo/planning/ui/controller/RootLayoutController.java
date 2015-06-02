@@ -57,6 +57,9 @@ public class RootLayoutController {
 
 	public void saveConfiguration(File file) throws IOException {
 
+		// Deletes the defined file
+		Files.delete(file.toPath());
+		
 		// Select the zip file to write into
 		final URI uri = URI.create("jar:file:" + file.toURI().getPath());
 		
