@@ -12,23 +12,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Map.Entry;
-
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.FileChooser;
 
+import com.github.pjpo.planning.model.DaoPhysician;
 import com.github.pjpo.planning.model.Physician;
-import com.github.pjpo.planning.model.PhysicianBuilder;
 import com.github.pjpo.planning.ui.PlanningMainUIApp;
-import com.github.pjpo.planning.utils.IntervalDateTime;
 
 public class RootLayoutController {
 
@@ -62,62 +56,26 @@ public class RootLayoutController {
 	}
 
 	public void saveConfiguration(File file) throws IOException {
+
 		// Select the zip file to write into
 		final URI uri = URI.create("jar:file:" + file.toURI().getPath());
+		
 		// Select the env parameters
 		final Map<String, String> env = new HashMap<>();
 		env.put("create", "true");
 		
-		try (FileSystem zipFile = FileSystems.newFileSystem(uri, env)) {
-			Path physicians = zipFile.getPath("/", "physicians");
-			try (BufferedWriter writer = Files.newBufferedWriter(
-				physicians, Charset.forName("UTF-8"),
-				StandardOpenOption.WRITE,
-				StandardOpenOption.CREATE,
-				StandardOpenOption.TRUNCATE_EXISTING)) {
-				
+		try (final FileSystem zipFile = FileSystems.newFileSystem(uri, env)) {
+			final Path physicians = zipFile.getPath("/", "physicians");
+			try (final BufferedWriter writer = Files.newBufferedWriter(
+					physicians, Charset.forName("UTF-8"),
+					StandardOpenOption.WRITE,
+					StandardOpenOption.CREATE,
+					StandardOpenOption.TRUNCATE_EXISTING)) {
+				final DaoPhysician daoPhysician = new DaoPhysician(writer);
+				for (final Physician physician : mainApp.getPhysicians()) {
+					daoPhysician.store(physician);
+				}
 			}
-		}
-		Path saveFile = Paths.get(file.toURI().);
-		try (BufferedWriter writer = Files.newBufferedWriter(
-				saveFile, Charset.forName("UTF-8"),
-				StandardOpenOption.WRITE,
-				StandardOpenOption.CREATE,
-				StandardOpenOption.TRUNCATE_EXISTING)) {
-			// WRITE MEDS
-			writer.append("01:docs");
-			for (Physician physician : mainApp.getPhysicians()) {
-				writer.append("\n02:");
-				writer.append(physician.getName() == null ? "N" : ":" + physician.getName());
-				writer.append("\n03:");
-				writer.append(physician.getTimePart() == null ? "N" : ":" + physician.getTimePart().toString());
-				for (IntervalDateTime interval : physician.getPaidVacation()) {
-					writer.append("\n06:");
-					writer.append(interval.getStart() == null ? "N" : interval.getStart().toString());
-					writer.append(';');
-					writer.append(interval.getEnd() == null ? "N" : interval.getEnd().toString());
-				}
-				for (IntervalDateTime interval : physician.getUnpaidVacation()) {
-					writer.append("\n07:");
-					writer.append(interval.getStart() == null ? "N" : interval.getStart().toString());
-					writer.append(';');
-					writer.append(interval.getEnd() == null ? "N" : interval.getEnd().toString());
-				}
-				for (Entry<LocalDate, ArrayList<String>> entry : physician.getWorkedVacs().entrySet()) {
-					for (String poste : entry.getValue()) {
-						writer.append("\n08:");
-						writer.append(entry.getKey().toString());
-						writer.append(';');
-						writer.append(poste);
-					}
-				}
-				for (String poste : physician.getRefusedPostes()) {
-					writer.append("\n09:");
-					writer.append(poste);
-				}
-				writer.append("\n99:END");
-			}
-			writer.append('\n');
 		}
 	}
 
@@ -141,54 +99,31 @@ public class RootLayoutController {
 	}
 
 	public void loadConfiguration(File file) throws IOException {
-		Path saveFile = Paths.get(file.toURI());
+		
+		// Path de l'archive
+		final Path zipFile = Paths.get(file.toURI());
+		// Création d'une instance de FileSystem pour gérer les zip
+		final FileSystem fs = FileSystems.newFileSystem(zipFile, null);
+		
+		// Récupération du fichier des physicians dans l'archive
+		final Path physiciansFile = fs.getPath("/", "physicians");
 
 		// READED LIST OF PHSYCICIANS
-		LinkedList<Physician> physicians = new LinkedList<>();
+		final LinkedList<Physician> physicians = new LinkedList<>();
 
-		try (BufferedReader reader = Files.newBufferedReader(
-				saveFile, Charset.forName("UTF-8"))) {
-			// READED LINE IN FILE
-			String readedLine = null;
+		// lecture du fichier contenu dans l'archive
+		try (final BufferedReader reader = Files.newBufferedReader(
+				physiciansFile, Charset.forName("UTF-8"))) {
+			
+			final DaoPhysician daoPhysician = new DaoPhysician(reader);
 
-			// IGNORE UNTIL DOCS DEFINITION
-			while ((readedLine = reader.readLine()) != null && !readedLine.equals("01:docs")) {}
-
-			// READ DOCS DEFINITIONS
-			PhysicianBuilder physicianBuilder = new PhysicianBuilder();
-			while ((readedLine = reader.readLine()) != null && !readedLine.startsWith("01:plages")) {
-				if (readedLine.startsWith("02:") && readedLine.charAt(3) == ':') {
-					physicianBuilder.setName(readedLine.substring(4));
-				} else if (readedLine.startsWith("03:") && readedLine.charAt(3) == ':') {
-					physicianBuilder.setTimePart(Integer.decode(readedLine.substring(4)));
-				} else if (readedLine.startsWith("06:")) {
-					int splitPosition = readedLine.indexOf(';', 3);
-					String start = readedLine.substring(3, splitPosition);
-					String end = readedLine.substring(splitPosition + 1);
-					physicianBuilder.addPaidVacation(new IntervalDateTime(
-							start.equals("N") ? null : LocalDateTime.parse(start),
-									end.equals("N") ? null : LocalDateTime.parse(end)));
-				} else if (readedLine.startsWith("07:")) {
-					int splitPosition = readedLine.indexOf(';', 3);
-					String start = readedLine.substring(3, splitPosition);
-					String end = readedLine.substring(splitPosition + 1);
-					physicianBuilder.addUnpaidVacation(new IntervalDateTime(
-							start.equals("N") ? null : LocalDateTime.parse(start),
-									end.equals("N") ? null : LocalDateTime.parse(end)));
-				} else if (readedLine.startsWith("08:")) {
-					int splitPosition = readedLine.indexOf(';', 3);
-					LocalDate date = LocalDate.parse(readedLine.substring(3, splitPosition));
-					String poste = readedLine.substring(splitPosition + 1);
-					physicianBuilder.addWorkedVac(date, poste);
-				} else if (readedLine.startsWith("09:")) {
-					physicianBuilder.addRefusedPoste(readedLine.substring(3));
-				} else if (readedLine.equals("99:END")) {
-					physicians.add(physicianBuilder.toPhysician());
-					physicianBuilder = new PhysicianBuilder();
-				}
+			Physician readedPhysician = null;
+			
+			while ((readedPhysician = daoPhysician.load()) != null) {
+				physicians.add(readedPhysician);
 			}
 		}
-
+		
 		// READING WAS FINE, CHANGE DATAS IN tHE UI
 		mainApp.getPhysicians().clear();
 		for (Physician physician : physicians) {
