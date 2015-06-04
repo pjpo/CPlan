@@ -9,6 +9,7 @@ import java.nio.charset.Charset;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -61,7 +62,11 @@ public class RootLayoutController {
 	public void saveConfiguration(File file) throws IOException {
 
 		// Deletes the defined file
-		Files.delete(file.toPath());
+		try {
+			Files.delete(file.toPath());
+		} catch (NoSuchFileException e) {
+			// Do nothing, the file will be created
+		}
 		
 		// Select the zip file to write into
 		final URI uri = URI.create("jar:file:" + file.toURI().getPath());

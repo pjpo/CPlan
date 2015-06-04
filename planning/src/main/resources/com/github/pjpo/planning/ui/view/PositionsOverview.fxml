@@ -19,7 +19,7 @@
                     </columns>
                   </TableView>
                </children></AnchorPane>
-            <VBox prefHeight="400.0" prefWidth="370.0">
+            <VBox prefHeight="400.0" prefWidth="370.0" HBox.hgrow="ALWAYS">
                <children>
                   <HBox prefHeight="50.0" prefWidth="370.0">
                      <children>
@@ -35,7 +35,7 @@
                         </TextField>
                      </children>
                   </HBox>
-                  <TextArea fx:id="codeArea" prefHeight="281.0" prefWidth="370.0" />
+                  <TextArea fx:id="codeArea" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" VBox.vgrow="ALWAYS" />
                   <HBox prefHeight="60.0" prefWidth="370.0">
                      <children>
                         <Button mnemonicParsing="false" onAction="#newHandler" text="Nouveau">

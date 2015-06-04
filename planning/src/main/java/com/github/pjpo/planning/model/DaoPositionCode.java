@@ -62,6 +62,9 @@ public class DaoPositionCode {
 				// We have a new position defined, return it
 				final PositionCode positionCode = new PositionCode();
 				positionCode.setName(positionName);
+				// Remove the last new line in script (was separating with separator)
+				if (script.length() != 0)
+					script.deleteCharAt(script.length() - 1);
 				positionCode.setCode(script.toString());
 				return positionCode;
 			}

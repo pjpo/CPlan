@@ -48,7 +48,7 @@ public class Planning {
 		this.physicians = physicians;
 
 		// Finds the positions defined for this interval in positionsCode
-		for (LocalDate date = intervalDate.getStart() ; !date.isAfter(date) ; date = date.plusDays(1L)) {
+		for (LocalDate date = intervalDate.getStart() ; !date.isAfter(intervalDate.getEnd()) ; date = date.plusDays(1L)) {
 			final HashMap<String, Position> datePositions = new HashMap<>();
 			positions.put(date, datePositions);
 			for (final PositionCode positionCode : positionsCode) {
