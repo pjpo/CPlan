@@ -67,7 +67,7 @@ public class DaoPositionCode {
 			}
 			// WE ARE IN SCRIPT, STORE IT
 			else {
-				script.append(readed);
+				script.append(readed).append('\n');
 			}
 		}
 		

@@ -13,7 +13,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VariableFactory;
 
 import com.github.pjpo.planning.model.Physician;
-import com.github.pjpo.planning.model.Position;
+import com.github.pjpo.planning.model.PositionCode.Position;
 import com.github.pjpo.planning.utils.IntervalDate;
 import com.github.pjpo.planning.utils.IntervalDateTime;
 
@@ -25,7 +25,7 @@ import com.github.pjpo.planning.utils.IntervalDateTime;
 public class Agenda {
 
 	/** List of days and corresponding positions */
-	private final HashMap<LocalDate, HashMap<String, Position>> workingPositions = new HashMap<>();
+	private final HashMap<LocalDate, HashMap<String, Position>> positions;
 	
 	/** Interval of agenda */
 	private final IntervalDate interval;
@@ -34,21 +34,14 @@ public class Agenda {
 	 * Creates an agenda for this kind of jour and a defined interval
 	 * @param typeJour definition of the positions
 	 * @param intervalDate
+	 * @param positions 
 	 */
-	public Agenda(final IntervalDate intervalDate) {
+	public Agenda(final IntervalDate intervalDate,
+			final HashMap<LocalDate, HashMap<String, Position>> positions) {
 		if (intervalDate.getStart() == null || intervalDate.getEnd() == null)
 			throw new IllegalArgumentException("interval must be finite");
 		this.interval = intervalDate;
-	}
-
-	/**
-	 * Fills the days of agenda with possible positions
-	 */
-	public void calculateWorkingPeriods() {
-		workingPositions.clear();
-		for (LocalDate date = interval.getStart() ; !date.isAfter(interval.getEnd()) ; date = date.plusDays(1L)) {
-			workingPositions.put(date, DateConstraints.getPositions(date));
-		}
+		this.positions = positions;
 	}
 
 	/**
@@ -63,14 +56,14 @@ public class Agenda {
 			final List<Physician> physicians,
 			final HashMap<LocalDate, HashMap<String, Integer>> preFill) {
 		// WORKING PERIODS HAVE TO BE CALCULATED BEFOER
-		if (workingPositions == null)
+		if (positions == null)
 			throw new IllegalArgumentException("Agenda has not been calculated");
 		
 		// CREATES THE MAP OF WORKING
-		final HashMap<LocalDate, HashMap<String, IntVar>> workers = new HashMap<>(workingPositions.size());
+		final HashMap<LocalDate, HashMap<String, IntVar>> workers = new HashMap<>(positions.size());
 		
 		// == 1 - Check for each day
-		for (final Entry<LocalDate, HashMap<String, Position>> positionsInDayEntry : workingPositions.entrySet()) {
+		for (final Entry<LocalDate, HashMap<String, Position>> positionsInDayEntry : positions.entrySet()) {
 						
 			// CREATES THE CONSTRAINTS PROGRAMMING VARIABLES FOR THIS DAY
 			final HashMap<String, IntVar> workingConstraintsVars = new HashMap<>();
@@ -166,7 +159,7 @@ public class Agenda {
 	 * @return
 	 */
 	public HashMap<LocalDate, HashMap<String, Position>> getWorkingPositions() {
-		return workingPositions;
+		return positions;
 	}
 
 	/**

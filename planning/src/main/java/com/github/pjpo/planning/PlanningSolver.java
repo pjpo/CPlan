@@ -10,7 +10,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 
 import com.github.pjpo.planning.model.Physician;
-import com.github.pjpo.planning.model.Position;
+import com.github.pjpo.planning.model.PositionCode.Position;
 
 public class PlanningSolver {
 

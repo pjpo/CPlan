@@ -6,7 +6,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
+
+import javax.script.ScriptException;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
@@ -16,6 +19,8 @@ import org.chocosolver.solver.variables.IntVar;
 
 import com.github.pjpo.planning.jours.Agenda;
 import com.github.pjpo.planning.model.Physician;
+import com.github.pjpo.planning.model.PositionCode;
+import com.github.pjpo.planning.model.PositionCode.Position;
 import com.github.pjpo.planning.utils.IntervalDate;
 
 /**
@@ -28,15 +33,37 @@ public class Planning {
 	/** List of used physicians */
 	private final ArrayList<Physician> physicians;
 	
+	/** List of days and corresponding positions to fill*/
+	private final HashMap<LocalDate, HashMap<String, Position>> positions = new HashMap<>();
+	
 	/** Agenda */
 	private final Agenda agenda;
 	
 	private final Random random = new Random(new Date().getTime());
 	
-	public Planning(final IntervalDate intervalDate, final ArrayList<Physician> physicians) {
+	public Planning(
+			final IntervalDate intervalDate,
+			final ArrayList<Physician> physicians,
+			final List<PositionCode> positionsCode) {
 		this.physicians = physicians;
-		this.agenda = new Agenda(intervalDate);
-		this.agenda.calculateWorkingPeriods();
+
+		// Finds the positions defined for this interval in positionsCode
+		for (LocalDate date = intervalDate.getStart() ; !date.isAfter(date) ; date = date.plusDays(1L)) {
+			final HashMap<String, Position> datePositions = new HashMap<>();
+			positions.put(date, datePositions);
+			for (final PositionCode positionCode : positionsCode) {
+				try {
+					final Position position = positionCode.getPosition(date);
+					if (position.isWorking())
+						datePositions.put(position.getName(), position);
+				} catch (ScriptException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		// Creates the Agenda for the interval dates and corresponding positions
+		this.agenda = new Agenda(intervalDate, positions);
 	}
 
 	public Agenda getAgenda() {
@@ -70,7 +97,10 @@ public class Planning {
 
 		// FILLS THE SOLVER
 		HashMap<LocalDate, HashMap<String, IntVar>> allIntVars;
-		allIntVars = agenda.fillSolver(solver, physicians, previousAcceptedSolutions.size() == 0 ? null : previousAcceptedSolutions.getLast().lightenWorkBurden(idem));
+		allIntVars = agenda.fillSolver(
+				solver,
+				physicians,
+				previousAcceptedSolutions.size() == 0 ? null : previousAcceptedSolutions.getLast().lightenWorkBurden(idem));
 		
 		// GETS AN ARRAY OF EACH INTVAR
 		LinkedList<IntVar> allDays = new LinkedList<>();

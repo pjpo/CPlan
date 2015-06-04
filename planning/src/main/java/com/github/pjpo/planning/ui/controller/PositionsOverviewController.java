@@ -1,13 +1,15 @@
 package com.github.pjpo.planning.ui.controller;
 
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+
 import com.github.pjpo.planning.model.PositionCode;
 import com.github.pjpo.planning.ui.PlanningMainUIApp;
 
@@ -29,7 +31,9 @@ public class PositionsOverviewController {
 	@FXML
     private void initialize() {
 		// Initialize the person table
-		positionNameColumn.setCellValueFactory(new PropertyValueFactory<PositionCode, String>("name"));
+		positionNameColumn.setCellValueFactory(
+				param ->
+				new SimpleStringProperty(param.getValue().getName() == null ? "A définir" : param.getValue().getName()));
         
         // clear code
         showPositionDetails(null);
@@ -42,17 +46,19 @@ public class PositionsOverviewController {
 	
 	public void setMainApp(PlanningMainUIApp mainApp) {
 		this.mainApp = mainApp;
+        // Add observable list data to the table
+        positionNamesTable.setItems(mainApp.getPositions());
 	}
 	
     private void showPositionDetails(PositionCode position) {
     	positionName.setText(position == null ? "" : (position.getName() == null ? "Non défini" : position.getName()));
+    	codeArea.setText(position == null ? "" : (position.getCode() == null ? "Non défini" : position.getCode()));
     }
 
     @FXML
     public void newHandler() {
     	
     	final PositionCode positionCode = new PositionCode();
-    	positionCode.setName("");
     	positionCode.setCode("");
     
     	mainApp.getPositions().add(positionCode);
@@ -77,9 +83,12 @@ public class PositionsOverviewController {
     public void saveHandler() {
     	int selectedIndex = positionNamesTable.getSelectionModel().getSelectedIndex();
         if (selectedIndex >= 0) {
-        	final PositionCode positionCode = positionNamesTable.getItems().get(selectedIndex);
+        	final ObservableList<PositionCode> positionCodes = positionNamesTable.getItems(); 
+        	final PositionCode positionCode = positionCodes.get(selectedIndex);
         	positionCode.setName(positionName.getText());
         	positionCode.setCode(codeArea.getText());
+        	// Refresh element
+        	positionCodes.set(selectedIndex, positionCode);
         } else {
       	  // NOTHING SELECTED
       	  Alert alert = new Alert(AlertType.INFORMATION);

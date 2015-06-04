@@ -12,7 +12,7 @@ import java.util.Random;
 import org.chocosolver.solver.variables.IntVar;
 
 import com.github.pjpo.planning.model.Physician;
-import com.github.pjpo.planning.model.Position;
+import com.github.pjpo.planning.model.PositionCode.Position;
 import com.github.pjpo.planning.utils.IntervalDateTime;
 
 /**

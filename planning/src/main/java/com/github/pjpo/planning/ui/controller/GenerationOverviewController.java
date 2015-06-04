@@ -24,6 +24,7 @@ import java.util.Map.Entry;
 
 
 
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -39,10 +40,11 @@ import au.com.bytecode.opencsv.CSVWriter;
 
 
 
+
 import com.github.pjpo.planning.Planning;
 import com.github.pjpo.planning.Solution;
 import com.github.pjpo.planning.SolutionException;
-import com.github.pjpo.planning.model.Position;
+import com.github.pjpo.planning.model.PositionCode.Position;
 import com.github.pjpo.planning.ui.PlanningMainUIApp;
 import com.github.pjpo.planning.ui.controller.utils.DefaultDatePickerConverter;
 import com.github.pjpo.planning.ui.controller.utils.PlanningGenerationTask;
@@ -117,7 +119,8 @@ public class GenerationOverviewController {
     	Planning planning = new Planning(new IntervalDate(
     			startPeriodPicker.getValue(),
     			endPeriodPicker.getValue()),
-    			new ArrayList<>(mainApp.getPhysicians()));
+    			new ArrayList<>(mainApp.getPhysicians()),
+    			mainApp.getPositions());
 
     	task = new PlanningGenerationTask(planning, this);
 
