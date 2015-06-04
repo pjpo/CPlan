@@ -115,7 +115,7 @@ public class Planning {
 		// USE A RANDOM CUSTOM SETTER
 		solver.set(
 				IntStrategyFactory.lastKConflicts(solver, 1000, IntStrategyFactory.custom(
-				IntStrategyFactory.random_var_selector(new Date().getTime()), (IntValueSelector) new MyRandomStrategy(physicians), allDaysArray)));
+				IntStrategyFactory.random_var_selector(new Date().getTime()), (IntValueSelector) new CPlanRandomStrategy(physicians), allDaysArray)));
 		
 		SearchMonitorFactory.limitTime(solver, 600000);
 		

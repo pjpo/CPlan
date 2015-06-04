@@ -19,7 +19,7 @@ import com.github.pjpo.planning.model.Physician;
  *
  */
 @SuppressWarnings("serial")
-public class MyRandomStrategy implements IntValueSelector {
+public class CPlanRandomStrategy implements IntValueSelector {
 
 	/** Random used to select a physician */ 
 	private final Random rand = new Random(new Date().getTime());
@@ -31,7 +31,7 @@ public class MyRandomStrategy implements IntValueSelector {
 	 * Simple Constructor : list of all people
 	 * @param physicians
 	 */
-	public MyRandomStrategy(final ArrayList<Physician> physicians) {
+	public CPlanRandomStrategy(final ArrayList<Physician> physicians) {
 		this.physicians = physicians;
 	}
 
