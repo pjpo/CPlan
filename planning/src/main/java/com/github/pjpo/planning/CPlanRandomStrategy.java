@@ -1,8 +1,8 @@
 package com.github.pjpo.planning;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -25,13 +25,13 @@ public class CPlanRandomStrategy implements IntValueSelector {
 	private final Random rand = new Random(new Date().getTime());
 	
 	/** Physicians */
-	private final ArrayList<Physician> physicians;
+	private final List<Physician> physicians;
 
 	/**
 	 * Simple Constructor : list of all people
 	 * @param physicians
 	 */
-	public CPlanRandomStrategy(final ArrayList<Physician> physicians) {
+	public CPlanRandomStrategy(final List<Physician> physicians) {
 		this.physicians = physicians;
 	}
 

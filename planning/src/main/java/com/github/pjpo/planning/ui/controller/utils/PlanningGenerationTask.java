@@ -2,7 +2,7 @@ package com.github.pjpo.planning.ui.controller.utils;
 
 import java.util.LinkedList;
 
-import com.github.pjpo.planning.Planning;
+import com.github.pjpo.planning.PlanningImplementation;
 import com.github.pjpo.planning.PlanningSolver;
 import com.github.pjpo.planning.Solution;
 import com.github.pjpo.planning.SolutionException;
@@ -17,29 +17,24 @@ public class PlanningGenerationTask extends Task<LinkedList<Solution>> {
 
 	private boolean isAlive = true;
 
-	private final Planning planning;
+	private final PlanningImplementation planningImplementation;
 	
 	private final Object sync = new Object();
 
 	private final GenerationOverviewController controller;
 		
-	public PlanningGenerationTask(final Planning planning, final GenerationOverviewController controller) {
-		this.planning = planning;
+	public PlanningGenerationTask(final PlanningImplementation planningImplementation, final GenerationOverviewController controller) {
+		this.planningImplementation = planningImplementation;
 		this.controller = controller;
 	}
 	
 	@Override
 	protected LinkedList<Solution> call() throws Exception {
 		// INIT VARS
-		final LinkedList<Solution> solutions = new LinkedList<>();
 		Integer retrys = 0;
 
 		for (;;) {
-			// IN ORDER TO PREVENT A RACE CONDITION, GENERATE THE SOLVER BEFORE CHECKING IF PROCESS IS CANCELLED
 			retrys++;
-			synchronized (sync) {
-				solver = planning.generateSolver(solutions);
-			}
 
 			// FIRST CHECK GENERATION STATUS
 			synchronized (sync) {
@@ -47,25 +42,23 @@ public class PlanningGenerationTask extends Task<LinkedList<Solution>> {
 					break;
 			}
 			
-			final Solution solution = solver.findSolution();
+			final Solution solution = planningImplementation.findNewSolution();
 			final Integer finalRetrys = new Integer(retrys);
 
-			if (solutions.size() == 0 && solution == null && !solver.hasSolution() && !solver.isUndefined()) {
+			if (planningImplementation.getPreviousAcceptedSolutions().size() == 0 && solution == null && !solver.hasSolution() && !solver.isUndefined()) {
 				throw new SolutionException("No solution");
 			} else if (solution != null) {
 				// UPDATES VALUES IN LABELS
 				Platform.runLater( () ->
 				controller.showFeedBack(new Integer(finalRetrys), solution.getWorkLoadSD()));
-				// ADDS THIS SOLUTION AS LAST SOLUTION
-				solutions.add(solution);
 			} else {
 				Platform.runLater( () ->
 				controller.showFeedBack(new Integer(finalRetrys),
-						solutions.size() == 0 ? null : solutions.getLast().getWorkLoadSD()));
+						planningImplementation.getPreviousAcceptedSolutions().size() == 0 ? null : planningImplementation.getPreviousAcceptedSolutions().getLast().getWorkLoadSD()));
 			}
 		}
 		// HERE, RETURN SOLUTIONS
-		return solutions;
+		return planningImplementation.getPreviousAcceptedSolutions();
 	}
 
 	public void stopProcessing(String reason) {

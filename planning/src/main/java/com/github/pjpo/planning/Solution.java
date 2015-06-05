@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
 
@@ -28,7 +29,7 @@ public class Solution {
 	private final HashMap<LocalDate, HashMap<String, Position>> workingPositions;
 	
 	/** Stores the physicians definitions */
-	private final ArrayList<Physician> physicians;
+	private final List<Physician> physicians;
 	
 	/** Stores the solution */
 	private final HashMap<LocalDate, HashMap<String, Integer>> solutionMedIndicesMap = new HashMap<>();
@@ -45,7 +46,7 @@ public class Solution {
 	 * @param physicians
 	 */
 	public Solution(final HashMap<LocalDate, HashMap<String, Position>> workingPositions,
-			ArrayList<Physician> physicians) {
+			List<Physician> physicians) {
 		this.workingPositions = workingPositions;
 		this.physicians = physicians;
 	}
@@ -58,7 +59,7 @@ public class Solution {
 		return solutionMedIndicesMap;
 	}
 
-	public ArrayList<Physician> getPhysicians() {
+	public List<Physician> getPhysicians() {
 		return physicians;
 	}
 

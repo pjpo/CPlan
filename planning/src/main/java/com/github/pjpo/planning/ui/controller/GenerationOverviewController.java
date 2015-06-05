@@ -25,6 +25,8 @@ import java.util.Map.Entry;
 
 
 
+
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -35,13 +37,8 @@ import javafx.scene.control.Label;
 import javafx.stage.FileChooser;
 import au.com.bytecode.opencsv.CSVWriter;
 
-
-
-
-
-
-
-import com.github.pjpo.planning.Planning;
+import com.github.pjpo.planning.PlanningConstraints;
+import com.github.pjpo.planning.PlanningImplementation;
 import com.github.pjpo.planning.Solution;
 import com.github.pjpo.planning.SolutionException;
 import com.github.pjpo.planning.model.PositionCode.Position;
@@ -115,14 +112,19 @@ public class GenerationOverviewController {
     
     public void handleGenerateButton() {
     	
-    	// INIT PLANNING
-    	Planning planning = new Planning(new IntervalDate(
-    			startPeriodPicker.getValue(),
-    			endPeriodPicker.getValue()),
-    			new ArrayList<>(mainApp.getPhysicians()),
-    			mainApp.getPositions());
+    	// INIT PLANNING DEFINITION
+    	final PlanningConstraints planningConstraints =
+    			new PlanningConstraints(
+    					new ArrayList<>(mainApp.getPhysicians()),
+    					mainApp.getPositions(),
+    					null);
 
-    	task = new PlanningGenerationTask(planning, this);
+    	// REAL PLANNING FOR INTERVAL
+    	final PlanningImplementation planningImplementation =
+    			planningConstraints.generatePlanningImplementation(
+    					new IntervalDate(startPeriodPicker.getValue(), endPeriodPicker.getValue()));
+
+    	task = new PlanningGenerationTask(planningImplementation, this);
 
     	task.setOnFailed( (event) -> {
     		Throwable exception  =

@@ -18,6 +18,8 @@ import org.chocosolver.solver.variables.impl.BitsetIntVarImpl;
 import org.chocosolver.solver.variables.impl.FixedIntVarImpl;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 
+import com.github.pjpo.planning.constraintsrules.PositionConstraintRuleElement;
+
 public class ExprCPlanListener extends ExprBaseListener {
 
 	final private List<Constraint> constraints = new LinkedList<Constraint>();
@@ -66,17 +68,17 @@ public class ExprCPlanListener extends ExprBaseListener {
 	 * @param equality
 	 * @param rules
 	 */
-	private List<IntVar> getExistingIndices(List<ChocoRule> rules) {
+	private List<IntVar> getExistingIndices(List<PositionConstraintRuleElement> rules) {
 		List<IntVar> existingPositionsIndices = new LinkedList<>();
-		rule : for (ChocoRule rule : rules) {
+		rule : for (PositionConstraintRuleElement rule : rules) {
 			// Get date reference or this rule
 			HashMap<String, IntVar> subPositionsIndices =
-					positionsIndices.get(currentDate.plusDays(rule.getValue()));
+					positionsIndices.get(currentDate.plusDays(rule.getDeltaDays()));
 			// If nothing defined, go to next element
 			if (subPositionsIndices == null)
 				continue rule;
 			// Get reference of this position
-			IntVar indice = subPositionsIndices.get(rule.getName());
+			IntVar indice = subPositionsIndices.get(rule.getPositionName());
 			// If no reference is defined, go to next element
 			if (indice == null)
 				continue rule;
