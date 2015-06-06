@@ -2,7 +2,7 @@ grammar Expr;
 
 @header {
 	import java.util.LinkedList;
-	import com.github.pjpo.planning.jours.ChocoRule;
+	import com.github.pjpo.planning.constraintsrules.PositionConstraintRuleElement;
 	import java.util.List;
 }
 
@@ -13,25 +13,25 @@ equality :
 difference:
   NOT EQ PARI rules=rulei PARO;
 
-rulei returns [List<ChocoRule> rules]
+rulei returns [List<PositionConstraintRuleElement> rules]
   @init {
-  	List<ChocoRule> chocoRules = new LinkedList<ChocoRule>();
+  	final List<PositionConstraintRuleElement> chocoRules = new LinkedList<PositionConstraintRuleElement>();
   }
   @after {
   	$rules = chocoRules;
   }:
   first=rule_element {chocoRules.add($first.rule);}
   (COMMA next=rule_element {chocoRules.add($next.rule);})*;
-rule_element returns [ChocoRule rule]
+rule_element returns [PositionConstraintRuleElement rule]
   @init {
-  	StringBuilder name = new StringBuilder();
-  	$rule = new ChocoRule();
+  	final StringBuilder name = new StringBuilder();
+  	$rule = new PositionConstraintRuleElement();
   }
   @after {
-  	$rule.setName(name.toString());
+  	$rule.setPositionName(name.toString());
   }:
   (wd=WORD {name.append($wd.text);} | nb=NUMBER {name.append($nb.text);})+ value=index {
-  	$rule.setValue($value.n);
+  	$rule.setDeltaDays($value.n);
   };
 
 index returns [Integer n]:

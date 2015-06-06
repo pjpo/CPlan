@@ -22,8 +22,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.FileChooser;
 
-import com.github.pjpo.planning.model.DaoPhysician;
-import com.github.pjpo.planning.model.DaoPositionCode;
+import com.github.pjpo.planning.dao.DaoPhysician;
+import com.github.pjpo.planning.dao.DaoPositionCode;
 import com.github.pjpo.planning.model.Physician;
 import com.github.pjpo.planning.model.PositionCode;
 import com.github.pjpo.planning.ui.PlanningMainUIApp;

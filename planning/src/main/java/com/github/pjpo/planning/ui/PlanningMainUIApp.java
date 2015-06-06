@@ -40,7 +40,7 @@ public class PlanningMainUIApp extends Application {
 		this.primaryStage = primaryStage;
         this.primaryStage.setTitle("Planning");
 
-        try {
+        try {        	
             // LOADS THE ROOT LAYOUT
         	BorderPane rootLayout = loadRootLayout();
 

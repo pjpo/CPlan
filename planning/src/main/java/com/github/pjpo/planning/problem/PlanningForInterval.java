@@ -1,4 +1,4 @@
-package com.github.pjpo.planning;
+package com.github.pjpo.planning.problem;
 
 import java.time.LocalDate;
 import java.util.Date;
@@ -9,16 +9,17 @@ import java.util.Random;
 
 import javax.script.ScriptException;
 
+import com.github.pjpo.planning.Solution;
 import com.github.pjpo.planning.model.PositionCode;
 import com.github.pjpo.planning.model.PositionCode.Position;
 import com.github.pjpo.planning.utils.IntervalDate;
 
 /**
- * Uses the constraints of the planning ({@link PlanningConstraints}) to define the content of the planning for an interval
+ * Uses the constraints of the planning ({@link PlanningDefinition}) to define the content of the planning for an interval
  * @author jpc
  *
  */
-public class PlanningImplementation {
+public class PlanningForInterval {
 
 	/** List of days and corresponding positions */
 	private final HashMap<LocalDate, HashMap<String, Position>> positions = new HashMap<>();
@@ -27,7 +28,7 @@ public class PlanningImplementation {
 	private final IntervalDate interval;
 	
 	/** Reference to planning constraints */
-	private final PlanningConstraints planningConstraints;
+	private final PlanningDefinition planningConstraints;
 
 	/** Random number generator */
 	private final Random random = new Random(new Date().getTime()); 
@@ -41,9 +42,9 @@ public class PlanningImplementation {
 	 * @param intervalDate
 	 * @param positions 
 	 */
-	public PlanningImplementation(
+	public PlanningForInterval(
 			final IntervalDate intervalDate,
-			final PlanningConstraints planningConstraints) {
+			final PlanningDefinition planningConstraints) {
 		// Verifies that the boundings of planning have been defined
 		if (intervalDate.getStart() == null || intervalDate.getEnd() == null)
 			throw new IllegalArgumentException("interval must be finite");
@@ -89,7 +90,7 @@ public class PlanningImplementation {
 		if (random.nextInt(10) == 0)
 			idem = idem * idem;
 		
-		final PlanningSolver planningSolver = new PlanningSolver(idem, this);
+		final PlanningForIntervalSolver planningSolver = new PlanningForIntervalSolver(idem, this);
 		
 		final Solution newSolution = planningSolver.findSolution();
 		
@@ -114,7 +115,7 @@ public class PlanningImplementation {
 		return interval;
 	}
 
-	public PlanningConstraints getPlanningConstraints() {
+	public PlanningDefinition getPlanningConstraints() {
 		return planningConstraints;
 	}
 

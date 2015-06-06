@@ -1,8 +1,10 @@
-package com.github.pjpo.planning.model;
+package com.github.pjpo.planning.dao;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+
+import com.github.pjpo.planning.model.PositionCode;
 
 public class DaoPositionCode {
 

@@ -2,6 +2,7 @@ package com.github.pjpo.planning.ui.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,7 +14,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map.Entry;
+
+
+
+
+
+
 
 
 
@@ -37,11 +45,13 @@ import javafx.scene.control.Label;
 import javafx.stage.FileChooser;
 import au.com.bytecode.opencsv.CSVWriter;
 
-import com.github.pjpo.planning.PlanningConstraints;
-import com.github.pjpo.planning.PlanningImplementation;
 import com.github.pjpo.planning.Solution;
 import com.github.pjpo.planning.SolutionException;
+import com.github.pjpo.planning.constraintsrules.PositionConstraintBase;
+import com.github.pjpo.planning.dao.DaoConstraints;
 import com.github.pjpo.planning.model.PositionCode.Position;
+import com.github.pjpo.planning.problem.PlanningDefinition;
+import com.github.pjpo.planning.problem.PlanningForInterval;
 import com.github.pjpo.planning.ui.PlanningMainUIApp;
 import com.github.pjpo.planning.ui.controller.utils.DefaultDatePickerConverter;
 import com.github.pjpo.planning.ui.controller.utils.PlanningGenerationTask;
@@ -111,63 +121,73 @@ public class GenerationOverviewController {
     }
     
     public void handleGenerateButton() {
-    	
-    	// INIT PLANNING DEFINITION
-    	final PlanningConstraints planningConstraints =
-    			new PlanningConstraints(
-    					new ArrayList<>(mainApp.getPhysicians()),
-    					mainApp.getPositions(),
-    					null);
 
-    	// REAL PLANNING FOR INTERVAL
-    	final PlanningImplementation planningImplementation =
-    			planningConstraints.generatePlanningImplementation(
-    					new IntervalDate(startPeriodPicker.getValue(), endPeriodPicker.getValue()));
+    	// Loads the constraints
+    	try (final InputStream is = PlanningMainUIApp.class.getResourceAsStream("/com/github/pjpo/planning/conditions.cfg")) {
+    		final DaoConstraints daoConstraints = new DaoConstraints(is);
+    		final List<PositionConstraintBase> constraints = daoConstraints.load();
 
-    	task = new PlanningGenerationTask(planningImplementation, this);
+        	// INIT PLANNING DEFINITION
+    		final PlanningDefinition planningConstraints =
+    				new PlanningDefinition(
+        					mainApp.getPhysicians(),
+        					mainApp.getPositions(),
+        					constraints);
 
-    	task.setOnFailed( (event) -> {
-    		Throwable exception  =
-    				event.getSource().getException() == null ?
-    						new Exception("Erreur inconnue") :
-    							event.getSource().getException();
-    		if (exception instanceof SolutionException) {
-    			Alert alert = new Alert(AlertType.INFORMATION);
-    			alert.setTitle("Information");
-    			alert.setHeaderText("Pas de solution");
-    			alert.setContentText(exception.getMessage());
-    			alert.showAndWait();
-    		} else {
-    			Alert alert = new Alert(AlertType.INFORMATION);
-    			alert.setTitle("Information");
-    			alert.setHeaderText("Erreur");
-    			alert.setContentText(exception.getMessage());
-    			alert.showAndWait();
-    		}
-			setButtonsStatus(true, false, false);
-		});
+        	// REAL PLANNING FOR INTERVAL
+        	final PlanningForInterval planningImplementation =
+        			planningConstraints.generatePlanningImplementation(
+        					new IntervalDate(startPeriodPicker.getValue(), endPeriodPicker.getValue()));
 
-    	task.setOnSucceeded( (event) -> {
-    		try {
-				if (task.get() == null || task.get().size() == 0)
-					setButtonsStatus(true, false, false);
-				else {
-					setButtonsStatus(true, false, true);
-					solution = task.get().getLast();
-				}
-			} catch (Exception e) {
-    			Alert alert = new Alert(AlertType.INFORMATION);
-    			alert.setTitle("Information");
-    			alert.setHeaderText("Erreur");
-    			alert.setContentText(e.getMessage());
-    			alert.showAndWait();
-			}
-    	});
-    	
-    	new Thread(task).start();
+        	task = new PlanningGenerationTask(planningImplementation, this);
 
-    	// ADAPTS BUTTONS VISIBILITY
-    	setButtonsStatus(false, true, false);
+        	task.setOnFailed( (event) -> {
+        		Throwable exception  =
+        				event.getSource().getException() == null ?
+        						new Exception("Erreur inconnue") :
+        							event.getSource().getException();
+        		if (exception instanceof SolutionException) {
+        			Alert alert = new Alert(AlertType.INFORMATION);
+        			alert.setTitle("Information");
+        			alert.setHeaderText("Pas de solution");
+        			alert.setContentText(exception.getMessage());
+        			alert.showAndWait();
+        		} else {
+        			Alert alert = new Alert(AlertType.INFORMATION);
+        			alert.setTitle("Information");
+        			alert.setHeaderText("Erreur");
+        			alert.setContentText(exception.getMessage());
+        			alert.showAndWait();
+        		}
+    			setButtonsStatus(true, false, false);
+    		});
+
+        	task.setOnSucceeded( (event) -> {
+        		try {
+    				if (task.get() == null || task.get().size() == 0)
+    					setButtonsStatus(true, false, false);
+    				else {
+    					setButtonsStatus(true, false, true);
+    					solution = task.get().getLast();
+    				}
+    			} catch (Exception e) {
+        			Alert alert = new Alert(AlertType.INFORMATION);
+        			alert.setTitle("Information");
+        			alert.setHeaderText("Erreur");
+        			alert.setContentText(e.getMessage());
+        			alert.showAndWait();
+    			}
+        	});
+        	
+        	new Thread(task).start();
+
+        	// ADAPTS BUTTONS VISIBILITY
+        	setButtonsStatus(false, true, false);
+        	
+    	} catch (final IOException e) {
+			e.printStackTrace();
+		}
+
     }	
     
     public void handlePauseButton() {

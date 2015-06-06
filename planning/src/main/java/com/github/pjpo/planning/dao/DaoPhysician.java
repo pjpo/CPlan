@@ -1,4 +1,4 @@
-package com.github.pjpo.planning.model;
+package com.github.pjpo.planning.dao;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -8,6 +8,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 
+import com.github.pjpo.planning.model.Physician;
+import com.github.pjpo.planning.model.PhysicianBuilder;
 import com.github.pjpo.planning.utils.IntervalDateTime;
 
 public class DaoPhysician {

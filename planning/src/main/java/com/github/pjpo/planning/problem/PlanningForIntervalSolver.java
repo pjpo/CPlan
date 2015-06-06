@@ -1,4 +1,4 @@
-package com.github.pjpo.planning;
+package com.github.pjpo.planning.problem;
 
 import java.time.LocalDate;
 import java.util.Date;
@@ -15,23 +15,24 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.ESat;
 
-import com.github.pjpo.planning.jours.DateConstraints;
+import com.github.pjpo.planning.CPlanRandomStrategy;
+import com.github.pjpo.planning.Solution;
 import com.github.pjpo.planning.model.Physician;
 import com.github.pjpo.planning.utils.IntervalDateTime;
 
-public class PlanningSolver {
+public class PlanningForIntervalSolver {
 	
 	/** Choco solver */
 	private final Solver solver;
 	
 	private final HashMap<LocalDate, HashMap<String, IntVar>> constraintVariables;
 	
-	private final PlanningImplementation planningImplementation;
+	private final PlanningForInterval planningImplementation;
 	
 	/** Previous solutions found */
 	private final LinkedList<Solution> previousAcceptedSolutions = new LinkedList<>();
 	
-	public PlanningSolver(int shaker, final PlanningImplementation planningImplementation) throws IllegalArgumentException {
+	public PlanningForIntervalSolver(int shaker, final PlanningForInterval planningImplementation) throws IllegalArgumentException {
 		
 		this.solver = new Solver();
 		this.planningImplementation = planningImplementation;
@@ -111,6 +112,7 @@ public class PlanningSolver {
 		
 		// CREATES THE GENERAL CONSTRAINTS AND APPLY THEM TO THE SOLVER
 		for (LocalDate date = planningImplementation.getInterval().getStart() ; !date.isAfter(planningImplementation.getInterval().getEnd()) ; date = date.plusDays(1L)) {
+			
 			for (final Constraint constraint : DateConstraints.getConstraints(date, constraintVariables)) {
 				solver.post(constraint);
 			}

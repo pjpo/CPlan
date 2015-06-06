@@ -2,10 +2,10 @@ package com.github.pjpo.planning.ui.controller.utils;
 
 import java.util.LinkedList;
 
-import com.github.pjpo.planning.PlanningImplementation;
-import com.github.pjpo.planning.PlanningSolver;
 import com.github.pjpo.planning.Solution;
 import com.github.pjpo.planning.SolutionException;
+import com.github.pjpo.planning.problem.PlanningForInterval;
+import com.github.pjpo.planning.problem.PlanningForIntervalSolver;
 import com.github.pjpo.planning.ui.controller.GenerationOverviewController;
 
 import javafx.application.Platform;
@@ -13,17 +13,17 @@ import javafx.concurrent.Task;
 
 public class PlanningGenerationTask extends Task<LinkedList<Solution>> {
 
-	private PlanningSolver solver = null;
+	private PlanningForIntervalSolver solver = null;
 
 	private boolean isAlive = true;
 
-	private final PlanningImplementation planningImplementation;
+	private final PlanningForInterval planningImplementation;
 	
 	private final Object sync = new Object();
 
 	private final GenerationOverviewController controller;
 		
-	public PlanningGenerationTask(final PlanningImplementation planningImplementation, final GenerationOverviewController controller) {
+	public PlanningGenerationTask(final PlanningForInterval planningImplementation, final GenerationOverviewController controller) {
 		this.planningImplementation = planningImplementation;
 		this.controller = controller;
 	}
