@@ -3,8 +3,10 @@ package com.github.pjpo.planning.problem;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
@@ -16,35 +18,65 @@ import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.ESat;
 
 import com.github.pjpo.planning.CPlanRandomStrategy;
-import com.github.pjpo.planning.Solution;
+import com.github.pjpo.planning.constraintsrules.PositionConstraintBase;
 import com.github.pjpo.planning.model.Physician;
+import com.github.pjpo.planning.model.Position;
+import com.github.pjpo.planning.model.Solution;
 import com.github.pjpo.planning.utils.IntervalDateTime;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table.Cell;
 
 public class PlanningForIntervalSolver {
 	
 	/** Choco solver */
 	private final Solver solver;
 	
-	private final HashMap<LocalDate, HashMap<String, IntVar>> constraintVariables;
+	/** Private HashTable for storing intvars from choco solver */
+	private final HashBasedTable<LocalDate, String, Position> positions = HashBasedTable.create();
 	
-	private final PlanningForInterval planningImplementation;
-	
-	/** Previous solutions found */
-	private final LinkedList<Solution> previousAcceptedSolutions = new LinkedList<>();
-	
-	public PlanningForIntervalSolver(int shaker, final PlanningForInterval planningImplementation) throws IllegalArgumentException {
-		
-		this.solver = new Solver();
-		this.planningImplementation = planningImplementation;
-		
-		// Map of positions for each day (for Choco, a position is an IntVar)
-		constraintVariables = new HashMap<>(planningImplementation.getPositions().size());
+	/** Random number generator */
+	private final Random random = new Random(new Date().getTime()); 
 
-		// If a solution was existing, use it as a base for the new solution
-		HashMap<LocalDate, HashMap<String, Integer>> preFill = planningImplementation.getPreviousAcceptedSolutions().size() == 0 ? null :
-			planningImplementation.getPreviousAcceptedSolutions().getLast().lightenWorkBurden(shaker);
+	public PlanningForIntervalSolver(
+			final HashMap<Integer, Physician> physicians,
+			final HashBasedTable<LocalDate, String, Position> positions,
+			final List<PositionConstraintBase> positionsConstraints,
+			final LinkedList<HashBasedTable<LocalDate, String, Position>> previousAcceptedSolutions) {
 		
-		// For each day, use prefill if needed, and the create the constraints
+		// Creates choco solver
+		this.solver = new Solver();
+		
+		// If a previous accepted solution exists, use it in order to clone the previous solution, else use the table
+		// of positions as a reference
+		// Clones the positions in order to modify them depending on the solver
+		for (Cell<LocalDate, String, Position> position : previousAcceptedSolutions.size() > 0 ? previousAcceptedSolutions.getLast().cellSet() : positions.cellSet()) {
+			this.positions.put(position.getRowKey(), position.getColumnKey(), (Position) position.getValue().clone());
+		}
+
+		// Finds how many id solutions are existing :
+		int idem = 1;
+		double workSD = -1;
+		final Iterator<HashBasedTable<LocalDate, String, Position>> lastSolutions = previousAcceptedSolutions.descendingIterator();
+		while (lastSolutions.hasNext()) {
+			final HashBasedTable<LocalDate, String, Position> lastSolution = lastSolutions.next();
+			if (workSD == -1 || lastSolution.getWorkLoadSD() == workSD) {
+				idem++;
+				workSD = lastSolution.getWorkLoadSD();
+			} else {
+				break;
+			}
+		}
+		
+		// IN 10% OF CASES, INCREASES THE SHAKER EXPONENT (TRY TO JUMP BETWEEN TWO MINIMAS SOLUTIONS LIKE ENTROPY)
+		if (random.nextInt(10) == 0)
+			idem = idem * idem;
+		
+		// Alters the last found solution in order to try to equilibrate workload
+		l
+		HashMap<LocalDate, HashMap<String, Integer>> preFill = previousAcceptedSolutions.size() == 0 ? null :
+			previousAcceptedSolutions.getLast().lightenWorkBurden(idem);
+		
+		// For each day / position, use prefill if needed, and the create the constraints
 		planningImplementation.getPositions().forEach((day, positions) -> {
 
 			// Positions for this day (Choco uses IntVar for positions)
@@ -113,9 +145,6 @@ public class PlanningForIntervalSolver {
 		// CREATES THE GENERAL CONSTRAINTS AND APPLY THEM TO THE SOLVER
 		for (LocalDate date = planningImplementation.getInterval().getStart() ; !date.isAfter(planningImplementation.getInterval().getEnd()) ; date = date.plusDays(1L)) {
 			
-			for (final Constraint constraint : DateConstraints.getConstraints(date, constraintVariables)) {
-				solver.post(constraint);
-			}
 		}
 		
 		// GETS AN ARRAY OF EACH INTVAR

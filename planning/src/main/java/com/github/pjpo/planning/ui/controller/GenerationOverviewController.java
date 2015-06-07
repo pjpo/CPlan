@@ -35,6 +35,7 @@ import java.util.Map.Entry;
 
 
 
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -45,10 +46,10 @@ import javafx.scene.control.Label;
 import javafx.stage.FileChooser;
 import au.com.bytecode.opencsv.CSVWriter;
 
-import com.github.pjpo.planning.Solution;
 import com.github.pjpo.planning.SolutionException;
 import com.github.pjpo.planning.constraintsrules.PositionConstraintBase;
 import com.github.pjpo.planning.dao.DaoConstraints;
+import com.github.pjpo.planning.model.Solution;
 import com.github.pjpo.planning.model.PositionCode.Position;
 import com.github.pjpo.planning.problem.PlanningDefinition;
 import com.github.pjpo.planning.problem.PlanningForInterval;

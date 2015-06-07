@@ -2,8 +2,8 @@ package com.github.pjpo.planning.ui.controller.utils;
 
 import java.util.LinkedList;
 
-import com.github.pjpo.planning.Solution;
 import com.github.pjpo.planning.SolutionException;
+import com.github.pjpo.planning.model.Solution;
 import com.github.pjpo.planning.problem.PlanningForInterval;
 import com.github.pjpo.planning.problem.PlanningForIntervalSolver;
 import com.github.pjpo.planning.ui.controller.GenerationOverviewController;

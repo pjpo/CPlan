@@ -1,12 +1,26 @@
 package com.github.pjpo.planning.model;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
 
 import com.github.pjpo.planning.utils.IntervalDateTime;
+import com.google.common.collect.Multimap;
 
-public class Physician extends PhysicianBase {
+public class Physician {
+
+	private String name;
+	
+	private Integer timePart;
+		
+	private List<IntervalDateTime> paidVacation;
+	
+	private List<IntervalDateTime> unpaidVacation;
+
+	private Multimap<LocalDate, String> workedVacs;
+	
+	private List<String> refusedPostes;
+	
+	private Integer internalIndice;
 
 	public String getName() {
 		return name;
@@ -24,36 +38,44 @@ public class Physician extends PhysicianBase {
 		this.timePart = timePart;
 	}
 
-	public ArrayList<IntervalDateTime> getPaidVacation() {
+	public List<IntervalDateTime> getPaidVacation() {
 		return paidVacation;
 	}
 
-	public void setPaidVacation(ArrayList<IntervalDateTime> paidVacation) {
+	public void setPaidVacation(List<IntervalDateTime> paidVacation) {
 		this.paidVacation = paidVacation;
 	}
 
-	public ArrayList<IntervalDateTime> getUnpaidVacation() {
+	public List<IntervalDateTime> getUnpaidVacation() {
 		return unpaidVacation;
 	}
 
-	public void setUnpaidVacation(ArrayList<IntervalDateTime> unpaidVacation) {
+	public void setUnpaidVacation(List<IntervalDateTime> unpaidVacation) {
 		this.unpaidVacation = unpaidVacation;
 	}
 
-	public HashMap<LocalDate, ArrayList<String>> getWorkedVacs() {
+	public Multimap<LocalDate, String> getWorkedVacs() {
 		return workedVacs;
 	}
 
-	public void setWorkedVacs(HashMap<LocalDate, ArrayList<String>> workedVacs) {
+	public void setWorkedVacs(Multimap<LocalDate, String> workedVacs) {
 		this.workedVacs = workedVacs;
 	}
 
-	public ArrayList<String> getRefusedPostes() {
+	public List<String> getRefusedPostes() {
 		return refusedPostes;
 	}
 
-	public void setRefusedPostes(ArrayList<String> refusedPostes) {
+	public void setRefusedPostes(List<String> refusedPostes) {
 		this.refusedPostes = refusedPostes;
+	}
+
+	public int getInternalIndice() {
+		return internalIndice;
+	}
+
+	public void setInternalIndice(int internalIndice) {
+		this.internalIndice = internalIndice;
 	}
 
 }
