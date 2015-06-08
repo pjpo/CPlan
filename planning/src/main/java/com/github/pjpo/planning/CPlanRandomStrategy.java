@@ -1,8 +1,8 @@
 package com.github.pjpo.planning;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -25,13 +25,13 @@ public class CPlanRandomStrategy implements IntValueSelector {
 	private final Random rand = new Random(new Date().getTime());
 	
 	/** Physicians */
-	private final List<Physician> physicians;
+	private final HashMap<Integer, Physician> physicians;
 
 	/**
 	 * Simple Constructor : list of all people
 	 * @param physicians
 	 */
-	public CPlanRandomStrategy(final List<Physician> physicians) {
+	public CPlanRandomStrategy(final HashMap<Integer, Physician> physicians) {
 		this.physicians = physicians;
 	}
 
@@ -52,7 +52,7 @@ public class CPlanRandomStrategy implements IntValueSelector {
 		
 		// Sum of work part
 		final int totalWorkPart = possiblePersons.stream().collect(Collectors.summingInt((personNb) -> physicians.get(personNb).getTimePart()));
-				
+
 		// Randomizes a value between 1 and total work part
 		final int workingElapsed = rand.nextInt(totalWorkPart - 1) + 1;
 

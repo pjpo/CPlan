@@ -7,18 +7,25 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.Map.Entry;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.search.strategy.selectors.IntValueSelector;
+import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.ESat;
+import org.jfree.data.statistics.MeanAndStandardDeviation;
 
 import com.github.pjpo.planning.CPlanRandomStrategy;
 import com.github.pjpo.planning.constraintsrules.PositionConstraintBase;
+import com.github.pjpo.planning.constraintsrules.PositionConstraintRuleElement;
+import com.github.pjpo.planning.constraintsrules.PositionDifferentConstraint;
+import com.github.pjpo.planning.constraintsrules.PositionEqualConstraint;
 import com.github.pjpo.planning.model.Physician;
 import com.github.pjpo.planning.model.Position;
 import com.github.pjpo.planning.model.Solution;
@@ -37,11 +44,21 @@ public class PlanningForIntervalSolver {
 	/** Random number generator */
 	private final Random random = new Random(new Date().getTime()); 
 
+	/** Previous accepted solutions */
+	private final List<Solution> previousAcceptedSolutions;
+	
+	// Defined Workers
+	private final HashMap<Integer, Physician> physicians;
+	
 	public PlanningForIntervalSolver(
 			final HashMap<Integer, Physician> physicians,
 			final HashBasedTable<LocalDate, String, Position> positions,
 			final List<PositionConstraintBase> positionsConstraints,
-			final LinkedList<HashBasedTable<LocalDate, String, Position>> previousAcceptedSolutions) {
+			final LinkedList<Solution> previousAcceptedSolutions) {
+		
+		// inits fields
+		this.previousAcceptedSolutions = previousAcceptedSolutions;
+		this.physicians = physicians;
 		
 		// Creates choco solver
 		this.solver = new Solver();
@@ -49,119 +66,133 @@ public class PlanningForIntervalSolver {
 		// If a previous accepted solution exists, use it in order to clone the previous solution, else use the table
 		// of positions as a reference
 		// Clones the positions in order to modify them depending on the solver
-		for (Cell<LocalDate, String, Position> position : previousAcceptedSolutions.size() > 0 ? previousAcceptedSolutions.getLast().cellSet() : positions.cellSet()) {
+		for (final Cell<LocalDate, String, Position> position : previousAcceptedSolutions.size() > 0 ? previousAcceptedSolutions.getFirst().getPositions().cellSet() : positions.cellSet()) {
 			this.positions.put(position.getRowKey(), position.getColumnKey(), (Position) position.getValue().clone());
 		}
+		
+		// If previous solutions exist, alters the positions cloned to adapt burden of work
+		if (previousAcceptedSolutions.size() != 0) {
+			// WorkLoad of last solution
+			final double lastWorkSd = previousAcceptedSolutions.getFirst().getWorkLoadSD();
+			final double lastMeanWork = previousAcceptedSolutions.getFirst().getMeanWorkLoad();
+			// Last solution
+			final Solution lastSolution = previousAcceptedSolutions.getFirst();
+			
+			// Id solutions
+			final LinkedList<Solution> idSolutions = new LinkedList<Solution>();
+			previousAcceptedSolutions.stream().filter(
+					(solution) -> {
+						idSolutions.add(solution);
+						return solution.getWorkLoadSD() == lastWorkSd;
+					}).findFirst();
+			final int nbIdSolutions = idSolutions.size();
 
-		// Finds how many id solutions are existing :
-		int idem = 1;
-		double workSD = -1;
-		final Iterator<HashBasedTable<LocalDate, String, Position>> lastSolutions = previousAcceptedSolutions.descendingIterator();
-		while (lastSolutions.hasNext()) {
-			final HashBasedTable<LocalDate, String, Position> lastSolution = lastSolutions.next();
-			if (workSD == -1 || lastSolution.getWorkLoadSD() == workSD) {
-				idem++;
-				workSD = lastSolution.getWorkLoadSD();
-			} else {
-				break;
+			// Sets the shaker indice randomly depends on (id solutions + 1)
+			final int shaker = random.nextInt(10) == 0 ? (nbIdSolutions + 1) * (nbIdSolutions + 1) : nbIdSolutions + 1;
+			
+			// lighten burden of work
+			for (final Cell<LocalDate, String, Position> position : this.positions.cellSet()) {
+				// For this worker, see the number of mean workload for his workload
+				final double numWorkLoads = lastSolution.getWorkLoad(position.getValue().getWorker()).doubleValue() / lastMeanWork;
+				// Removes the physician depending on lastMeanWork and shaker
+				double randomIndice = random.nextDouble() * shaker * numWorkLoads;
+				if (randomIndice != 0) randomIndice = Math.sqrt(randomIndice);
+				if (randomIndice >= 2) {
+					position.getValue().setWorker(null);
+				}
+
 			}
 		}
-		
-		// IN 10% OF CASES, INCREASES THE SHAKER EXPONENT (TRY TO JUMP BETWEEN TWO MINIMAS SOLUTIONS LIKE ENTROPY)
-		if (random.nextInt(10) == 0)
-			idem = idem * idem;
-		
-		// Alters the last found solution in order to try to equilibrate workload
-		l
-		HashMap<LocalDate, HashMap<String, Integer>> preFill = previousAcceptedSolutions.size() == 0 ? null :
-			previousAcceptedSolutions.getLast().lightenWorkBurden(idem);
-		
-		// For each day / position, use prefill if needed, and the create the constraints
-		planningImplementation.getPositions().forEach((day, positions) -> {
 
-			// Positions for this day (Choco uses IntVar for positions)
-			final HashMap<String, IntVar> dayConstraintsVariables = new HashMap<>();
-			constraintVariables.put(day, dayConstraintsVariables);
-			
-			// for each position, set which one can work
-			positions.forEach((positionName, position) -> {
-				// Do we have already somebody positioned in last solution modified with shaking? If yes, 
-				if (preFill != null && preFill.get(day) != null &&
-						preFill.get(day).containsKey(positionName)) {
-					dayConstraintsVariables.put(positionName,
-							VariableFactory.fixed(positionName + "_" + day, preFill.get(day).get(positionName), solver));
+		// Fill the choco solver with the defined positions
+		this.positions.cellSet().forEach((position) ->  {
+			// If we have already a worker, use it and sets the IntVar
+			if (position.getValue().getWorker() != null) {
+				position.getValue().setInternalChocoRepresentation(
+						VariableFactory.fixed(position.getColumnKey() + "_" + position.getRowKey(),
+								position.getValue().getWorker().getInternalIndice(), solver));
+			}
+			// If we don't have a worker, see which one is possible to work at this date
+			else {
+				// Does somebody has to work this day ?
+				for (final Entry<Integer, Physician> physician : physicians.entrySet()) {
+					if (physician.getValue().getWorkedVacs().containsEntry(position.getColumnKey(), position.getRowKey())) {
+						position.getValue().setInternalChocoRepresentation(
+								VariableFactory.fixed(position.getColumnKey() + "_" + position.getRowKey(),
+										physician.getValue().getInternalIndice(), solver));
+						return;
+					}
 				}
-				else {
-					final List<Physician> physicians = planningImplementation.getPlanningConstraints().getPhysicians();
 
-					// Do we have already somebody positioned to work in preferences ?
-					for (int i = 0 ; i < physicians.size() ; i++) {
-						if (physicians.get(i).getWorkedVacs().containsKey(day)
-								&& physicians.get(i).getWorkedVacs().get(day).contains(positionName)) {
-							dayConstraintsVariables.put(positionName,
-									VariableFactory.fixed(
-											positionName + "_" + day, i, solver));
-							return;
-						}
+				// List people able to work at this position
+				final LinkedList<Physician> workersAbleToWork = new LinkedList<>();
+				eachPhysician : for (final Entry<Integer, Physician> physician : physicians.entrySet()) {
+					
+					// CHECK IF THIS PHYSICIAN HAS THE RIGHT TO WORK AT THIS POSITION
+					if (physician.getValue().getRefusedPostes().contains(position.getValue().getName()))
+						continue eachPhysician;					
+					
+					// CHECK IF PHYSICIAN IS IN PAID VACATIONS
+					for (final IntervalDateTime vacation : physician.getValue().getPaidVacation()) {
+						if (vacation.isOverlapping(position.getValue().getPlage()))
+							continue eachPhysician;
 					}
 					
-					// Here, list the people not in vacation this day
-					final LinkedList<Integer> workers = new LinkedList<>();
-					eachPhysician : for (int i = 0 ; i < physicians.size() ; i++) {
-
-						final Physician physician = physicians.get(i);
-						
-						// CHECK IF THIS PHYSICIAN HAS THE RIGHT TO WORK AT THIS POSITION
-						if (physicians.get(i).getRefusedPostes().contains(positionName))
-							continue eachPhysician;					
-						
-						// CHECK IF PHYSICIAN IS IN PAID VACATIONS
-						for (final IntervalDateTime vacation : physician.getPaidVacation()) {
-							if (vacation.isOverlapping(position.getPlage()))
-								continue eachPhysician;
-						}
-						
-						// CHECK IF PHYSICIAN IS IN UNPAID VACATIONS
-						for (final IntervalDateTime vacation : physician.getUnpaidVacation()) {
-							if (vacation.isOverlapping(position.getPlage()))
-								continue eachPhysician;
-						}
-						
-						// THIS PHYSICIAN CAN WORK AT THIS POSITION AT THIS DAY
-						workers.add(i);
-						
-					}					
-					// c(2) - TEST WITH THESE PHYSICIANS
-					dayConstraintsVariables.put(positionName,
-							VariableFactory.enumerated(
-									positionName + "_" + day, workers.stream().mapToInt((value) -> value).toArray(), solver));
-
-
-				}
-			});
+					// CHECK IF PHYSICIAN IS IN UNPAID VACATIONS
+					for (final IntervalDateTime vacation : physician.getValue().getUnpaidVacation()) {
+						if (vacation.isOverlapping(position.getValue().getPlage()))
+							continue eachPhysician;
+					}
 					
+					// THIS PHYSICIAN CAN WORK AT THIS POSITION AT THIS DAY
+					workersAbleToWork.add(physician.getValue());
+				}
+				position.getValue().setInternalChocoRepresentation(
+						VariableFactory.enumerated(position.getColumnKey() + "_" + position.getRowKey(),
+								workersAbleToWork.stream().mapToInt((value) -> value.getInternalIndice()).toArray(), solver));
+			}
 		});
 		
-		// CREATES THE GENERAL CONSTRAINTS AND APPLY THEM TO THE SOLVER
-		for (LocalDate date = planningImplementation.getInterval().getStart() ; !date.isAfter(planningImplementation.getInterval().getEnd()) ; date = date.plusDays(1L)) {
-			
-		}
+		// Sets the constraints
 		
-		// GETS AN ARRAY OF EACH INTVAR
-		LinkedList<IntVar> allDays = new LinkedList<>();
-		for (HashMap<String, IntVar> oneDay : constraintVariables.values()) {
-			for (IntVar var : oneDay.values()) {
-				allDays.add(var);
-			}
-		}
 		
-		IntVar[] allDaysArray = allDays.toArray(new IntVar[allDays.size()]);
+		// CREATES THE GENERAL CONSTRAINTS AND APPLY THEM TO THE SOLVER for each date
+		this.positions.rowKeySet().forEach((date) -> {
+			positionsConstraints.forEach((constraint) -> {
+				// Find each IntVar
+				final LinkedList<IntVar> internalPositions = new LinkedList<>();
+				constraint.getRuleElements().forEach((element) -> {
+					// Date of element selected
+					final LocalDate targetDate = date.plusDays(element.getDeltaDays());
+					// Internal Position (representation for Solver)
+					final IntVar internalPosition = this.positions.get(targetDate, element.getPositionName()).getInternalChocoRepresentation();
+					if (internalPosition != null)
+						internalPositions.add(internalPosition);
+				});
+				// Create the constraint 
+				if (constraint instanceof PositionEqualConstraint) {
+					IntVar previousElement = null;
+					for (final IntVar element : internalPositions) {
+						if (previousElement != null) {
+							IntConstraintFactory.arithm(previousElement, "=", element);
+						}
+						previousElement = element;
+					}
+				} else if (constraint instanceof PositionDifferentConstraint) {
+					IntConstraintFactory.alldifferent(internalPositions.toArray(new IntVar[internalPositions.size()]));
+				}
+			});
+		});
 		
-		// USE A RANDOM CUSTOM SETTER
-		solver.set(
-				IntStrategyFactory.lastKConflicts(solver, 1000, IntStrategyFactory.custom(
-				IntStrategyFactory.random_var_selector(new Date().getTime()), (IntValueSelector) new CPlanRandomStrategy(planningImplementation.getPlanningConstraints().getPhysicians()), allDaysArray)));
-		
+		// Sets the custom strategy
+		final IntStrategy strategy = 
+				IntStrategyFactory.custom(
+						IntStrategyFactory.random_var_selector(new Date().getTime()),
+						(IntValueSelector) new CPlanRandomStrategy(physicians),
+						this.positions.values().stream().map((position) -> position.getInternalChocoRepresentation()).toArray(IntVar[]::new));
+		// sets the strategy for the solver
+		solver.set(IntStrategyFactory.lastKConflicts(solver, 1000, strategy));
+		// Limits the 
 		SearchMonitorFactory.limitTime(solver, 600000);
 
 	}
@@ -172,28 +203,12 @@ public class PlanningForIntervalSolver {
 		solver.findSolution();
 				
 		// IF NO SOLUTION, RETRY IF A SOLUTION ALREADY EXISTS
-		if (solver.isFeasible() != ESat.TRUE && planningImplementation.getPreviousAcceptedSolutions().size() == 0) {
+		if (solver.isFeasible() != ESat.TRUE && previousAcceptedSolutions.size() == 0) {
 			return null;
 		} else {
-			final Solution solution = new Solution(planningImplementation.getPositions(), planningImplementation.getPlanningConstraints().getPhysicians());
-			solution.setSolutionMedIndicesMap(constraintVariables);
+			final Solution solution = new Solution(physicians, positions);
 			return solution;
 		}
 	}
-	
-	public void stopProcessing(String reason) {
-		solver.getSearchLoop().interrupt(reason);
-	}
 
-	public boolean hasSolution() {
-		return solver.isFeasible() == ESat.TRUE;
-	}
-
-	public boolean isUndefined() {
-		return solver.isFeasible() == ESat.UNDEFINED;
-	}
-
-	public LinkedList<Solution> getPreviousAcceptedSolutions() {
-		return previousAcceptedSolutions;
-	}
 }

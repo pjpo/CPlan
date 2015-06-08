@@ -1,10 +1,8 @@
 package com.github.pjpo.planning.problem;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -17,9 +15,7 @@ import com.github.pjpo.planning.model.Position;
 import com.github.pjpo.planning.model.PositionCode;
 import com.github.pjpo.planning.model.Solution;
 import com.github.pjpo.planning.utils.IntervalDate;
-import com.google.common.collect.ArrayTable;
 import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.HashMultimap;
 
 /**
  * Uses the constraints of the planning ({@link PlanningDefinition}) to define the content of the planning for an interval
@@ -109,7 +105,7 @@ public class PlanningForInterval {
 		if (previousAcceptedSolutions.size() > 0 &&
 				newSolution.getWorkLoadSD() <= previousAcceptedSolutions.getLast().getWorkLoadSD()) {
 				// Accepted solution
-			previousAcceptedSolutions.add(newSolution);
+			previousAcceptedSolutions.addFirst(newSolution);
 		}
 	}
 
