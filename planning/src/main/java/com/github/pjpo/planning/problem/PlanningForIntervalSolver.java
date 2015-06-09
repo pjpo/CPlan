@@ -3,14 +3,12 @@ package com.github.pjpo.planning.problem;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.Map.Entry;
 
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
@@ -19,11 +17,8 @@ import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.ESat;
-import org.jfree.data.statistics.MeanAndStandardDeviation;
-
 import com.github.pjpo.planning.CPlanRandomStrategy;
 import com.github.pjpo.planning.constraintsrules.PositionConstraintBase;
-import com.github.pjpo.planning.constraintsrules.PositionConstraintRuleElement;
 import com.github.pjpo.planning.constraintsrules.PositionDifferentConstraint;
 import com.github.pjpo.planning.constraintsrules.PositionEqualConstraint;
 import com.github.pjpo.planning.model.Physician;

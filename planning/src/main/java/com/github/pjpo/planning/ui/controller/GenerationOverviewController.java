@@ -17,25 +17,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -49,8 +30,9 @@ import au.com.bytecode.opencsv.CSVWriter;
 import com.github.pjpo.planning.SolutionException;
 import com.github.pjpo.planning.constraintsrules.PositionConstraintBase;
 import com.github.pjpo.planning.dao.DaoConstraints;
+import com.github.pjpo.planning.model.Physician;
+import com.github.pjpo.planning.model.Position;
 import com.github.pjpo.planning.model.Solution;
-import com.github.pjpo.planning.model.PositionCode.Position;
 import com.github.pjpo.planning.problem.PlanningDefinition;
 import com.github.pjpo.planning.problem.PlanningForInterval;
 import com.github.pjpo.planning.ui.PlanningMainUIApp;
@@ -128,18 +110,26 @@ public class GenerationOverviewController {
     		final DaoConstraints daoConstraints = new DaoConstraints(is);
     		final List<PositionConstraintBase> constraints = daoConstraints.load();
 
-        	// INIT PLANNING DEFINITION
+        	// Creates couples of physician // integer
+    		final HashMap<Integer, Physician> workers = new HashMap<>();
+    		int i = 0;
+    		for (Physician physician: mainApp.getPhysicians()) {
+    			workers.put(i, physician);
+    		}
+    		// Creates the definition of planning
     		final PlanningDefinition planningConstraints =
     				new PlanningDefinition(
-        					mainApp.getPhysicians(),
+        					workers,
         					mainApp.getPositions(),
         					constraints);
 
-        	// REAL PLANNING FOR INTERVAL
+        	// Planning for the interval defined
         	final PlanningForInterval planningImplementation =
         			planningConstraints.generatePlanningImplementation(
         					new IntervalDate(startPeriodPicker.getValue(), endPeriodPicker.getValue()));
-
+        	
+        	// Solver for this planning
+        	
         	task = new PlanningGenerationTask(planningImplementation, this);
 
         	task.setOnFailed( (event) -> {

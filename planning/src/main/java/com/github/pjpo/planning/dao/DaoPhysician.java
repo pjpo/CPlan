@@ -5,12 +5,12 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Map.Entry;
 
 import com.github.pjpo.planning.model.Physician;
-import com.github.pjpo.planning.model.PhysicianBuilder;
 import com.github.pjpo.planning.utils.IntervalDateTime;
+import com.google.common.collect.HashMultimap;
 
 public class DaoPhysician {
 	
@@ -47,12 +47,10 @@ public class DaoPhysician {
 			writer.append(interval.getStart() == null ? "N" : interval.getStart().toString()).append(';');
 			writer.append(interval.getEnd() == null ? "N" : interval.getEnd().toString()).append('\n');
 		}
-		for (final Entry<LocalDate, ArrayList<String>> entry : physician.getWorkedVacs().entrySet()) {
-			for (final String poste : entry.getValue()) {
+		for (final Entry<LocalDate, String> entry : physician.getWorkedVacs().entries()) {
 				writer.append("08:");
 				writer.append(entry.getKey().toString()).append(';');
-				writer.append(poste).append('\n');
-			}
+				writer.append(entry.getValue()).append('\n');
 		}
 		for (final String poste : physician.getRefusedPostes()) {
 			writer.append("09:");
@@ -66,38 +64,43 @@ public class DaoPhysician {
 		if (reader == null)
 			throw new IOException("This dao has no reader defined");
 
-		final PhysicianBuilder physicianBuilder = new PhysicianBuilder();
-
 		String readedLine = null;
 		
 		while ((readedLine = reader.readLine()) != null && !readedLine.startsWith("01:plages")) {
+
+			final Physician physician = new Physician();
+			physician.setPaidVacation(new LinkedList<>());
+			physician.setRefusedPostes(new LinkedList<>());
+			physician.setUnpaidVacation(new LinkedList<>());
+			physician.setWorkedVacs(HashMultimap.create());
+
 			if (readedLine.startsWith("02:") && readedLine.charAt(3) == ':') {
-				physicianBuilder.setName(readedLine.substring(4));
+				physician.setName(readedLine.substring(4));
 			} else if (readedLine.startsWith("03:") && readedLine.charAt(3) == ':') {
-				physicianBuilder.setTimePart(Integer.decode(readedLine.substring(4)));
+				physician.setTimePart(Integer.decode(readedLine.substring(4)));
 			} else if (readedLine.startsWith("06:")) {
 				int splitPosition = readedLine.indexOf(';', 3);
 				String start = readedLine.substring(3, splitPosition);
 				String end = readedLine.substring(splitPosition + 1);
-				physicianBuilder.addPaidVacation(new IntervalDateTime(
+				physician.getPaidVacation().add(new IntervalDateTime(
 						start.equals("N") ? null : LocalDateTime.parse(start),
 								end.equals("N") ? null : LocalDateTime.parse(end)));
 			} else if (readedLine.startsWith("07:")) {
 				int splitPosition = readedLine.indexOf(';', 3);
 				String start = readedLine.substring(3, splitPosition);
 				String end = readedLine.substring(splitPosition + 1);
-				physicianBuilder.addUnpaidVacation(new IntervalDateTime(
+				physician.getUnpaidVacation().add(new IntervalDateTime(
 						start.equals("N") ? null : LocalDateTime.parse(start),
 								end.equals("N") ? null : LocalDateTime.parse(end)));
 			} else if (readedLine.startsWith("08:")) {
 				int splitPosition = readedLine.indexOf(';', 3);
 				LocalDate date = LocalDate.parse(readedLine.substring(3, splitPosition));
 				String poste = readedLine.substring(splitPosition + 1);
-				physicianBuilder.addWorkedVac(date, poste);
+				physician.getWorkedVacs().put(date, poste);
 			} else if (readedLine.startsWith("09:")) {
-				physicianBuilder.addRefusedPoste(readedLine.substring(3));
+				physician.getRefusedPostes().add(readedLine.substring(3));
 			} else if (readedLine.equals("99:END")) {
-				return physicianBuilder.toPhysician();
+				return physician;
 			}
 		}
 

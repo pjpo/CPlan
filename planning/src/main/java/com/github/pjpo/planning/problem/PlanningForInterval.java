@@ -1,12 +1,9 @@
 package com.github.pjpo.planning.problem;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
-
 import javax.script.ScriptException;
 
 import com.github.pjpo.planning.constraintsrules.PositionConstraintBase;
@@ -26,14 +23,8 @@ public class PlanningForInterval {
 
 	// ==== Informative fields (external) ====
 	
-	/** Interval of planning */
-	private final IntervalDate interval;
-	
 	/** List of used physicians */
 	private final HashMap<Integer, Physician> physicians;
-	
-	/** List of positions definitions */
-	private final List<PositionCode> positionsDefinitions;
 	
 	/** List of intra and interday constraints */
 	private final List<PositionConstraintBase> positionsConstraints;
@@ -42,9 +33,6 @@ public class PlanningForInterval {
 	
 	/** List of positions By Date and name (indexed positions)*/
 	private final HashBasedTable<LocalDate, String, Position> positions;
-
-	/** Random number generator */
-	private final Random random = new Random(new Date().getTime()); 
 
 	// ==== Variable Fields ====
 				
@@ -67,9 +55,7 @@ public class PlanningForInterval {
 			throw new IllegalArgumentException("interval must be finite");
 		
 		// Sets the values of class fields
-		this.interval = intervalDate;
 		this.physicians = physicians;
-		this.positionsDefinitions = positionsDefinitions;
 		this.positionsConstraints = positionsConstraints;
 		
 		// Creates the positions arraytable with predefined size
@@ -89,7 +75,7 @@ public class PlanningForInterval {
 		}
 	}
 
-	public void findNewSolution() {
+	public boolean findNewSolution() {
 		// Creates the planning solver from :
 		// - The physicians definitions
 		// - The existing positions
@@ -101,12 +87,23 @@ public class PlanningForInterval {
 		// Finds a new solution
 		final Solution newSolution = solver.findSolution();
 		
-		// See if this solution is better than the precedent solution
-		if (previousAcceptedSolutions.size() > 0 &&
-				newSolution.getWorkLoadSD() <= previousAcceptedSolutions.getLast().getWorkLoadSD()) {
-				// Accepted solution
-			previousAcceptedSolutions.addFirst(newSolution);
+		// if no solution, return false
+		if (newSolution == null) {
+			return false;
+		} else {
+			// See if this solution is better than the precedent solution
+			if (previousAcceptedSolutions.size() > 0 &&
+					newSolution.getWorkLoadSD() <= previousAcceptedSolutions.getLast().getWorkLoadSD()) {
+					// Accepted solution
+				previousAcceptedSolutions.addFirst(newSolution);
+			}
+			return true;
 		}
+		
 	}
 
+	public LinkedList<Solution> getSolutions() {
+		return previousAcceptedSolutions;
+	}
+	
 }
