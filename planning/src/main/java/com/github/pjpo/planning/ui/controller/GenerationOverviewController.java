@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -36,6 +37,7 @@ import com.github.pjpo.planning.ui.PlanningMainUIApp;
 import com.github.pjpo.planning.ui.controller.utils.DefaultDatePickerConverter;
 import com.github.pjpo.planning.ui.controller.utils.PlanningGenerationTask;
 import com.github.pjpo.planning.utils.IntervalDate;
+import com.google.common.collect.HashMultimap;
 
 public class GenerationOverviewController {
 
@@ -110,8 +112,17 @@ public class GenerationOverviewController {
         	// Creates couples of physician // integer
     		final HashMap<Integer, Physician> workers = new HashMap<>();
     		int i = 0;
-    		for (Physician physician: mainApp.getPhysicians()) {
-    			workers.put(i, physician);
+    		for (final Physician physician: mainApp.getPhysicians()) {
+    			final Physician clonedPhysician = new Physician();
+    			clonedPhysician.setInternalIndice(i);
+    			clonedPhysician.setName(physician.getName());
+    			clonedPhysician.setPaidVacation(new ArrayList<>(physician.getPaidVacation()));
+    			clonedPhysician.setRefusedPostes(new ArrayList<String>(physician.getRefusedPostes()));
+    			clonedPhysician.setTimePart(physician.getTimePart());
+    			clonedPhysician.setUnpaidVacation(new ArrayList<>(physician.getUnpaidVacation()));
+    			clonedPhysician.setWorkedVacs(HashMultimap.create(physician.getWorkedVacs()));
+    			workers.put(i, clonedPhysician);
+    			i++;
     		}
     		// Creates the definition of planning
     		final PlanningDefinition planningConstraints =
