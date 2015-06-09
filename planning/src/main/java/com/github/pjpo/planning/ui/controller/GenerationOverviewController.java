@@ -13,10 +13,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map.Entry;
-
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -159,7 +156,7 @@ public class GenerationOverviewController {
     					setButtonsStatus(true, false, false);
     				else {
     					setButtonsStatus(true, false, true);
-    					solution = task.get().getLast();
+    					this.solution = task.get().getLast();
     				}
     			} catch (Exception e) {
         			Alert alert = new Alert(AlertType.INFORMATION);
@@ -213,33 +210,25 @@ public class GenerationOverviewController {
 				 StandardOpenOption.CREATE,
 				 StandardOpenOption.TRUNCATE_EXISTING))) {
 			 
-			 // SEARCHES THE LIST OF POSTES AND LIST OF DATES
-			 HashSet<String> postes = new HashSet<>();
-			 ArrayList<LocalDate> dates = new ArrayList<>();
-			 for (Entry<LocalDate, HashMap<String, Position>> entry : solution.getWorkingPositions().entrySet()) {
-				 dates.add(entry.getKey());
-				 for (String poste : entry.getValue().keySet()) {
-					 postes.add(poste);
-				 }
-			 }
-			 // SORTS LIST OF POSTES AND DATES
-			 ArrayList<String> postesArray = new ArrayList<>(postes);
-			 Collections.sort(postesArray);
-			 Collections.sort(dates);
-			 
+			 // List of positions names and dates
+			 final List<String> positionsNames = new ArrayList<String>(solution.getPositions().columnKeySet());
+			 final List<LocalDate> positionDates = new ArrayList<LocalDate>(solution.getPositions().rowKeySet());
+			 Collections.sort(positionsNames);
+			 Collections.sort(positionDates);
+
 			 // WRITE HEADERS
-			ArrayList<String> header = new ArrayList<>(postesArray.size() + 1);
+			final ArrayList<String> header = new ArrayList<>(positionsNames.size() + 1);
 			header.add("");
-			header.addAll(postesArray);
-			csvWriter.writeNext(header.toArray(new String[header.size()]));
+			header.addAll(positionsNames);
+			csvWriter.writeNext(header.stream().toArray(size-> new String[size]));
 			
 			// WRITE CONTENTS
-			for (LocalDate localDate : dates) {
-				ArrayList<String> content = new ArrayList<>(postesArray.size() + 1);
+			for (final LocalDate localDate : positionDates) {
+				final ArrayList<String> content = new ArrayList<>(positionsNames.size() + 1);
 				content.add(localDate.toString());
-				HashMap<String, Integer> physiciansNb = solution.getSolutionMedIndicesMap().get(localDate);
-				for (String poste : postesArray) {
-					content.add(physiciansNb.containsKey(poste) ? solution.getPhysicians().get(physiciansNb.get(poste)).getName() : "");
+				for (final String positionName : positionsNames) {
+					final Position position = solution.getPositions().get(localDate, positionName);
+					content.add(position == null ? "" : position.getWorker().getName());
 				}
 				csvWriter.writeNext(content.toArray(new String[content.size()]));
 			 }

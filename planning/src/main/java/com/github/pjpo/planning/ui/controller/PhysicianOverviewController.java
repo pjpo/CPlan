@@ -1,6 +1,7 @@
 package com.github.pjpo.planning.ui.controller;
 
 import java.time.format.DateTimeFormatter;
+import java.util.LinkedList;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -11,8 +12,8 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 import com.github.pjpo.planning.model.Physician;
-import com.github.pjpo.planning.model.PhysicianBuilder;
 import com.github.pjpo.planning.ui.PlanningMainUIApp;
+import com.google.common.collect.HashMultimap;
 
 public class PhysicianOverviewController {
 
@@ -71,7 +72,13 @@ public class PhysicianOverviewController {
     
     @FXML
     private void handleNewPhysician() {
-      Physician tempPhysician = new PhysicianBuilder().setName("").setTimePart(100).toPhysician();
+      final Physician tempPhysician = new Physician();
+      tempPhysician.setName("");
+      tempPhysician.setTimePart(100);
+      tempPhysician.setPaidVacation(new LinkedList<>());
+      tempPhysician.setRefusedPostes(new LinkedList<>());
+      tempPhysician.setUnpaidVacation(new LinkedList<>());
+      tempPhysician.setWorkedVacs(HashMultimap.create());
       boolean okClicked = mainApp.showPhysicianEditDialog(tempPhysician);
       if (okClicked) {
         mainApp.getPhysicians().add(tempPhysician);

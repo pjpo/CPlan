@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
@@ -24,6 +23,8 @@ import javafx.util.Callback;
 import com.github.pjpo.planning.model.Physician;
 import com.github.pjpo.planning.ui.model.Poste;
 import com.github.pjpo.planning.utils.IntervalDateTime;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 
 public class PhysicianEditDialogController {
 
@@ -302,24 +303,19 @@ public class PhysicianEditDialogController {
             physician.setTimePart(Integer.decode(timePartField.getText()));
             physician.setPaidVacation(new ArrayList<>(paidVacationsTable.getItems()));
             physician.setUnpaidVacation(new ArrayList<>(unpaidVacationsTable.getItems()));
-            HashMap<LocalDate, ArrayList<String>> workedVacs = new HashMap<>();
+            final Multimap<LocalDate, String> workedVacs = HashMultimap.create();
             for (Poste poste : neededVacList) {
-            	ArrayList<String> dateWorkedVacs = null;
-            	if ((dateWorkedVacs = workedVacs.get(poste.getDate())) == null) {
-            		dateWorkedVacs = new ArrayList<>();
-            		workedVacs.put(poste.getDate(), dateWorkedVacs);
-            	}
-            	dateWorkedVacs.add(poste.getPoste());
+            	workedVacs.put(poste.getDate(), poste.getPoste());
             }
             physician.setWorkedVacs(workedVacs);
-            ArrayList<String> postes = new ArrayList<>();
+            final ArrayList<String> postes = new ArrayList<>();
             if (refusedPostes.getText() != null && refusedPostes.getText().length() != 0) {
-	            for (String poste : refusedPostes.getText().split(";")) {
+	            for (final String poste : refusedPostes.getText().split(";")) {
 	            	postes.add(poste);
 	            }
             }
             physician.setRefusedPostes(postes);
-            
+
             okClicked = true;
             dialogStage.close();
         }
