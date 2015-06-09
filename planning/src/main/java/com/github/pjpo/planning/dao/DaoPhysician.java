@@ -66,13 +66,13 @@ public class DaoPhysician {
 
 		String readedLine = null;
 		
-		while ((readedLine = reader.readLine()) != null && !readedLine.startsWith("01:plages")) {
+		final Physician physician = new Physician();
+		physician.setPaidVacation(new LinkedList<>());
+		physician.setRefusedPostes(new LinkedList<>());
+		physician.setUnpaidVacation(new LinkedList<>());
+		physician.setWorkedVacs(HashMultimap.create());
 
-			final Physician physician = new Physician();
-			physician.setPaidVacation(new LinkedList<>());
-			physician.setRefusedPostes(new LinkedList<>());
-			physician.setUnpaidVacation(new LinkedList<>());
-			physician.setWorkedVacs(HashMultimap.create());
+		while ((readedLine = reader.readLine()) != null && !readedLine.startsWith("01:plages")) {
 
 			if (readedLine.startsWith("02:") && readedLine.charAt(3) == ':') {
 				physician.setName(readedLine.substring(4));

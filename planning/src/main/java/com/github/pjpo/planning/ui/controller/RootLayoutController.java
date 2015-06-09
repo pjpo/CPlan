@@ -151,7 +151,7 @@ public class RootLayoutController {
 		
 		// READING WAS FINE, CHANGE DATAS IN tHE UI
 		mainApp.getPhysicians().clear();
-		for (Physician physician : physicians) {
+		for (final Physician physician : physicians) {
 			mainApp.getPhysicians().add(physician);
 		}
 

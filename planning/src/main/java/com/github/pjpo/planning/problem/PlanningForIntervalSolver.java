@@ -5,8 +5,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 import java.util.Map.Entry;
+import java.util.Random;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
@@ -17,6 +17,7 @@ import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.ESat;
+
 import com.github.pjpo.planning.CPlanRandomStrategy;
 import com.github.pjpo.planning.constraintsrules.PositionConstraintBase;
 import com.github.pjpo.planning.constraintsrules.PositionDifferentConstraint;
@@ -124,7 +125,7 @@ public class PlanningForIntervalSolver {
 				eachPhysician : for (final Entry<Integer, Physician> physician : physicians.entrySet()) {
 					
 					// CHECK IF THIS PHYSICIAN HAS THE RIGHT TO WORK AT THIS POSITION
-					if (physician.getValue().getRefusedPostes().contains(position.getValue().getName()))
+					if (physician.getValue().getRefusedPostes().contains(position.getColumnKey()))
 						continue eachPhysician;					
 					
 					// CHECK IF PHYSICIAN IS IN PAID VACATIONS
@@ -142,9 +143,14 @@ public class PlanningForIntervalSolver {
 					// THIS PHYSICIAN CAN WORK AT THIS POSITION AT THIS DAY
 					workersAbleToWork.add(physician.getValue());
 				}
-				position.getValue().setInternalChocoRepresentation(
-						VariableFactory.enumerated(position.getColumnKey() + "_" + position.getRowKey(),
-								workersAbleToWork.stream().mapToInt((value) -> value.getInternalIndice()).toArray(), solver));
+
+				if (workersAbleToWork.size() == 0) {
+					throw new IllegalArgumentException("No worker able to work the " + position.getRowKey());
+				} else {
+					position.getValue().setInternalChocoRepresentation(
+							VariableFactory.enumerated(position.getColumnKey() + "_" + position.getRowKey(),
+									workersAbleToWork.stream().mapToInt((value) -> value.getInternalIndice()).toArray(), solver));
+				}
 			}
 		});
 		
@@ -159,10 +165,13 @@ public class PlanningForIntervalSolver {
 				constraint.getRuleElements().forEach((element) -> {
 					// Date of element selected
 					final LocalDate targetDate = date.plusDays(element.getDeltaDays());
-					// Internal Position (representation for Solver)
-					final IntVar internalPosition = this.positions.get(targetDate, element.getPositionName()).getInternalChocoRepresentation();
-					if (internalPosition != null)
+					// Targeted position
+					final Position position = this.positions.get(targetDate, element.getPositionName());
+					if (position != null) {
+						// Internal Position (representation for Solver)
+						final IntVar internalPosition = this.positions.get(targetDate, element.getPositionName()).getInternalChocoRepresentation();
 						internalPositions.add(internalPosition);
+					}
 				});
 				// Create the constraint 
 				if (constraint instanceof PositionEqualConstraint) {

@@ -39,13 +39,17 @@ public class PlanningGenerationTask extends Task<LinkedList<Solution>> {
 					break;
 			}
 			
-			if (planningImplementation.findNewSolution() == false && planningImplementation.getSolutions().size() == 0) {
-				throw new SolutionException("No solution found");
-			} else {
-				final Integer finalRetrys = Integer.valueOf(retrys);
-				// UPDATES VALUES IN LABELS
-				Platform.runLater(() ->
-				controller.showFeedBack(finalRetrys, planningImplementation.getSolutions().getFirst().getWorkLoadSD()));
+			try {
+				if (planningImplementation.findNewSolution() == false && planningImplementation.getSolutions().size() == 0) {
+					throw new SolutionException("No solution found");
+				} else {
+					final Integer finalRetrys = Integer.valueOf(retrys);
+					// UPDATES VALUES IN LABELS
+					Platform.runLater(() ->
+					controller.showFeedBack(finalRetrys, planningImplementation.getSolutions().getFirst().getWorkLoadSD()));
+				}
+			} catch (Throwable th) {
+				th.printStackTrace();
 			}
 		}
 		// HERE, RETURN SOLUTIONS
