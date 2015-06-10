@@ -34,7 +34,7 @@ public class Position implements Cloneable {
 	
 	private IntVar internalChocoRepresentation;
 	
-	private Physician worker;
+	private Worker worker;
 		
 	public Position(final LocalDate date, final LocalDateTime startWork,
 			final LocalDateTime endWork, final IntervalDateTime plage,
@@ -113,11 +113,11 @@ public class Position implements Cloneable {
 		this.internalChocoRepresentation = internalChocoRepresentation;
 	}
 	
-	public Physician getWorker() {
+	public Worker getWorker() {
 		return worker;
 	}
 
-	public void setWorker(Physician worker) {
+	public void setWorker(Worker worker) {
 		this.worker = worker;
 	}
 	

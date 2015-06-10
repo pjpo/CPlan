@@ -11,18 +11,18 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.PropertyValueFactory;
 
-import com.github.pjpo.planning.model.Physician;
+import com.github.pjpo.planning.model.Worker;
 import com.github.pjpo.planning.ui.PlanningMainUIApp;
 import com.google.common.collect.HashMultimap;
 
 public class PhysicianOverviewController {
 
 	@FXML
-    private TableView<Physician> physicianTable;
+    private TableView<Worker> physicianTable;
     @FXML
-    private TableColumn<Physician, String> nameColumn;
+    private TableColumn<Worker, String> nameColumn;
     @FXML
-    private TableColumn<Physician, Integer> parttimeColumn;
+    private TableColumn<Worker, Integer> parttimeColumn;
 
     @FXML
     private Label nameLabel;
@@ -39,8 +39,8 @@ public class PhysicianOverviewController {
     @FXML
     private void initialize() {
     	// Initialize the person table
-        nameColumn.setCellValueFactory(new PropertyValueFactory<Physician, String>("name"));
-        parttimeColumn.setCellValueFactory(new PropertyValueFactory<Physician, Integer>("timePart"));
+        nameColumn.setCellValueFactory(new PropertyValueFactory<Worker, String>("name"));
+        parttimeColumn.setCellValueFactory(new PropertyValueFactory<Worker, Integer>("timePart"));
         
         // clear person
         showPhysicianDetails(null);
@@ -50,7 +50,7 @@ public class PhysicianOverviewController {
         		(observable, oldValue, newValue) -> showPhysicianDetails(newValue));
     }
     
-    private void showPhysicianDetails(Physician physician) {
+    private void showPhysicianDetails(Worker physician) {
     	nameLabel.setText(physician == null ? "" : (physician.getName() == null ? "Non défini" : physician.getName()));
     	parttimeLabel.setText(physician == null ? "" : (physician.getTimePart() == null ? "Non défini" : physician.getTimePart().toString()));
     }
@@ -72,12 +72,12 @@ public class PhysicianOverviewController {
     
     @FXML
     private void handleNewPhysician() {
-      final Physician tempPhysician = new Physician();
+      final Worker tempPhysician = new Worker();
       tempPhysician.setName("");
       tempPhysician.setTimePart(100);
-      tempPhysician.setPaidVacation(new LinkedList<>());
-      tempPhysician.setRefusedPostes(new LinkedList<>());
-      tempPhysician.setUnpaidVacation(new LinkedList<>());
+      tempPhysician.setPaidVacations(new LinkedList<>());
+      tempPhysician.setRefusedPositions(new LinkedList<>());
+      tempPhysician.setUnpaidVacations(new LinkedList<>());
       tempPhysician.setWorkedVacs(HashMultimap.create());
       boolean okClicked = mainApp.showPhysicianEditDialog(tempPhysician);
       if (okClicked) {
@@ -91,7 +91,7 @@ public class PhysicianOverviewController {
      */
     @FXML
     private void handleEditPhysician() {
-      Physician selectedPhysician = physicianTable.getSelectionModel().getSelectedItem();
+      Worker selectedPhysician = physicianTable.getSelectionModel().getSelectedItem();
       if (selectedPhysician != null) {
         boolean okClicked = mainApp.showPhysicianEditDialog(selectedPhysician);
         if (okClicked) {

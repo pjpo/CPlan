@@ -25,7 +25,7 @@ import javafx.scene.control.Label;
 import javafx.stage.FileChooser;
 import au.com.bytecode.opencsv.CSVWriter;
 
-import com.github.pjpo.planning.model.Physician;
+import com.github.pjpo.planning.model.Worker;
 import com.github.pjpo.planning.model.Position;
 import com.github.pjpo.planning.model.PositionConstraintBase;
 import com.github.pjpo.planning.model.dao.DaoConstraints;
@@ -110,17 +110,17 @@ public class GenerationOverviewController {
     		final List<PositionConstraintBase> constraints = daoConstraints.load();
 
         	// Creates couples of physician // integer
-    		final HashMap<Integer, Physician> workers = new HashMap<>();
+    		final HashMap<Integer, Worker> workers = new HashMap<>();
     		int i = 0;
-    		for (final Physician physician: mainApp.getPhysicians()) {
-    			final Physician clonedPhysician = new Physician();
+    		for (final Worker physician: mainApp.getPhysicians()) {
+    			final Worker clonedPhysician = new Worker();
     			clonedPhysician.setInternalIndice(i);
     			clonedPhysician.setName(physician.getName());
-    			clonedPhysician.setPaidVacation(new ArrayList<>(physician.getPaidVacation()));
-    			clonedPhysician.setRefusedPostes(new ArrayList<String>(physician.getRefusedPostes()));
+    			clonedPhysician.setPaidVacations(new ArrayList<>(physician.getPaidVacations()));
+    			clonedPhysician.setRefusedPositions(new ArrayList<String>(physician.getRefusedPositions()));
     			clonedPhysician.setTimePart(physician.getTimePart());
-    			clonedPhysician.setUnpaidVacation(new ArrayList<>(physician.getUnpaidVacation()));
-    			clonedPhysician.setWorkedVacs(HashMultimap.create(physician.getWorkedVacs()));
+    			clonedPhysician.setUnpaidVacations(new ArrayList<>(physician.getUnpaidVacations()));
+    			clonedPhysician.setWorkedVacs(HashMultimap.create(physician.getWorkedPositions()));
     			workers.put(i, clonedPhysician);
     			i++;
     		}

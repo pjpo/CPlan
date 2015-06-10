@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import org.chocosolver.solver.search.strategy.selectors.IntValueSelector;
 import org.chocosolver.solver.variables.IntVar;
 
-import com.github.pjpo.planning.model.Physician;
+import com.github.pjpo.planning.model.Worker;
 
 /**
  * Choco Strategy to select a value (= worker) for an IntVar (= position)
@@ -25,13 +25,13 @@ public class CPlanRandomStrategy implements IntValueSelector {
 	private final Random rand = new Random(new Date().getTime());
 	
 	/** Physicians */
-	private final HashMap<Integer, Physician> physicians;
+	private final HashMap<Integer, Worker> physicians;
 
 	/**
 	 * Initiates the strategy with couples of physician and corresponding internal int value.
 	 * @param physicians
 	 */
-	public CPlanRandomStrategy(final HashMap<Integer, Physician> physicians) {
+	public CPlanRandomStrategy(final HashMap<Integer, Worker> physicians) {
 		this.physicians = physicians;
 	}
 

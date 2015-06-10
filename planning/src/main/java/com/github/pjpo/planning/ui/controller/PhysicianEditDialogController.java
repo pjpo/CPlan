@@ -20,7 +20,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
-import com.github.pjpo.planning.model.Physician;
+import com.github.pjpo.planning.model.Worker;
 import com.github.pjpo.planning.ui.model.Poste;
 import com.github.pjpo.planning.utils.IntervalDateTime;
 import com.google.common.collect.HashMultimap;
@@ -63,7 +63,7 @@ public class PhysicianEditDialogController {
 	
 	private Stage dialogStage;
     
-	private Physician physician;
+	private Worker physician;
 
     private boolean okClicked = false;
     
@@ -119,7 +119,7 @@ public class PhysicianEditDialogController {
         this.dialogStage = dialogStage;
     }
     
-    public void setPhysician(Physician physician) {
+    public void setPhysician(Worker physician) {
         this.physician = physician;
 
         nameField.setText(physician.getName() == null ? "" : physician.getName());
@@ -127,26 +127,26 @@ public class PhysicianEditDialogController {
         
         // == PAID VACATIONS ==
         // LINKS OBSERVABLE WITH PHYSICIAN
-        paidVacationsList.setAll(physician.getPaidVacation());
+        paidVacationsList.setAll(physician.getPaidVacations());
         // LINKS TABLE WITH OBSERVABLE
         paidVacationsTable.setItems(paidVacationsList);
     
         // == UNPAID VACATIONS ==
         // LINKS OBSERVABLE WITH PHYSICIAN
-        unpaidVacationsList.setAll(physician.getUnpaidVacation());
+        unpaidVacationsList.setAll(physician.getUnpaidVacations());
         // LINKS TABLE WITH OBSERVABLE
         unpaidVacationsTable.setItems(unpaidVacationsList);
 
         // == NEEDED VACS LIST ==
         // FILLS THE OBSERVABLE ASSOCIATED LIST
         neededVacList.clear();
-        ArrayList<LocalDate> neededVacDates = new ArrayList<>(physician.getWorkedVacs().size());
-        for (LocalDate date : physician.getWorkedVacs().keySet()) {
+        ArrayList<LocalDate> neededVacDates = new ArrayList<>(physician.getWorkedPositions().size());
+        for (LocalDate date : physician.getWorkedPositions().keySet()) {
         	neededVacDates.add(date);
         }
         Collections.sort(neededVacDates);
         for (LocalDate date : neededVacDates) {
-        	for (String posteName : physician.getWorkedVacs().get(date)) {
+        	for (String posteName : physician.getWorkedPositions().get(date)) {
         		Poste poste = new Poste();
         		poste.setDate(date);
         		poste.setPoste(posteName);
@@ -158,7 +158,7 @@ public class PhysicianEditDialogController {
         
         // == REFUSED POSTES ==
         StringBuilder refusedPostesBuilder = new StringBuilder();
-        for (String poste : physician.getRefusedPostes()) {
+        for (String poste : physician.getRefusedPositions()) {
         	refusedPostesBuilder.append(poste).append(';');
         }
         if (refusedPostesBuilder.length() != 0)
@@ -301,8 +301,8 @@ public class PhysicianEditDialogController {
         if (isInputValid()) {
             physician.setName(nameField.getText());
             physician.setTimePart(Integer.decode(timePartField.getText()));
-            physician.setPaidVacation(new ArrayList<>(paidVacationsTable.getItems()));
-            physician.setUnpaidVacation(new ArrayList<>(unpaidVacationsTable.getItems()));
+            physician.setPaidVacations(new ArrayList<>(paidVacationsTable.getItems()));
+            physician.setUnpaidVacations(new ArrayList<>(unpaidVacationsTable.getItems()));
             final Multimap<LocalDate, String> workedVacs = HashMultimap.create();
             for (Poste poste : neededVacList) {
             	workedVacs.put(poste.getDate(), poste.getPoste());
@@ -314,7 +314,7 @@ public class PhysicianEditDialogController {
 	            	postes.add(poste);
 	            }
             }
-            physician.setRefusedPostes(postes);
+            physician.setRefusedPositions(postes);
 
             okClicked = true;
             dialogStage.close();

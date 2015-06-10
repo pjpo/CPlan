@@ -22,7 +22,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.FileChooser;
 
-import com.github.pjpo.planning.model.Physician;
+import com.github.pjpo.planning.model.Worker;
 import com.github.pjpo.planning.model.PositionCode;
 import com.github.pjpo.planning.model.dao.DaoPhysician;
 import com.github.pjpo.planning.model.dao.DaoPositionCode;
@@ -83,7 +83,7 @@ public class RootLayoutController {
 					StandardOpenOption.CREATE,
 					StandardOpenOption.TRUNCATE_EXISTING)) {
 				final DaoPhysician daoPhysician = new DaoPhysician(writer);
-				for (final Physician physician : mainApp.getPhysicians()) {
+				for (final Worker physician : mainApp.getPhysicians()) {
 					daoPhysician.store(physician);
 				}
 			}
@@ -134,7 +134,7 @@ public class RootLayoutController {
 		final Path physiciansFile = fs.getPath("/", "physicians");
 
 		// READED LIST OF PHSYCICIANS
-		final LinkedList<Physician> physicians = new LinkedList<>();
+		final LinkedList<Worker> physicians = new LinkedList<>();
 
 		// lecture du fichier contenu dans l'archive
 		try (final BufferedReader reader = Files.newBufferedReader(
@@ -142,7 +142,7 @@ public class RootLayoutController {
 			
 			final DaoPhysician daoPhysician = new DaoPhysician(reader);
 
-			Physician readedPhysician = null;
+			Worker readedPhysician = null;
 			
 			while ((readedPhysician = daoPhysician.load()) != null) {
 				physicians.add(readedPhysician);
@@ -151,7 +151,7 @@ public class RootLayoutController {
 		
 		// READING WAS FINE, CHANGE DATAS IN tHE UI
 		mainApp.getPhysicians().clear();
-		for (final Physician physician : physicians) {
+		for (final Worker physician : physicians) {
 			mainApp.getPhysicians().add(physician);
 		}
 

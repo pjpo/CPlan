@@ -18,7 +18,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.ESat;
 
-import com.github.pjpo.planning.model.Physician;
+import com.github.pjpo.planning.model.Worker;
 import com.github.pjpo.planning.model.Position;
 import com.github.pjpo.planning.model.PositionConstraintBase;
 import com.github.pjpo.planning.model.PositionDifferentConstraint;
@@ -42,10 +42,10 @@ public class PlanningForIntervalSolver {
 	private final LinkedList<Double> previousWordLoadSDs;
 	
 	// Defined Workers
-	private final HashMap<Integer, Physician> physicians;
+	private final HashMap<Integer, Worker> physicians;
 	
 	public PlanningForIntervalSolver(
-			final HashMap<Integer, Physician> physicians,
+			final HashMap<Integer, Worker> physicians,
 			final HashBasedTable<LocalDate, String, Position> positions,
 			final List<PositionConstraintBase> positionsConstraints,
 			final Solution previousSolution,
@@ -108,8 +108,8 @@ public class PlanningForIntervalSolver {
 			// If we don't have a worker, see which one is possible to work at this date
 			else {
 				// Does somebody has to work this day ?
-				for (final Entry<Integer, Physician> physician : physicians.entrySet()) {
-					if (physician.getValue().getWorkedVacs().containsEntry(position.getColumnKey(), position.getRowKey())) {
+				for (final Entry<Integer, Worker> physician : physicians.entrySet()) {
+					if (physician.getValue().getWorkedPositions().containsEntry(position.getColumnKey(), position.getRowKey())) {
 						position.getValue().setInternalChocoRepresentation(
 								VariableFactory.fixed(position.getColumnKey() + "_" + position.getRowKey(),
 										physician.getValue().getInternalIndice(), solver));
@@ -118,21 +118,21 @@ public class PlanningForIntervalSolver {
 				}
 
 				// List people able to work at this position
-				final LinkedList<Physician> workersAbleToWork = new LinkedList<>();
-				eachPhysician : for (final Entry<Integer, Physician> physician : physicians.entrySet()) {
+				final LinkedList<Worker> workersAbleToWork = new LinkedList<>();
+				eachPhysician : for (final Entry<Integer, Worker> physician : physicians.entrySet()) {
 					
 					// CHECK IF THIS PHYSICIAN HAS THE RIGHT TO WORK AT THIS POSITION
-					if (physician.getValue().getRefusedPostes().contains(position.getColumnKey()))
+					if (physician.getValue().getRefusedPositions().contains(position.getColumnKey()))
 						continue eachPhysician;					
 					
 					// CHECK IF PHYSICIAN IS IN PAID VACATIONS
-					for (final IntervalDateTime vacation : physician.getValue().getPaidVacation()) {
+					for (final IntervalDateTime vacation : physician.getValue().getPaidVacations()) {
 						if (vacation.isOverlapping(position.getValue().getPlage()))
 							continue eachPhysician;
 					}
 					
 					// CHECK IF PHYSICIAN IS IN UNPAID VACATIONS
-					for (final IntervalDateTime vacation : physician.getValue().getUnpaidVacation()) {
+					for (final IntervalDateTime vacation : physician.getValue().getUnpaidVacations()) {
 						if (vacation.isOverlapping(position.getValue().getPlage()))
 							continue eachPhysician;
 					}

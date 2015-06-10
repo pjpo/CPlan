@@ -3,7 +3,7 @@ package com.github.pjpo.planning.problem;
 import java.util.HashMap;
 import java.util.List;
 
-import com.github.pjpo.planning.model.Physician;
+import com.github.pjpo.planning.model.Worker;
 import com.github.pjpo.planning.model.PositionCode;
 import com.github.pjpo.planning.model.PositionConstraintBase;
 import com.github.pjpo.planning.utils.IntervalDate;
@@ -20,7 +20,7 @@ import com.github.pjpo.planning.utils.IntervalDate;
 public class PlanningDefinition {
 
 	/** List of used physicians with their internal indice number*/
-	private final HashMap<Integer, Physician> physicians;
+	private final HashMap<Integer, Worker> physicians;
 	
 	/** List of positions definitions */
 	private final List<PositionCode> positionsDefinitions;
@@ -34,7 +34,7 @@ public class PlanningDefinition {
 	 * @param positionsCode
 	 */
 	public PlanningDefinition(
-			final HashMap<Integer, Physician> physicians,
+			final HashMap<Integer, Worker> physicians,
 			final List<PositionCode> positionsCode,
 			final List<PositionConstraintBase> positionsConstraints) {
 		this.physicians = physicians;
@@ -46,7 +46,7 @@ public class PlanningDefinition {
 		return new PlanningForInterval(interval, physicians, positionsDefinitions, positionsConstraints);
 	}
 	
-	public HashMap<Integer, Physician> getPhysicians() {
+	public HashMap<Integer, Worker> getPhysicians() {
 		return physicians;
 	}
 	

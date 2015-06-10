@@ -7,7 +7,7 @@ import java.util.List;
 
 import javax.script.ScriptException;
 
-import com.github.pjpo.planning.model.Physician;
+import com.github.pjpo.planning.model.Worker;
 import com.github.pjpo.planning.model.Position;
 import com.github.pjpo.planning.model.PositionCode;
 import com.github.pjpo.planning.model.PositionConstraintBase;
@@ -24,7 +24,7 @@ public class PlanningForInterval {
 	// ==== Informative fields (external) ====
 	
 	/** List of used physicians */
-	private final HashMap<Integer, Physician> physicians;
+	private final HashMap<Integer, Worker> physicians;
 	
 	/** List of intra and interday constraints */
 	private final List<PositionConstraintBase> positionsConstraints;
@@ -49,7 +49,7 @@ public class PlanningForInterval {
 	 */
 	public PlanningForInterval(
 			final IntervalDate intervalDate,
-			final HashMap<Integer, Physician> physicians,
+			final HashMap<Integer, Worker> physicians,
 			final List<PositionCode> positionsDefinitions,
 			final List<PositionConstraintBase> positionsConstraints) {
 		

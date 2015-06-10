@@ -14,7 +14,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import com.github.pjpo.planning.model.Physician;
+import com.github.pjpo.planning.model.Worker;
 import com.github.pjpo.planning.model.PositionCode;
 import com.github.pjpo.planning.ui.controller.GenerationOverviewController;
 import com.github.pjpo.planning.ui.controller.PhysicianEditDialogController;
@@ -26,7 +26,7 @@ public class PlanningMainUIApp extends Application {
 
 	private Stage primaryStage;
     
-	final private ObservableList<Physician> physicians = FXCollections.observableArrayList();
+	final private ObservableList<Worker> physicians = FXCollections.observableArrayList();
 	
 	final private ObservableList<PositionCode> positions = FXCollections.observableArrayList();
 	
@@ -142,11 +142,11 @@ public class PlanningMainUIApp extends Application {
     	return overviewPage;
     }
 
-    public ObservableList<Physician> getPhysicians() {
+    public ObservableList<Worker> getPhysicians() {
 		return physicians;
 	}
 
-    public boolean showPhysicianEditDialog(Physician physician) {
+    public boolean showPhysicianEditDialog(Worker physician) {
   	  try {
   	    // Load the fxml file and create a new stage for the popup
   	    FXMLLoader loader = new FXMLLoader(PlanningMainUIApp.class.getResource("view/PhysicianEditDialog.fxml"));

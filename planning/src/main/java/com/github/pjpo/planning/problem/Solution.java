@@ -7,7 +7,7 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import com.github.pjpo.planning.model.Physician;
+import com.github.pjpo.planning.model.Worker;
 import com.github.pjpo.planning.model.Position;
 import com.github.pjpo.planning.utils.IntervalDateTime;
 import com.google.common.collect.HashBasedTable;
@@ -29,7 +29,7 @@ public class Solution {
 	private final HashMap<Integer, Long> workLoads;
 
 	public Solution(
-			final HashMap<Integer, Physician> physicians,
+			final HashMap<Integer, Worker> physicians,
 			final HashBasedTable<LocalDate, String, Position> positions) {
 
 		this.positions = positions;
@@ -43,7 +43,7 @@ public class Solution {
 		}
 		
 		// INITS THE WORK LOAD
-		for (Entry<Integer, Physician> physician : physicians.entrySet()) {
+		for (Entry<Integer, Worker> physician : physicians.entrySet()) {
 			workLoads.put(physician.getKey(), 0L);
 		}
 
@@ -67,13 +67,13 @@ public class Solution {
 			final HashSet<LocalDate> clonedWorkedDays = (HashSet<LocalDate>) workedDays.clone();
 	
 			// 2 - FINDS THE PHYSICIAN
-			final Physician physician = physicians.get(workLoad.getKey());
+			final Worker physician = physicians.get(workLoad.getKey());
 			
 			// 3 - REMOVES THE NOT WORKED DAYS (PAID VACATIONS)
 			final Iterator<LocalDate> localDateIt = clonedWorkedDays.iterator();
 			while (localDateIt.hasNext()) {
 				final LocalDate localDate = localDateIt.next();
-				for (final IntervalDateTime vacation : physician.getPaidVacation()) {
+				for (final IntervalDateTime vacation : physician.getPaidVacations()) {
 					if (vacation.isOverlapping(new IntervalDateTime(localDate.atTime(12, 00), localDate.atTime(12, 30)))) {
 						// DATE IS OUTSIDE WORK RANGE, REMOVE IT FROM WORKED DAYS FOR THIS PHYSICIAN
 						localDateIt.remove();
@@ -91,7 +91,7 @@ public class Solution {
 		return positions;
 	}
 	
-	public Long getWorkLoad(Physician physician) {
+	public Long getWorkLoad(Worker physician) {
 		return workLoads.get(physician.getInternalIndice());
 	}
 
