@@ -22,10 +22,10 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.FileChooser;
 
-import com.github.pjpo.planning.dao.DaoPhysician;
-import com.github.pjpo.planning.dao.DaoPositionCode;
 import com.github.pjpo.planning.model.Physician;
 import com.github.pjpo.planning.model.PositionCode;
+import com.github.pjpo.planning.model.dao.DaoPhysician;
+import com.github.pjpo.planning.model.dao.DaoPositionCode;
 import com.github.pjpo.planning.ui.PlanningMainUIApp;
 
 public class RootLayoutController {

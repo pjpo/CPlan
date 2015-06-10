@@ -2,7 +2,7 @@ grammar Expr;
 
 @header {
 	import java.util.LinkedList;
-	import com.github.pjpo.planning.constraintsrules.PositionConstraintRuleElement;
+	import com.github.pjpo.planning.model.PositionConstraintRuleElement;
 	import java.util.List;
 }
 

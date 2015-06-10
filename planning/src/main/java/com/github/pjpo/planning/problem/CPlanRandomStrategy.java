@@ -1,4 +1,4 @@
-package com.github.pjpo.planning;
+package com.github.pjpo.planning.problem;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -28,7 +28,7 @@ public class CPlanRandomStrategy implements IntValueSelector {
 	private final HashMap<Integer, Physician> physicians;
 
 	/**
-	 * Simple Constructor : list of all people
+	 * Initiates the strategy with couples of physician and corresponding internal int value.
 	 * @param physicians
 	 */
 	public CPlanRandomStrategy(final HashMap<Integer, Physician> physicians) {

@@ -1,4 +1,4 @@
-package com.github.pjpo.planning.constraintsrules;
+package com.github.pjpo.planning.model;
 
 import java.util.List;
 

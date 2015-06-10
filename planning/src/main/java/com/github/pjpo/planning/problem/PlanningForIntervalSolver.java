@@ -18,13 +18,11 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.ESat;
 
-import com.github.pjpo.planning.CPlanRandomStrategy;
-import com.github.pjpo.planning.constraintsrules.PositionConstraintBase;
-import com.github.pjpo.planning.constraintsrules.PositionDifferentConstraint;
-import com.github.pjpo.planning.constraintsrules.PositionEqualConstraint;
 import com.github.pjpo.planning.model.Physician;
 import com.github.pjpo.planning.model.Position;
-import com.github.pjpo.planning.model.Solution;
+import com.github.pjpo.planning.model.PositionConstraintBase;
+import com.github.pjpo.planning.model.PositionDifferentConstraint;
+import com.github.pjpo.planning.model.PositionEqualConstraint;
 import com.github.pjpo.planning.utils.IntervalDateTime;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table.Cell;

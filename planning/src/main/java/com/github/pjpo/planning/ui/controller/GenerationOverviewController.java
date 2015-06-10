@@ -25,14 +25,14 @@ import javafx.scene.control.Label;
 import javafx.stage.FileChooser;
 import au.com.bytecode.opencsv.CSVWriter;
 
-import com.github.pjpo.planning.SolutionException;
-import com.github.pjpo.planning.constraintsrules.PositionConstraintBase;
-import com.github.pjpo.planning.dao.DaoConstraints;
 import com.github.pjpo.planning.model.Physician;
 import com.github.pjpo.planning.model.Position;
-import com.github.pjpo.planning.model.Solution;
+import com.github.pjpo.planning.model.PositionConstraintBase;
+import com.github.pjpo.planning.model.dao.DaoConstraints;
 import com.github.pjpo.planning.problem.PlanningDefinition;
 import com.github.pjpo.planning.problem.PlanningForInterval;
+import com.github.pjpo.planning.problem.Solution;
+import com.github.pjpo.planning.problem.SolutionException;
 import com.github.pjpo.planning.ui.PlanningMainUIApp;
 import com.github.pjpo.planning.ui.controller.utils.DefaultDatePickerConverter;
 import com.github.pjpo.planning.ui.controller.utils.PlanningGenerationTask;

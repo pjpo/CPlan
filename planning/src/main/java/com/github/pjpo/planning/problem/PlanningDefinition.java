@@ -3,9 +3,9 @@ package com.github.pjpo.planning.problem;
 import java.util.HashMap;
 import java.util.List;
 
-import com.github.pjpo.planning.constraintsrules.PositionConstraintBase;
 import com.github.pjpo.planning.model.Physician;
 import com.github.pjpo.planning.model.PositionCode;
+import com.github.pjpo.planning.model.PositionConstraintBase;
 import com.github.pjpo.planning.utils.IntervalDate;
 
 /**

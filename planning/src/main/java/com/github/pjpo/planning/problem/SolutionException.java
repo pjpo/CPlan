@@ -1,5 +1,10 @@
-package com.github.pjpo.planning;
+package com.github.pjpo.planning.problem;
 
+/**
+ * Exception sent when an error in solvers happen
+ * @author jp@dm.lan
+ *
+ */
 public class SolutionException extends Exception {
 
 	/** Serial id */

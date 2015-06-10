@@ -1,4 +1,4 @@
-package com.github.pjpo.planning.dao;
+package com.github.pjpo.planning.model.dao;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -11,7 +11,9 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 
-import com.github.pjpo.planning.constraintsrules.PositionConstraintBase;
+import com.github.pjpo.planning.model.dao.ExprLexer;
+import com.github.pjpo.planning.model.dao.ExprParser;
+import com.github.pjpo.planning.model.PositionConstraintBase;
 
 public class DaoConstraints {
 

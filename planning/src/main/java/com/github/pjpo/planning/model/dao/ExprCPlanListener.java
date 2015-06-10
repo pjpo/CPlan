@@ -1,11 +1,13 @@
-package com.github.pjpo.planning.dao;
+package com.github.pjpo.planning.model.dao;
 
 import java.util.LinkedList;
 import java.util.List;
 
-import com.github.pjpo.planning.constraintsrules.PositionConstraintBase;
-import com.github.pjpo.planning.constraintsrules.PositionDifferentConstraint;
-import com.github.pjpo.planning.constraintsrules.PositionEqualConstraint;
+import com.github.pjpo.planning.model.dao.ExprBaseListener;
+import com.github.pjpo.planning.model.dao.ExprParser;
+import com.github.pjpo.planning.model.PositionConstraintBase;
+import com.github.pjpo.planning.model.PositionDifferentConstraint;
+import com.github.pjpo.planning.model.PositionEqualConstraint;
 
 public class ExprCPlanListener extends ExprBaseListener {
 

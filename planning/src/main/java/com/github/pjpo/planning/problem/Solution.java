@@ -1,4 +1,4 @@
-package com.github.pjpo.planning.model;
+package com.github.pjpo.planning.problem;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -7,6 +7,8 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import com.github.pjpo.planning.model.Physician;
+import com.github.pjpo.planning.model.Position;
 import com.github.pjpo.planning.utils.IntervalDateTime;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table.Cell;

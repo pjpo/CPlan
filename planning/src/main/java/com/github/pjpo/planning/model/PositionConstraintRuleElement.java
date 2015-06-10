@@ -1,4 +1,4 @@
-package com.github.pjpo.planning.constraintsrules;
+package com.github.pjpo.planning.model;
 
 /**
  * Used in grammar for constraints : stores the name of a position and the number of days before

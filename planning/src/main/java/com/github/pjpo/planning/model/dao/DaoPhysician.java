@@ -1,4 +1,4 @@
-package com.github.pjpo.planning.dao;
+package com.github.pjpo.planning.model.dao;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

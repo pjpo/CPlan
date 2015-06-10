@@ -3,9 +3,9 @@ package com.github.pjpo.planning.ui.controller.utils;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 
-import com.github.pjpo.planning.SolutionException;
-import com.github.pjpo.planning.model.Solution;
 import com.github.pjpo.planning.problem.PlanningForInterval;
+import com.github.pjpo.planning.problem.Solution;
+import com.github.pjpo.planning.problem.SolutionException;
 import com.github.pjpo.planning.ui.controller.GenerationOverviewController;
 
 public class PlanningGenerationTask extends Task<Solution> {
