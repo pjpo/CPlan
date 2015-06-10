@@ -16,7 +16,7 @@ public class PositionConstraintRuleElement {
 		return positionName;
 	}
 	
-	public void setPositionName(String positionName) {
+	public void setPositionName(final String positionName) {
 		this.positionName = positionName;
 	}
 	
@@ -24,7 +24,12 @@ public class PositionConstraintRuleElement {
 		return deltaDays;
 	}
 	
-	public void setDeltaDays(Integer deltaDays) {
+	public void setDeltaDays(final Integer deltaDays) {
 		this.deltaDays = deltaDays;
+	}
+	
+	@Override
+	public String toString() {
+		return positionName + "[n" + (deltaDays >= 0 ? "+" : "-") + deltaDays + "]"; 
 	}
 }

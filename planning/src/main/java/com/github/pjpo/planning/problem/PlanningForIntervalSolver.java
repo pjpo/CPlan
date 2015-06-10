@@ -177,12 +177,13 @@ public class PlanningForIntervalSolver {
 					IntVar previousElement = null;
 					for (final IntVar element : internalPositions) {
 						if (previousElement != null) {
-							IntConstraintFactory.arithm(previousElement, "=", element);
+							solver.post(
+									IntConstraintFactory.arithm(previousElement, "=", element));
 						}
 						previousElement = element;
 					}
 				} else if (constraint instanceof PositionDifferentConstraint) {
-					IntConstraintFactory.alldifferent(internalPositions.toArray(new IntVar[internalPositions.size()]));
+					solver.post(IntConstraintFactory.alldifferent(internalPositions.toArray(new IntVar[internalPositions.size()])));
 				}
 			});
 		});

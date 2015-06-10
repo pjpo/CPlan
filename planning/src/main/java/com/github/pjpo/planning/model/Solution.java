@@ -102,8 +102,8 @@ public class Solution {
 		// Mean value
 		final Double mean = getMeanWorkLoad();
 		// Now, sum of square difference to mean
-		final Double sumSquare = 0D;
-		workLoads.values().stream().collect(Collectors.summingDouble((value) -> Math.pow(value.doubleValue() - mean, 2D)));
+		final Double sumSquare = 
+				workLoads.values().stream().collect(Collectors.summingDouble((value) -> Math.pow(value.doubleValue() - mean, 2D)));
 		// return the sqrt of sumSquare divided by num of elements - 1 (SD)
 		return Math.sqrt(sumSquare / ((double) workLoads.size() - 1D));
 	}

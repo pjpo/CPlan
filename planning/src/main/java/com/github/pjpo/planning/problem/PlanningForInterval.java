@@ -95,7 +95,7 @@ public class PlanningForInterval {
 			return false;
 		} else {
 			// See if this solution is better than the precedent solution
-			if (solution != null && previousWorkLoads.size() > 0 && newSolution.getWorkLoadSD() <= previousWorkLoads.getLast()) {
+			if (solution != null && previousWorkLoads.size() > 0 && newSolution.getWorkLoadSD() <= previousWorkLoads.getFirst()) {
 					// Accepted solution
 				previousWorkLoads.addFirst(newSolution.getWorkLoadSD());
 				this.solution = newSolution;
