@@ -1,16 +1,14 @@
 package com.github.pjpo.planning.ui.controller.utils;
 
-import java.util.LinkedList;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 
 import com.github.pjpo.planning.SolutionException;
 import com.github.pjpo.planning.model.Solution;
 import com.github.pjpo.planning.problem.PlanningForInterval;
 import com.github.pjpo.planning.ui.controller.GenerationOverviewController;
 
-import javafx.application.Platform;
-import javafx.concurrent.Task;
-
-public class PlanningGenerationTask extends Task<LinkedList<Solution>> {
+public class PlanningGenerationTask extends Task<Solution> {
 
 	private boolean isAlive = true;
 
@@ -26,7 +24,7 @@ public class PlanningGenerationTask extends Task<LinkedList<Solution>> {
 	}
 	
 	@Override
-	protected LinkedList<Solution> call() throws Exception {
+	protected Solution call() throws Exception {
 		// INIT VARS
 		Integer retrys = 0;
 
@@ -40,20 +38,20 @@ public class PlanningGenerationTask extends Task<LinkedList<Solution>> {
 			}
 			
 			try {
-				if (planningImplementation.findNewSolution() == false && planningImplementation.getSolutions().size() == 0) {
+				if (planningImplementation.findNewSolution() == false && planningImplementation.getSolution() == null) {
 					throw new SolutionException("No solution found");
 				} else {
 					final Integer finalRetrys = Integer.valueOf(retrys);
 					// UPDATES VALUES IN LABELS
 					Platform.runLater(() ->
-					controller.showFeedBack(finalRetrys, planningImplementation.getSolutions().getFirst().getWorkLoadSD()));
+					controller.showFeedBack(finalRetrys, planningImplementation.getWorkLoadSDs().getFirst()));
 				}
 			} catch (Throwable th) {
 				th.printStackTrace();
 			}
 		}
 		// HERE, RETURN SOLUTIONS
-		return planningImplementation.getSolutions();
+		return planningImplementation.getSolution();
 	}
 
 	public void stopProcessing(String reason) {

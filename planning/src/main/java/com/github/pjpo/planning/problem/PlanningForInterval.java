@@ -36,8 +36,11 @@ public class PlanningForInterval {
 
 	// ==== Variable Fields ====
 				
-	/** Solutions already found */
-	private final LinkedList<Solution> previousAcceptedSolutions = new LinkedList<>();
+	/** Workload SD of solutions already found */
+	private final LinkedList<Double> previousWorkLoads = new LinkedList<>();
+	
+	/** Last good solution */
+	private Solution solution = null;
 	
 	/**
 	 * Creates a planning with a planning definition for a given interval of dates
@@ -82,7 +85,7 @@ public class PlanningForInterval {
 		// - The constraints
 		// - The already found solutions
 		final PlanningForIntervalSolver solver =
-				new PlanningForIntervalSolver(physicians, positions, positionsConstraints, previousAcceptedSolutions);
+				new PlanningForIntervalSolver(physicians, positions, positionsConstraints, solution, previousWorkLoads);
 		
 		// Finds a new solution
 		final Solution newSolution = solver.findSolution();
@@ -92,18 +95,26 @@ public class PlanningForInterval {
 			return false;
 		} else {
 			// See if this solution is better than the precedent solution
-			if (previousAcceptedSolutions.size() > 0 &&
-					newSolution.getWorkLoadSD() <= previousAcceptedSolutions.getLast().getWorkLoadSD()) {
+			if (solution != null && previousWorkLoads.size() > 0 && newSolution.getWorkLoadSD() <= previousWorkLoads.getLast()) {
 					// Accepted solution
-				previousAcceptedSolutions.addFirst(newSolution);
+				previousWorkLoads.addFirst(newSolution.getWorkLoadSD());
+				this.solution = newSolution;
+			}
+			// If no other solution, add this one
+			else if (solution == null) {
+				previousWorkLoads.addFirst(newSolution.getWorkLoadSD());
+				this.solution = newSolution;
 			}
 			return true;
 		}
 		
 	}
 
-	public LinkedList<Solution> getSolutions() {
-		return previousAcceptedSolutions;
+	public LinkedList<Double> getWorkLoadSDs() {
+		return previousWorkLoads;
 	}
 	
+	public Solution getSolution() {
+		return solution;
+	}
 }

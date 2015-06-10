@@ -39,9 +39,9 @@ public class PlanningForIntervalSolver {
 	
 	/** Random number generator */
 	private final Random random = new Random(new Date().getTime()); 
-
-	/** Previous accepted solutions */
-	private final List<Solution> previousAcceptedSolutions;
+	
+	/** Previous workloadSds for previous solutions */
+	private final LinkedList<Double> previousWordLoadSDs;
 	
 	// Defined Workers
 	private final HashMap<Integer, Physician> physicians;
@@ -50,11 +50,12 @@ public class PlanningForIntervalSolver {
 			final HashMap<Integer, Physician> physicians,
 			final HashBasedTable<LocalDate, String, Position> positions,
 			final List<PositionConstraintBase> positionsConstraints,
-			final LinkedList<Solution> previousAcceptedSolutions) {
+			final Solution previousSolution,
+			final LinkedList<Double> previousWordLoadSDs) {
 		
 		// inits fields
-		this.previousAcceptedSolutions = previousAcceptedSolutions;
 		this.physicians = physicians;
+		this.previousWordLoadSDs = previousWordLoadSDs;
 		
 		// Creates choco solver
 		this.solver = new Solver();
@@ -62,24 +63,22 @@ public class PlanningForIntervalSolver {
 		// If a previous accepted solution exists, use it in order to clone the previous solution, else use the table
 		// of positions as a reference
 		// Clones the positions in order to modify them depending on the solver
-		for (final Cell<LocalDate, String, Position> position : previousAcceptedSolutions.size() > 0 ? previousAcceptedSolutions.getFirst().getPositions().cellSet() : positions.cellSet()) {
+		for (final Cell<LocalDate, String, Position> position : previousSolution != null ? previousSolution.getPositions().cellSet() : positions.cellSet()) {
 			this.positions.put(position.getRowKey(), position.getColumnKey(), (Position) position.getValue().clone());
 		}
 		
 		// If previous solutions exist, alters the positions cloned to adapt burden of work
-		if (previousAcceptedSolutions.size() != 0) {
+		if (previousSolution != null) {
 			// WorkLoad of last solution
-			final double lastWorkSd = previousAcceptedSolutions.getFirst().getWorkLoadSD();
-			final double lastMeanWork = previousAcceptedSolutions.getFirst().getMeanWorkLoad();
-			// Last solution
-			final Solution lastSolution = previousAcceptedSolutions.getFirst();
+			final double lastWorkSd = previousSolution.getWorkLoadSD();
+			final double lastMeanWork = previousSolution.getMeanWorkLoad();
 			
 			// Id solutions
-			final LinkedList<Solution> idSolutions = new LinkedList<Solution>();
-			previousAcceptedSolutions.stream().filter(
-					(solution) -> {
-						idSolutions.add(solution);
-						return solution.getWorkLoadSD() == lastWorkSd;
+			final LinkedList<Double> idSolutions = new LinkedList<Double>();
+			previousWordLoadSDs.stream().filter(
+					(workLoadSD) -> {
+						idSolutions.add(workLoadSD);
+						return previousWordLoadSDs.getFirst() == lastWorkSd;
 					}).findFirst();
 			final int nbIdSolutions = idSolutions.size();
 
@@ -89,7 +88,7 @@ public class PlanningForIntervalSolver {
 			// lighten burden of work
 			for (final Cell<LocalDate, String, Position> position : this.positions.cellSet()) {
 				// For this worker, see the number of mean workload for his workload
-				final double numWorkLoads = lastSolution.getWorkLoad(position.getValue().getWorker()).doubleValue() / lastMeanWork;
+				final double numWorkLoads = previousSolution.getWorkLoad(position.getValue().getWorker()).doubleValue() / lastMeanWork;
 				// Removes the physician depending on lastMeanWork and shaker
 				double randomIndice = random.nextDouble() * shaker * numWorkLoads;
 				if (randomIndice != 0) randomIndice = Math.sqrt(randomIndice);
@@ -207,7 +206,7 @@ public class PlanningForIntervalSolver {
 		solver.findSolution();
 				
 		// IF NO SOLUTION, RETRY IF A SOLUTION ALREADY EXISTS
-		if (solver.isFeasible() != ESat.TRUE && previousAcceptedSolutions.size() == 0) {
+		if (solver.isFeasible() != ESat.TRUE && previousWordLoadSDs.size() == 0) {
 			return null;
 		} else {
 			final Solution solution = new Solution(physicians, positions);

@@ -163,11 +163,11 @@ public class GenerationOverviewController {
 
         	task.setOnSucceeded( (event) -> {
         		try {
-    				if (task.get() == null || task.get().size() == 0)
+    				if (task.get() == null)
     					setButtonsStatus(true, false, false);
     				else {
     					setButtonsStatus(true, false, true);
-    					this.solution = task.get().getLast();
+    					this.solution = task.get();
     				}
     			} catch (Exception e) {
         			Alert alert = new Alert(AlertType.INFORMATION);
