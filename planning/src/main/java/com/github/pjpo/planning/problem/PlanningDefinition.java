@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.github.pjpo.planning.model.Worker;
-import com.github.pjpo.planning.model.PositionCode;
+import com.github.pjpo.planning.model.PositionDefinition;
 import com.github.pjpo.planning.model.PositionConstraintBase;
 import com.github.pjpo.planning.utils.IntervalDate;
 
@@ -23,7 +23,7 @@ public class PlanningDefinition {
 	private final HashMap<Integer, Worker> physicians;
 	
 	/** List of positions definitions */
-	private final List<PositionCode> positionsDefinitions;
+	private final List<PositionDefinition> positionsDefinitions;
 	
 	/** List of intra and interday constraints */
 	private final List<PositionConstraintBase> positionsConstraints;
@@ -35,7 +35,7 @@ public class PlanningDefinition {
 	 */
 	public PlanningDefinition(
 			final HashMap<Integer, Worker> physicians,
-			final List<PositionCode> positionsCode,
+			final List<PositionDefinition> positionsCode,
 			final List<PositionConstraintBase> positionsConstraints) {
 		this.physicians = physicians;
 		this.positionsDefinitions = positionsCode;
@@ -50,7 +50,7 @@ public class PlanningDefinition {
 		return physicians;
 	}
 	
-	public List<PositionCode> getPositionsDefinitions() {
+	public List<PositionDefinition> getPositionsDefinitions() {
 		return positionsDefinitions;
 	}
 	

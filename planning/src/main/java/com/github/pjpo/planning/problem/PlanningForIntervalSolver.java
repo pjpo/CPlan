@@ -127,13 +127,13 @@ public class PlanningForIntervalSolver {
 					
 					// CHECK IF PHYSICIAN IS IN PAID VACATIONS
 					for (final IntervalDateTime vacation : physician.getValue().getPaidVacations()) {
-						if (vacation.isOverlapping(position.getValue().getPlage()))
+						if (vacation.isOverlapping(position.getValue().getBounds()))
 							continue eachPhysician;
 					}
 					
 					// CHECK IF PHYSICIAN IS IN UNPAID VACATIONS
 					for (final IntervalDateTime vacation : physician.getValue().getUnpaidVacations()) {
-						if (vacation.isOverlapping(position.getValue().getPlage()))
+						if (vacation.isOverlapping(position.getValue().getBounds()))
 							continue eachPhysician;
 					}
 					

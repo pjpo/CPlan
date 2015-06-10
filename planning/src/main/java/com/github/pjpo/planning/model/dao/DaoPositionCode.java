@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 
-import com.github.pjpo.planning.model.PositionCode;
+import com.github.pjpo.planning.model.PositionDefinition;
 
 public class DaoPositionCode {
 
@@ -22,7 +22,7 @@ public class DaoPositionCode {
 		this.writer = null;
 	}
 	
-	public void store(final PositionCode positionCode) throws IOException {
+	public void store(final PositionDefinition positionCode) throws IOException {
 		
 		if (writer == null)
 			throw new IOException("This dao has no writer defined");
@@ -34,16 +34,16 @@ public class DaoPositionCode {
 		
 		final StringBuilder tokenBuilder = new java.lang.StringBuilder("<<>>");
 		
-		while (positionCode.getCode().contains(tokenBuilder)) {
+		while (positionCode.getScript().contains(tokenBuilder)) {
 			tokenBuilder.append(">").insert(0, "<");
 		}
 		
 		writer.append(tokenBuilder).append("\n");
-		writer.append(positionCode.getCode()).append("\n");
+		writer.append(positionCode.getScript()).append("\n");
 		writer.append(tokenBuilder).append("\n");
 	}	
 
-	public PositionCode load() throws IOException {
+	public PositionDefinition load() throws IOException {
 		
 		String positionName = null;
 		String separator = null;
@@ -62,12 +62,12 @@ public class DaoPositionCode {
 			// positionName and separator have been defined, see if we reached end of script
 			else if (readed.equals(separator)) {
 				// We have a new position defined, return it
-				final PositionCode positionCode = new PositionCode();
+				final PositionDefinition positionCode = new PositionDefinition();
 				positionCode.setName(positionName);
 				// Remove the last new line in script (was separating with separator)
 				if (script.length() != 0)
 					script.deleteCharAt(script.length() - 1);
-				positionCode.setCode(script.toString());
+				positionCode.setScript(script.toString());
 				return positionCode;
 			}
 			// WE ARE IN SCRIPT, STORE IT

@@ -10,7 +10,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 
-import com.github.pjpo.planning.model.PositionCode;
+import com.github.pjpo.planning.model.PositionDefinition;
 import com.github.pjpo.planning.ui.PlanningMainUIApp;
 
 public class PositionsOverviewController {
@@ -21,9 +21,9 @@ public class PositionsOverviewController {
     private TextArea codeArea;
     
 	@FXML
-    private TableView<PositionCode> positionNamesTable;
+    private TableView<PositionDefinition> positionNamesTable;
     @FXML
-    private TableColumn<PositionCode, String> positionNameColumn;
+    private TableColumn<PositionDefinition, String> positionNameColumn;
 
     /** Reference to the main application */
     private PlanningMainUIApp mainApp;
@@ -50,16 +50,16 @@ public class PositionsOverviewController {
         positionNamesTable.setItems(mainApp.getPositions());
 	}
 	
-    private void showPositionDetails(PositionCode position) {
+    private void showPositionDetails(PositionDefinition position) {
     	positionName.setText(position == null ? "" : (position.getName() == null ? "Non défini" : position.getName()));
-    	codeArea.setText(position == null ? "" : (position.getCode() == null ? "Non défini" : position.getCode()));
+    	codeArea.setText(position == null ? "" : (position.getScript() == null ? "Non défini" : position.getScript()));
     }
 
     @FXML
     public void newHandler() {
     	
-    	final PositionCode positionCode = new PositionCode();
-    	positionCode.setCode("");
+    	final PositionDefinition positionCode = new PositionDefinition();
+    	positionCode.setScript("");
     
     	mainApp.getPositions().add(positionCode);
     }
@@ -83,10 +83,10 @@ public class PositionsOverviewController {
     public void saveHandler() {
     	int selectedIndex = positionNamesTable.getSelectionModel().getSelectedIndex();
         if (selectedIndex >= 0) {
-        	final ObservableList<PositionCode> positionCodes = positionNamesTable.getItems(); 
-        	final PositionCode positionCode = positionCodes.get(selectedIndex);
+        	final ObservableList<PositionDefinition> positionCodes = positionNamesTable.getItems(); 
+        	final PositionDefinition positionCode = positionCodes.get(selectedIndex);
         	positionCode.setName(positionName.getText());
-        	positionCode.setCode(codeArea.getText());
+        	positionCode.setScript(codeArea.getText());
         	// Refresh element
         	positionCodes.set(selectedIndex, positionCode);
         } else {

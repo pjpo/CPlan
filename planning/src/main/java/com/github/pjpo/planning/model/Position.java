@@ -1,8 +1,5 @@
 package com.github.pjpo.planning.model;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-
 import org.chocosolver.solver.variables.IntVar;
 
 import com.github.pjpo.planning.utils.IntervalDateTime;
@@ -17,82 +14,46 @@ import com.github.pjpo.planning.utils.IntervalDateTime;
  *
  */
 public class Position implements Cloneable {
-	
-	private LocalDate date;
-	
-	private LocalDateTime startWork;
-	
-	private LocalDateTime endWork;
 
-	private IntervalDateTime plage;
+	/** Name of this position */
+	private String name;
 
-	private Boolean isWorking;
+	/** Bounds of the position */
+	private IntervalDateTime bounds;
+
+	/** Is the position active this day or not */
+	private Boolean isActive;
 	
+	/** Workload for this position (can be different from time bounds) */
 	private Integer workLoad;
 	
-	private String name;
-	
+	/** Internal representation for Choco for this position */
 	private IntVar internalChocoRepresentation;
 	
+	/** Worker at this position */
 	private Worker worker;
 		
-	public Position(final LocalDate date, final LocalDateTime startWork,
-			final LocalDateTime endWork, final IntervalDateTime plage,
-			final Boolean isWorking, final Integer workLoad, final String name) {
-		this.date = date;
-		this.startWork = startWork;
-		this.endWork = endWork;
-		this.plage = plage;
-		this.isWorking = isWorking;
-		this.workLoad = workLoad;
-		this.name = name;
+	public IntervalDateTime getBounds() {
+		return bounds;
 	}
 
-	public LocalDate getDate() {
-		return date;
+	public void setBounds(final IntervalDateTime bounds) {
+		this.bounds = bounds;
 	}
 
-	public void setDate(LocalDate date) {
-		this.date = date;
+	public Boolean getIsActive() {
+		return isActive;
 	}
 
-	public LocalDateTime getStartWork() {
-		return startWork;
-	}
-
-	public void setStartWork(LocalDateTime startWork) {
-		this.startWork = startWork;
-	}
-
-	public LocalDateTime getEndWork() {
-		return endWork;
-	}
-
-	public void setEndWork(LocalDateTime endWork) {
-		this.endWork = endWork;
-	}
-
-	public IntervalDateTime getPlage() {
-		return plage;
-	}
-
-	public void setPlage(IntervalDateTime plage) {
-		this.plage = plage;
-	}
-
-	public Boolean getIsWorking() {
-		return isWorking;
-	}
-
-	public void setIsWorking(Boolean isWorking) {
-		this.isWorking = isWorking;
+	public void setIsActive(final Boolean isActive) {
+		this.isActive = isActive;
 	}
 
 	public Integer getWorkLoad() {
 		return workLoad;
 	}
 
-	public void setWorkLoad(Integer workLoad) {
+	public void setWorkLoad(final Integer workLoad) {
 		this.workLoad = workLoad;
 	}
 
@@ -100,7 +61,7 @@ public class Position implements Cloneable {
 		return name;
 	}
 
-	public void setName(String name) {
+	public void setName(final String name) {
 		this.name = name;
 	}
 
@@ -108,8 +69,7 @@ public class Position implements Cloneable {
 		return internalChocoRepresentation;
 	}
 
-	public void setInternalChocoRepresentation(
-			IntVar internalChocoRepresentation) {
+	public void setInternalChocoRepresentation(final IntVar internalChocoRepresentation) {
 		this.internalChocoRepresentation = internalChocoRepresentation;
 	}
 	
@@ -117,13 +77,17 @@ public class Position implements Cloneable {
 		return worker;
 	}
 
-	public void setWorker(Worker worker) {
+	public void setWorker(final Worker worker) {
 		this.worker = worker;
 	}
 	
 	@Override
 	public Object clone() {
-		final Position clonedPosition = new Position(date, startWork, endWork, plage, isWorking, workLoad, name);
+		final Position clonedPosition = new Position();
+		clonedPosition.setBounds(bounds);
+		clonedPosition.setIsActive(isActive);
+		clonedPosition.setWorkLoad(workLoad);
+		clonedPosition.setName(name);
 		clonedPosition.setInternalChocoRepresentation(internalChocoRepresentation);
 		clonedPosition.setWorker(worker);
 		return clonedPosition;

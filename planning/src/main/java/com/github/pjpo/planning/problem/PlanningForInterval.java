@@ -9,7 +9,7 @@ import javax.script.ScriptException;
 
 import com.github.pjpo.planning.model.Worker;
 import com.github.pjpo.planning.model.Position;
-import com.github.pjpo.planning.model.PositionCode;
+import com.github.pjpo.planning.model.PositionDefinition;
 import com.github.pjpo.planning.model.PositionConstraintBase;
 import com.github.pjpo.planning.utils.IntervalDate;
 import com.google.common.collect.HashBasedTable;
@@ -50,7 +50,7 @@ public class PlanningForInterval {
 	public PlanningForInterval(
 			final IntervalDate intervalDate,
 			final HashMap<Integer, Worker> physicians,
-			final List<PositionCode> positionsDefinitions,
+			final List<PositionDefinition> positionsDefinitions,
 			final List<PositionConstraintBase> positionsConstraints) {
 		
 		// Verifies that the boundings of planning have been defined
@@ -66,10 +66,10 @@ public class PlanningForInterval {
 
 		// Calculates the positions for this interval and store them in positions and index it in positionsByDate
 		for (LocalDate date = intervalDate.getStart() ; !date.isAfter(intervalDate.getEnd()) ; date = date.plusDays(1L)) {
-			for (final PositionCode positionCode : positionsDefinitions) {
+			for (final PositionDefinition positionCode : positionsDefinitions) {
 				try {
 					final Position position = positionCode.getPosition(date);
-					if (position.getIsWorking())
+					if (position.getIsActive())
 						positions.put(date, position.getName(), position);
 				} catch (ScriptException e) {
 					e.printStackTrace();

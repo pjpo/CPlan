@@ -23,7 +23,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.stage.FileChooser;
 
 import com.github.pjpo.planning.model.Worker;
-import com.github.pjpo.planning.model.PositionCode;
+import com.github.pjpo.planning.model.PositionDefinition;
 import com.github.pjpo.planning.model.dao.DaoPhysician;
 import com.github.pjpo.planning.model.dao.DaoPositionCode;
 import com.github.pjpo.planning.ui.PlanningMainUIApp;
@@ -97,7 +97,7 @@ public class RootLayoutController {
 					StandardOpenOption.CREATE,
 					StandardOpenOption.TRUNCATE_EXISTING)) {
 				final DaoPositionCode daoPositionCode = new DaoPositionCode(writer);
-				for (final PositionCode positionCode : mainApp.getPositions()) {
+				for (final PositionDefinition positionCode : mainApp.getPositions()) {
 					daoPositionCode.store(positionCode);
 				}
 			}
@@ -159,14 +159,14 @@ public class RootLayoutController {
 		final Path positionsFile = fs.getPath("/", "positions");
 
 		// READED LIST OF POSITIONS CODES
-		final LinkedList<PositionCode> positionCodes = new LinkedList<>();
+		final LinkedList<PositionDefinition> positionCodes = new LinkedList<>();
 		
 		try (final BufferedReader reader = Files.newBufferedReader(
 				positionsFile, Charset.forName("UTF-8"))) {
 			
 			final DaoPositionCode daoPositionCode = new DaoPositionCode(reader);
 
-			PositionCode readedPositionCode = null;
+			PositionDefinition readedPositionCode = null;
 			
 			while ((readedPositionCode = daoPositionCode.load()) != null) {
 				positionCodes.add(readedPositionCode);
@@ -175,7 +175,7 @@ public class RootLayoutController {
 
 		// READING WAS FINE, CHANGE DATAS IN tHE UI
 		mainApp.getPositions().clear();
-		for (PositionCode positionCode : positionCodes) {
+		for (PositionDefinition positionCode : positionCodes) {
 			mainApp.getPositions().add(positionCode);
 		}
 
