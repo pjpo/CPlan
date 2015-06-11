@@ -59,6 +59,7 @@ public class PositionDefinition {
 			final Invocable inv = (Invocable) engine;
 			final Bindings result = (Bindings) inv.invokeFunction("fun", dateWorking);
 			
+			position.setName(name);
 			position.setIsActive((Boolean) result.get("working"));
 			position.setWorkLoad((Integer) result.get("load"));
 			final String[] startWorkString = ((String) result.get("start")).split(":");
