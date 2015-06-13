@@ -81,7 +81,15 @@ public class PlanningForIntervalSolver {
 			final int nbIdSolutions = idSolutions.size();
 
 			// Sets the shaker indice randomly depends on (id solutions + 1)
-			final int shaker = random.nextInt(10) == 0 ? (nbIdSolutions + 1) * (nbIdSolutions + 1) : nbIdSolutions + 1;
+			int randomInt = random.nextInt(10);
+			int shaker = 0;
+			if (randomInt == 0) {
+				shaker = (nbIdSolutions + 1) * (nbIdSolutions + 1);
+			} else if (randomInt == 1) {
+				shaker = Double.valueOf(Math.pow(shaker, 2)).intValue() + 1;
+			} else {
+				shaker = nbIdSolutions + 1;
+			}
 			
 			// lighten burden of work
 			for (final Cell<LocalDate, String, Position> position : this.positions.cellSet()) {
