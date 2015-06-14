@@ -28,6 +28,12 @@ public class Solution {
 	/** Stores the workload of each worker */
 	private final HashMap<Integer, Long> workLoads;
 
+	/**Undefined worker */
+	private final Worker undefinedWorker = new Worker() {{
+		setInternalIndice(-1);
+		setName("Undefined");
+	}};
+	
 	public Solution(
 			final HashMap<Integer, Worker> physicians,
 			final HashBasedTable<LocalDate, String, Position> positions) {
@@ -38,22 +44,29 @@ public class Solution {
 		for (Cell<LocalDate, String, Position> position : positions.cellSet()) {
 			// Gets the solution from solver of the selected physician
 			final int selectedWorker = position.getValue().getInternalChocoRepresentation().getValue();
-			// Sets the working physician in the solution
-			position.getValue().setWorker(physicians.get(selectedWorker));
+			if (physicians.containsKey(selectedWorker)) {
+				// Sets the working physician in the solution
+				position.getValue().setWorker(physicians.get(selectedWorker));
+			} else {
+				position.getValue().setWorker(undefinedWorker);
+			}
 		}
 		
 		// INITS THE WORK LOAD
-		for (Entry<Integer, Worker> physician : physicians.entrySet()) {
+		for (final Entry<Integer, Worker> physician : physicians.entrySet()) {
 			workLoads.put(physician.getKey(), 0L);
 		}
 
 		// 1 - COUNTS THE WORKLOAD FOR EACH PHYSICIAN AND EACH DAY
-		for (Cell<LocalDate, String, Position> position : positions.cellSet()) {
-			final Long newWorkLong = workLoads.get(position.getValue().getWorker().getInternalIndice()) +
-					// Here, we use a scaling of the time part defined in Position, and then
-					// adapt depending on the time part
-					Long.divideUnsigned(10000000L * position.getValue().getWorkLoad(), position.getValue().getWorker().getTimePart());
-			workLoads.put(position.getValue().getWorker().getInternalIndice(), newWorkLong);
+		for (final Cell<LocalDate, String, Position> position : positions.cellSet()) {
+			// Only keep the physicians (real people)
+			if (position.getValue().getWorker().getInternalIndice() > 0) {
+				final Long newWorkLong = workLoads.get(position.getValue().getWorker().getInternalIndice()) +
+						// Here, we use a scaling of the time part defined in Position, and then
+						// adapt depending on the time part
+						Long.divideUnsigned(10000000L * position.getValue().getWorkLoad(), position.getValue().getWorker().getTimePart());
+				workLoads.put(position.getValue().getWorker().getInternalIndice(), newWorkLong);
+			}
 		}
 		
 		// As a reference, creates a hashSet with all the worked days in solution :

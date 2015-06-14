@@ -5,25 +5,22 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Random;
 
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.loop.monitors.SearchMonitorFactory;
 import org.chocosolver.solver.search.strategy.IntStrategyFactory;
-import org.chocosolver.solver.search.strategy.selectors.IntValueSelector;
 import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VariableFactory;
 import org.chocosolver.util.ESat;
 
-import com.github.pjpo.planning.model.Worker;
 import com.github.pjpo.planning.model.Position;
 import com.github.pjpo.planning.model.PositionConstraintBase;
 import com.github.pjpo.planning.model.PositionDifferentConstraint;
 import com.github.pjpo.planning.model.PositionEqualConstraint;
-import com.github.pjpo.planning.utils.IntervalDateTime;
+import com.github.pjpo.planning.model.Worker;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table.Cell;
 
@@ -34,6 +31,9 @@ public class PlanningForIntervalSolver {
 	
 	/** Private HashTable for storing intvars from choco solver */
 	private final HashBasedTable<LocalDate, String, Position> positions = HashBasedTable.create();
+	
+	/** Private Hashtable for storing positions depending on intvar (index) */
+	private final HashMap<IntVar, Position> intVarPositions = new HashMap<>();
 	
 	/** Random number generator */
 	private final Random random = new Random(new Date().getTime()); 
@@ -93,73 +93,40 @@ public class PlanningForIntervalSolver {
 			
 			// lighten burden of work
 			for (final Cell<LocalDate, String, Position> position : this.positions.cellSet()) {
-				// For this worker, see the number of mean workload for his workload
-				final double numWorkLoads = previousSolution.getWorkLoad(position.getValue().getWorker()).doubleValue() / lastMeanWork;
-				// Removes the physician depending on lastMeanWork and shaker
-				double randomIndice = random.nextDouble() * shaker * numWorkLoads;
-				if (randomIndice != 0) randomIndice = Math.sqrt(randomIndice);
-				if (randomIndice >= 2) {
+				// If Worker is a pseudo worker, removes the physician
+				if (position.getValue().getWorker().getInternalIndice() < 0) {
 					position.getValue().setWorker(null);
+				} else {
+					// For this worker, see the number of mean workload for his workload
+					final double numWorkLoads = previousSolution.getWorkLoad(position.getValue().getWorker()).doubleValue() / lastMeanWork;
+					// Removes the physician depending on lastMeanWork and shaker
+					double randomIndice = random.nextDouble() * shaker * numWorkLoads;
+					if (randomIndice != 0) randomIndice = Math.sqrt(randomIndice);
+					if (randomIndice >= 2) {
+						position.getValue().setWorker(null);
+					}
 				}
-
 			}
 		}
 
-		// Fill the choco solver with the defined positions
+		// For each position, give any possibility
+		// The setting of the predefined employees... are done in the random strategy
 		this.positions.cellSet().forEach((position) ->  {
-			// If we have already a worker, use it and sets the IntVar
+			// If we have already a worker, use it and sets the IntVar as fixed
 			if (position.getValue().getWorker() != null) {
 				position.getValue().setInternalChocoRepresentation(
 						VariableFactory.fixed(position.getColumnKey() + "_" + position.getRowKey(),
 								position.getValue().getWorker().getInternalIndice(), solver));
 			}
-			// If we don't have a worker, see which one is possible to work at this date
+			// If no worker is defined, anyone can be defined at this position (depending on randomstrategy)
 			else {
-				// Does somebody has to work this day ?
-				for (final Entry<Integer, Worker> physician : physicians.entrySet()) {
-					if (physician.getValue().getWorkedPositions().containsEntry(position.getColumnKey(), position.getRowKey())) {
-						position.getValue().setInternalChocoRepresentation(
-								VariableFactory.fixed(position.getColumnKey() + "_" + position.getRowKey(),
-										physician.getValue().getInternalIndice(), solver));
-						return;
-					}
-				}
-
-				// List people able to work at this position
-				final LinkedList<Worker> workersAbleToWork = new LinkedList<>();
-				eachPhysician : for (final Entry<Integer, Worker> physician : physicians.entrySet()) {
-					
-					// CHECK IF THIS PHYSICIAN HAS THE RIGHT TO WORK AT THIS POSITION
-					if (physician.getValue().getRefusedPositions().contains(position.getColumnKey()))
-						continue eachPhysician;					
-					
-					// CHECK IF PHYSICIAN IS IN PAID VACATIONS
-					for (final IntervalDateTime vacation : physician.getValue().getPaidVacations()) {
-						if (vacation.isOverlapping(position.getValue().getBounds()))
-							continue eachPhysician;
-					}
-					
-					// CHECK IF PHYSICIAN IS IN UNPAID VACATIONS
-					for (final IntervalDateTime vacation : physician.getValue().getUnpaidVacations()) {
-						if (vacation.isOverlapping(position.getValue().getBounds()))
-							continue eachPhysician;
-					}
-					
-					// THIS PHYSICIAN CAN WORK AT THIS POSITION AT THIS DAY
-					workersAbleToWork.add(physician.getValue());
-				}
-
-				if (workersAbleToWork.size() == 0) {
-					throw new IllegalArgumentException("No worker able to work the " + position.getRowKey());
-				} else {
-					position.getValue().setInternalChocoRepresentation(
-							VariableFactory.enumerated(position.getColumnKey() + "_" + position.getRowKey(),
-									workersAbleToWork.stream().mapToInt((value) -> value.getInternalIndice()).toArray(), solver));
-				}
+				position.getValue().setInternalChocoRepresentation(
+						VariableFactory.bounded(position.getColumnKey() + "_" + position.getRowKey(), 0, Integer.MAX_VALUE, solver));
 			}
+			
+			// Indexes the positions depending on intvar
+			intVarPositions.put(position.getValue().getInternalChocoRepresentation(), position.getValue());
 		});
-		
-		// Sets the constraints
 		
 		
 		// CREATES THE GENERAL CONSTRAINTS AND APPLY THEM TO THE SOLVER for each date
@@ -195,10 +162,11 @@ public class PlanningForIntervalSolver {
 		});
 		
 		// Sets the custom strategy
+		final CPlanRandomStrategy cPlanRandomStrategy = new CPlanRandomStrategy(physicians, getIntVarPositions());
 		final IntStrategy strategy = 
 				IntStrategyFactory.custom(
 						IntStrategyFactory.random_var_selector(new Date().getTime()),
-						(IntValueSelector) new CPlanRandomStrategy(physicians),
+						cPlanRandomStrategy,
 						this.positions.values().stream().map((position) -> position.getInternalChocoRepresentation()).toArray(IntVar[]::new));
 		// sets the strategy for the solver
 		solver.set(IntStrategyFactory.lastKConflicts(solver, 1000, strategy));
@@ -219,6 +187,10 @@ public class PlanningForIntervalSolver {
 			final Solution solution = new Solution(physicians, positions);
 			return solution;
 		}
+	}
+
+	public HashMap<IntVar, Position> getIntVarPositions() {
+		return intVarPositions;
 	}
 
 }
