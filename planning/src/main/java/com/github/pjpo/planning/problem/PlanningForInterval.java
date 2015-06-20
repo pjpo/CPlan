@@ -39,6 +39,10 @@ public class PlanningForInterval {
 	/** Workload SD of solutions already found */
 	private final LinkedList<Double> previousWorkLoads = new LinkedList<>();
 	
+	
+	/** Previous undefined workers for previous solutions */
+	private final LinkedList<Long> previousUndefinedPositions = new LinkedList<>();
+	
 	/** Last good solution */
 	private Solution solution = null;
 	
@@ -95,19 +99,26 @@ public class PlanningForInterval {
 			return false;
 		} else {
 			// See if this solution is better than the precedent solution
-			if (solution != null && previousWorkLoads.size() > 0 && newSolution.getWorkLoadSD() <= previousWorkLoads.getFirst()) {
+			// 1 - Try to decrease the number of undefined positions
+			if (solution != null && previousUndefinedPositions.size() > 0 && newSolution.getUndefinedWorkers() <= previousUndefinedPositions.getFirst()) {
+				// Accepted solution
+				previousUndefinedPositions.addFirst(newSolution.getUndefinedWorkers());
+				this.solution = newSolution;
+			} else {
+				// 2 - Try to decrease the workloadsd
+				if (solution != null && previousWorkLoads.size() > 0 && newSolution.getWorkLoadSD() <= previousWorkLoads.getFirst()) {
 					// Accepted solution
-				previousWorkLoads.addFirst(newSolution.getWorkLoadSD());
-				this.solution = newSolution;
-			}
-			// If no other solution, add this one
-			else if (solution == null) {
-				previousWorkLoads.addFirst(newSolution.getWorkLoadSD());
-				this.solution = newSolution;
+					previousWorkLoads.addFirst(newSolution.getWorkLoadSD());
+					this.solution = newSolution;
+				}
+				// If no other solution, add this one
+				else if (solution == null) {
+					previousWorkLoads.addFirst(newSolution.getWorkLoadSD());
+					this.solution = newSolution;
+				}
 			}
 			return true;
-		}
-		
+		}		
 	}
 
 	public LinkedList<Double> getWorkLoadSDs() {

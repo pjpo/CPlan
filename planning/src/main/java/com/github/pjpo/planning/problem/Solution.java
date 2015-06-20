@@ -133,4 +133,11 @@ public class Solution {
 		return workLoads.values().stream().collect(Collectors.averagingDouble((value) -> value));
 	}
 
+	/**
+	 * Gets the number of positions where no worker has been found to be able to work
+	 * @return
+	 */
+	public long getUndefinedWorkers() {
+		return positions.values().stream().filter((position) -> position.getWorker().getInternalIndice() == -1).count();
+	}
 }
