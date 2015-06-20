@@ -2,15 +2,14 @@ package com.github.pjpo.planning.problem;
 
 import java.time.LocalDate;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.script.ScriptException;
 
-import com.github.pjpo.planning.model.Worker;
 import com.github.pjpo.planning.model.Position;
-import com.github.pjpo.planning.model.PositionDefinition;
 import com.github.pjpo.planning.model.PositionConstraintBase;
+import com.github.pjpo.planning.model.PositionDefinition;
+import com.github.pjpo.planning.model.Worker;
 import com.github.pjpo.planning.utils.IntervalDate;
 import com.google.common.collect.HashBasedTable;
 
@@ -37,11 +36,11 @@ public class PlanningForInterval {
 	// ==== Variable Fields ====
 				
 	/** Workload SD of solutions already found */
-	private final LinkedList<Double> previousWorkLoads = new LinkedList<>();
+	private Double previousWorkLoad = null;
 	
 	
 	/** Previous undefined workers for previous solutions */
-	private final LinkedList<Long> previousUndefinedPositions = new LinkedList<>();
+	private Long previousUndefinedPositions = null;
 	
 	/** Last good solution */
 	private Solution solution = null;
@@ -89,7 +88,7 @@ public class PlanningForInterval {
 		// - The constraints
 		// - The already found solutions
 		final PlanningForIntervalSolver solver =
-				new PlanningForIntervalSolver(physicians, positions, positionsConstraints, solution, previousWorkLoads);
+				new PlanningForIntervalSolver(physicians, positions, positionsConstraints, solution);
 		
 		// Finds a new solution
 		final Solution newSolution = solver.findSolution();
@@ -99,30 +98,35 @@ public class PlanningForInterval {
 			return false;
 		} else {
 			// See if this solution is better than the precedent solution
+			final Long newUndefinedPositions = newSolution.getUndefinedWorkers();
+			final Double newWorkLoadSD = newSolution.getWorkLoadSD();
 			// 1 - Try to decrease the number of undefined positions
-			if (solution != null && previousUndefinedPositions.size() > 0 && newSolution.getUndefinedWorkers() <= previousUndefinedPositions.getFirst()) {
+			if (solution != null && newUndefinedPositions < previousUndefinedPositions) {
 				// Accepted solution
-				previousUndefinedPositions.addFirst(newSolution.getUndefinedWorkers());
 				this.solution = newSolution;
-			} else {
-				// 2 - Try to decrease the workloadsd
-				if (solution != null && previousWorkLoads.size() > 0 && newSolution.getWorkLoadSD() <= previousWorkLoads.getFirst()) {
-					// Accepted solution
-					previousWorkLoads.addFirst(newSolution.getWorkLoadSD());
-					this.solution = newSolution;
-				}
-				// If no other solution, add this one
-				else if (solution == null) {
-					previousWorkLoads.addFirst(newSolution.getWorkLoadSD());
-					this.solution = newSolution;
-				}
+				previousUndefinedPositions = newUndefinedPositions;
+				previousWorkLoad = newWorkLoadSD;
+			}
+			// 2 - Try to decrease the workloadsd
+			else if (solution != null && newUndefinedPositions == previousUndefinedPositions && 
+					newWorkLoadSD < previousWorkLoad) {
+				// Accepted solution
+				this.solution = newSolution;
+				previousUndefinedPositions = newUndefinedPositions;
+				previousWorkLoad = newWorkLoadSD;
+			}
+			// If no other solution, add this one
+			else if (solution == null) {
+				this.solution = newSolution;
+				previousUndefinedPositions = newUndefinedPositions;
+				previousWorkLoad = newWorkLoadSD;
 			}
 			return true;
 		}		
 	}
 
-	public LinkedList<Double> getWorkLoadSDs() {
-		return previousWorkLoads;
+	public Double getWorkLoadSD() {
+		return previousWorkLoad;
 	}
 	
 	public Solution getSolution() {

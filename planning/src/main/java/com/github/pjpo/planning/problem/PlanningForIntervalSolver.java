@@ -39,9 +39,6 @@ public class PlanningForIntervalSolver {
 	/** Random number generator */
 	private final Random random = new Random(new Date().getTime()); 
 	
-	/** Previous workloadSds for previous solutions */
-	private final LinkedList<Double> previousWordLoadSDs;
-	
 	// Defined Workers
 	private final HashMap<Integer, Worker> physicians;
 	
@@ -49,12 +46,10 @@ public class PlanningForIntervalSolver {
 			final HashMap<Integer, Worker> physicians,
 			final HashBasedTable<LocalDate, String, Position> positions,
 			final List<PositionConstraintBase> positionsConstraints,
-			final Solution previousSolution,
-			final LinkedList<Double> previousWordLoadSDs) {
+			final Solution previousSolution) {
 		
 		// inits fields
 		this.physicians = physicians;
-		this.previousWordLoadSDs = previousWordLoadSDs;
 		
 		// Creates choco solver
 		this.solver = new Solver();
@@ -71,24 +66,10 @@ public class PlanningForIntervalSolver {
 			// WorkLoad of last solution
 			final double lastMeanWork = previousSolution.getMeanWorkLoad();
 			
-			// Id solutions
-			int nbIdSolutions = 0;
-			for (final Double previousWorkLoadSD : previousWordLoadSDs) {
-				if (previousWordLoadSDs.getFirst() != previousWorkLoadSD)
-					break;
-				nbIdSolutions++;
-			}
-
 			// Sets the shaker indice randomly depends on (id solutions + 1)
 			int randomInt = random.nextInt(10);
-			int shaker = 0;
-			if (randomInt == 0) {
-				shaker = (nbIdSolutions + 1) * (nbIdSolutions + 1);
-			} else if (randomInt == 1) {
-				shaker = Double.valueOf(Math.pow(shaker, 2)).intValue() + 1;
-			} else {
-				shaker = nbIdSolutions + 1;
-			}
+			int exponent = random.nextInt(10);
+			int shaker = Double.valueOf(Math.pow(randomInt, exponent)).intValue() + 1;
 			
 			// lighten burden of work
 			for (final Cell<LocalDate, String, Position> position : this.positions.cellSet()) {
@@ -101,9 +82,8 @@ public class PlanningForIntervalSolver {
 					// Removes the physician depending on lastMeanWork and shaker
 					double randomIndice = random.nextDouble() * shaker * numWorkLoads;
 					if (randomIndice != 0) randomIndice = Math.sqrt(randomIndice);
-					if (randomIndice >= 2) {
-						position.getValue().setWorker(null);
-					}
+					if (randomIndice >= 2) position.getValue().setWorker(null);
+					System.out.println(randomIndice);
 				}
 			}
 		}
@@ -190,7 +170,7 @@ public class PlanningForIntervalSolver {
 		solver.findSolution();
 				
 		// IF NO SOLUTION, RETRY IF A SOLUTION ALREADY EXISTS
-		if (solver.isFeasible() != ESat.TRUE && previousWordLoadSDs.size() == 0) {
+		if (solver.isFeasible() != ESat.TRUE) {
 			return null;
 		} else {
 			final Solution solution = new Solution(physicians, positions);

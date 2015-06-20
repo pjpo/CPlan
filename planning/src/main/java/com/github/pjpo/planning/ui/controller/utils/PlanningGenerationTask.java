@@ -44,7 +44,7 @@ public class PlanningGenerationTask extends Task<Solution> {
 					final Integer finalRetrys = Integer.valueOf(retrys);
 					// UPDATES VALUES IN LABELS
 					Platform.runLater(() ->
-					controller.showFeedBack(finalRetrys, planningImplementation.getWorkLoadSDs().getFirst()));
+					controller.showFeedBack(finalRetrys, planningImplementation.getWorkLoadSD()));
 				}
 			} catch (Throwable th) {
 				th.printStackTrace();
