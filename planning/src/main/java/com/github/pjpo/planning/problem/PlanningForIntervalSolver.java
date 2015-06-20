@@ -18,6 +18,7 @@ import org.chocosolver.util.ESat;
 
 import com.github.pjpo.planning.model.Position;
 import com.github.pjpo.planning.model.PositionConstraintBase;
+import com.github.pjpo.planning.model.PositionConstraintRuleElement;
 import com.github.pjpo.planning.model.PositionDifferentConstraint;
 import com.github.pjpo.planning.model.PositionEqualConstraint;
 import com.github.pjpo.planning.model.Worker;
@@ -68,17 +69,15 @@ public class PlanningForIntervalSolver {
 		// If previous solutions exist, alters the positions cloned to adapt burden of work
 		if (previousSolution != null) {
 			// WorkLoad of last solution
-			final double lastWorkSd = previousSolution.getWorkLoadSD();
 			final double lastMeanWork = previousSolution.getMeanWorkLoad();
 			
 			// Id solutions
-			final LinkedList<Double> idSolutions = new LinkedList<Double>();
-			previousWordLoadSDs.stream().filter(
-					(workLoadSD) -> {
-						idSolutions.add(workLoadSD);
-						return previousWordLoadSDs.getFirst() == lastWorkSd;
-					}).findFirst();
-			final int nbIdSolutions = idSolutions.size();
+			int nbIdSolutions = 0;
+			for (final Double previousWorkLoadSD : previousWordLoadSDs) {
+				if (previousWordLoadSDs.getFirst() != previousWorkLoadSD)
+					break;
+				nbIdSolutions++;
+			}
 
 			// Sets the shaker indice randomly depends on (id solutions + 1)
 			int randomInt = random.nextInt(10);
@@ -111,7 +110,7 @@ public class PlanningForIntervalSolver {
 
 		// For each position, give any possibility
 		// The setting of the predefined employees... are done in the random strategy
-		this.positions.cellSet().forEach((position) ->  {
+		for (final Cell<LocalDate, String, Position> position : this.positions.cellSet()) {
 			// If we have already a worker, use it and sets the IntVar as fixed
 			if (position.getValue().getWorker() != null) {
 				position.getValue().setInternalChocoRepresentation(
@@ -121,20 +120,21 @@ public class PlanningForIntervalSolver {
 			// If no worker is defined, anyone can be defined at this position (depending on randomstrategy)
 			else {
 				position.getValue().setInternalChocoRepresentation(
-						VariableFactory.bounded(position.getColumnKey() + "_" + position.getRowKey(), 0, Integer.MAX_VALUE, solver));
+						VariableFactory.bounded(position.getColumnKey() + "_" + position.getRowKey(), 0, Integer.MAX_VALUE - 1, solver));
 			}
 			
 			// Indexes the positions depending on intvar
 			intVarPositions.put(position.getValue().getInternalChocoRepresentation(), position.getValue());
-		});
+		}
 		
 		
 		// CREATES THE GENERAL CONSTRAINTS AND APPLY THEM TO THE SOLVER for each date
-		this.positions.rowKeySet().forEach((date) -> {
-			positionsConstraints.forEach((constraint) -> {
-				// Find each IntVar
-				final LinkedList<IntVar> internalPositions = new LinkedList<>();
-				constraint.getRuleElements().forEach((element) -> {
+		final LinkedList<IntVar> internalPositions = new LinkedList<>();
+		for (final LocalDate date : positions.rowKeySet()) {
+			for (final PositionConstraintBase constraint : positionsConstraints) {
+				// Clears list of IntVar
+				internalPositions.clear();
+				for (final PositionConstraintRuleElement element : constraint.getRuleElements()) {
 					// Date of element selected
 					final LocalDate targetDate = date.plusDays(element.getDeltaDays());
 					// Targeted position
@@ -144,7 +144,7 @@ public class PlanningForIntervalSolver {
 						final IntVar internalPosition = this.positions.get(targetDate, element.getPositionName()).getInternalChocoRepresentation();
 						internalPositions.add(internalPosition);
 					}
-				});
+				}
 				// Create the constraint 
 				if (constraint instanceof PositionEqualConstraint) {
 					IntVar previousElement = null;
@@ -156,20 +156,29 @@ public class PlanningForIntervalSolver {
 						previousElement = element;
 					}
 				} else if (constraint instanceof PositionDifferentConstraint) {
-					solver.post(IntConstraintFactory.alldifferent(internalPositions.toArray(new IntVar[internalPositions.size()])));
+					final IntVar[] intVars = new IntVar[internalPositions.size()];
+					internalPositions.toArray(intVars);
+					solver.post(IntConstraintFactory.alldifferent(intVars, "BC"));
 				}
-			});
-		});
+			}
+		}
 		
 		// Sets the custom strategy
 		final CPlanRandomStrategy cPlanRandomStrategy = new CPlanRandomStrategy(physicians, getIntVarPositions());
+		// All IntVars
+		final IntVar[] intVars = new IntVar[this.positions.size()];
+		int i = 0;
+		for (final Position position : this.positions.values()) {
+			intVars[i] = position.getInternalChocoRepresentation();
+			i++;
+		}
 		final IntStrategy strategy = 
 				IntStrategyFactory.custom(
 						IntStrategyFactory.random_var_selector(new Date().getTime()),
 						cPlanRandomStrategy,
-						this.positions.values().stream().map((position) -> position.getInternalChocoRepresentation()).toArray(IntVar[]::new));
+						intVars);
 		// sets the strategy for the solver
-		solver.set(IntStrategyFactory.lastKConflicts(solver, 1000, strategy));
+		solver.set(IntStrategyFactory.lastKConflicts(solver, 100, strategy));
 		// Limits the 
 		SearchMonitorFactory.limitTime(solver, 600000);
 

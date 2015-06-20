@@ -78,7 +78,7 @@ public class CPlanRandomStrategy implements IntValueSelector {
 
 			// If number of retrys is above MAX_RETRYS, return a random value above max worker indice (suggesting nobody can work at this position)
 			if (retry >= MAX_RETRYS) {
-				return random.nextInt(Integer.MAX_VALUE - physicians.size()) + physicians.size();
+				return random.nextInt(Integer.MAX_VALUE - physicians.size() - 1) + physicians.size();
 			}
 			// else find a possible worker
 			else {
@@ -118,7 +118,7 @@ public class CPlanRandomStrategy implements IntValueSelector {
 
 				// Nobody able to work, return a pseudo worker
 				if (employeesAbleToWorkIndices.size() == 0) {
-					return random.nextInt(Integer.MAX_VALUE - physicians.size()) + physicians.size();
+					return random.nextInt(Integer.MAX_VALUE - physicians.size() - 1) + physicians.size();
 				} else {
 					// In order to randomly select the working person but depending on work part, we sum up
 					// the whole work part and then choose randomly an number between 1 and this whole work part.
@@ -140,7 +140,7 @@ public class CPlanRandomStrategy implements IntValueSelector {
 					}
 
 					// If something went wrong, return a pseudo worker
-					return random.nextInt(Integer.MAX_VALUE - physicians.size()) + physicians.size();
+					return random.nextInt(Integer.MAX_VALUE - physicians.size() - 1) + physicians.size();
 				}
 					
 			}
