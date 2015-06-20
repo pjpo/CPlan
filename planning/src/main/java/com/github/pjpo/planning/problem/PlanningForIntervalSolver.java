@@ -82,7 +82,7 @@ public class PlanningForIntervalSolver {
 					// Removes the physician depending on lastMeanWork and shaker
 					double randomIndice = random.nextDouble() * shaker * numWorkLoads;
 					if (randomIndice != 0) randomIndice = Math.sqrt(randomIndice);
-					if (randomIndice >= 2) position.getValue().setWorker(null);
+					if (randomIndice >= 40) position.getValue().setWorker(null);
 					System.out.println(randomIndice);
 				}
 			}
