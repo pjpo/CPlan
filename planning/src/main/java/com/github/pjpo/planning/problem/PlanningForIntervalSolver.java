@@ -83,7 +83,6 @@ public class PlanningForIntervalSolver {
 					double randomIndice = random.nextDouble() * shaker * numWorkLoads;
 					if (randomIndice != 0) randomIndice = Math.sqrt(randomIndice);
 					if (randomIndice >= 40) position.getValue().setWorker(null);
-					System.out.println(randomIndice);
 				}
 			}
 		}
