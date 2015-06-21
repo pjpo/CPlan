@@ -9,14 +9,19 @@ import com.github.pjpo.planning.model.PositionConstraintBase;
 import com.github.pjpo.planning.model.PositionDifferentConstraint;
 import com.github.pjpo.planning.model.PositionEqualConstraint;
 
+/**
+ * Class between Parser and Data access object to read a constraints code
+ * and transform it to constraints objects
+ * @author jp@dm.lan
+ *
+ */
 public class ExprCPlanListener extends ExprBaseListener {
 
 	final private List<PositionConstraintBase> constraints = new LinkedList<>();
 		
 	/**
-	 * {@inheritDoc}
-	 *
-	 * When exiting equality, we have to add these constraints to solver
+	 * Listens to parser exiting an equality code. At this moment,
+	 * add this equal constraint to the aggregator
 	 */
 	@Override public void exitEquality(ExprParser.EqualityContext ctx) {
 		final PositionEqualConstraint constraint = new PositionEqualConstraint();
@@ -25,9 +30,8 @@ public class ExprCPlanListener extends ExprBaseListener {
 	}
 
 	/**
-	 * {@inheritDoc}
-	 *
-	 * When exiting differences, we have to add these constraints to solver
+	 * Listens to parser exiting a different code. At this moment,
+	 * add this different constraint to the aggregator
 	 */
 	@Override public void exitDifference(ExprParser.DifferenceContext ctx) {
 		final PositionDifferentConstraint constraint = new PositionDifferentConstraint();
@@ -35,6 +39,10 @@ public class ExprCPlanListener extends ExprBaseListener {
 		constraints.add(constraint);
 	}
 
+	/**
+	 * Retrieves the list of constraints after parsing
+	 * @return
+	 */
 	public List<PositionConstraintBase> getConstraints() {
 		return constraints;
 	}

@@ -39,9 +39,17 @@ public class PlanningForIntervalSolver {
 	/** Random number generator */
 	private final Random random = new Random(new Date().getTime()); 
 	
-	// Defined Workers
+	/** Defined emplyees with their internal indices in solver */
 	private final HashMap<Integer, Worker> physicians;
 	
+	/**
+	 * Creates a new solver for the positions defined in {@code positions}
+	 * for the employees defined in {@code physicians} and the constraints
+	 * @param physicians
+	 * @param positions
+	 * @param positionsConstraints
+	 * @param previousSolution
+	 */
 	public PlanningForIntervalSolver(
 			final HashMap<Integer, Worker> physicians,
 			final HashBasedTable<LocalDate, String, Position> positions,
@@ -163,6 +171,10 @@ public class PlanningForIntervalSolver {
 
 	}
 	
+	/**
+	 * Returns a solution (if possible)
+	 * @return
+	 */
 	public Solution findSolution() {
 
 		// FINDS A SOLUTION
@@ -177,6 +189,10 @@ public class PlanningForIntervalSolver {
 		}
 	}
 
+	/**
+	 * Returns the positions in the solver, indexed by internal choco defined vars
+	 * @return
+	 */
 	public HashMap<IntVar, Position> getIntVarPositions() {
 		return intVarPositions;
 	}

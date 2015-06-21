@@ -38,7 +38,6 @@ public class PlanningForInterval {
 	/** Workload SD of solutions already found */
 	private Double previousWorkLoad = null;
 	
-	
 	/** Previous undefined workers for previous solutions */
 	private Long previousUndefinedPositions = null;
 	
@@ -81,6 +80,10 @@ public class PlanningForInterval {
 		}
 	}
 
+	/**
+	 * Tries to find a new solution
+	 * @return true if a solution has been found, false otherwise
+	 */
 	public boolean findNewSolution() {
 		// Creates the planning solver from :
 		// - The physicians definitions
@@ -125,10 +128,18 @@ public class PlanningForInterval {
 		}		
 	}
 
+	/**
+	 * Returns the workload standard deviation for the previously found solution
+	 * @return
+	 */
 	public Double getWorkLoadSD() {
 		return previousWorkLoad;
 	}
 	
+	/**
+	 * returns the last best solution found
+	 * @return
+	 */
 	public Solution getSolution() {
 		return solution;
 	}

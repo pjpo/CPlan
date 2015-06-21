@@ -42,18 +42,35 @@ public class PlanningDefinition {
 		this.positionsConstraints = positionsConstraints;
 	}
 	
+	/**
+	 * Generates the planning from the current definitions for the defined interval
+	 * @param interval
+	 * @return
+	 */
 	public final PlanningForInterval generatePlanningImplementation(final IntervalDate interval) {
 		return new PlanningForInterval(interval, physicians, positionsDefinitions, positionsConstraints);
 	}
 	
+	/**
+	 * Returns the defined possible employees with their defined indice
+	 * @return
+	 */
 	public HashMap<Integer, Worker> getPhysicians() {
 		return physicians;
 	}
 	
+	/**
+	 * Returns the definitions for the positions
+	 * @return
+	 */
 	public List<PositionDefinition> getPositionsDefinitions() {
 		return positionsDefinitions;
 	}
 	
+	/**
+	 * Returns the definitions for the constraints
+	 * @return
+	 */
 	public List<PositionConstraintBase> getPositionsConstraints() {
 		return positionsConstraints;
 	}

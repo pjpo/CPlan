@@ -10,14 +10,27 @@ import org.antlr.v4.runtime.Recognizer;
 
 import com.github.pjpo.planning.model.PositionConstraintBase;
 
+/**
+ * Transforms the code of constraints written in pseudo-langage into java mode
+ * @author jp@dm.lan
+ *
+ */
 public class DaoConstraints {
 
 	private final String code;
 	
+	/**
+	 * Sets the source code
+	 * @param code
+	 */
 	public DaoConstraints(final String code) {
 		this.code = code;
 	}
 	
+	/**
+	 * Transforms the code into java model
+	 * @return list of constraints objects
+	 */
 	public List<PositionConstraintBase> load() {
 		final ANTLRInputStream ais = new ANTLRInputStream(code);
 		final ExprLexer l = new ExprLexer(ais);

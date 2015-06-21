@@ -12,22 +12,41 @@ import com.github.pjpo.planning.model.Worker;
 import com.github.pjpo.planning.utils.IntervalDateTime;
 import com.google.common.collect.HashMultimap;
 
+/**
+ * Data access object for physicians : can read or write a physician on a
+ * writer or from a reader
+ * @author jp@dm.lan
+ *
+ */
 public class DaoPhysician {
 	
 	private final BufferedWriter writer; 
 
 	private final BufferedReader reader;
 	
+	/**
+	 * Creates the Dao for writing
+	 * @param writer
+	 */
 	public DaoPhysician(final BufferedWriter writer) {
 		this.writer = writer;
 		this.reader = null;
 	}
 	
+	/**
+	 * Creates the Dao for reading 
+	 * @param reader
+	 */
 	public DaoPhysician(final BufferedReader reader) {
 		this.reader = reader;
 		this.writer = null;
 	}
 
+	/**
+	 * Stores the employee defintions on the writer
+	 * @param physician
+	 * @throws IOException
+	 */
 	public void store(final Worker physician) throws IOException {
 
 		if (writer == null)
@@ -59,6 +78,11 @@ public class DaoPhysician {
 		writer.append("99:END").append('\n');
 	}
 
+	/**
+	 * Loads the employee from the reader
+	 * @return
+	 * @throws IOException
+	 */
 	public Worker load() throws IOException {
 
 		if (reader == null)

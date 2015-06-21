@@ -28,12 +28,27 @@ public class Solution {
 	/** Stores the workload of each worker */
 	private final HashMap<Integer, Long> workLoads;
 
+	/** Standard Deviation of workload */
+	private final Double workLoadSD;
+	
+	/** Mean WorkLoad */
+	private final Double meanWorkLoad;
+	
+	/** Number of undefined positions */
+	private final Long undefinedPositionsNb;
+	
 	/**Undefined worker */
 	private final Worker undefinedWorker = new Worker() {{
 		setInternalIndice(-1);
 		setName("Undefined");
 	}};
 	
+	/**
+	 * Creates the composite solution object from a list of employees and a
+	 * list of positions
+	 * @param physicians
+	 * @param positions positions from solver (with choco internal value)
+	 */
 	public Solution(
 			final HashMap<Integer, Worker> physicians,
 			final HashBasedTable<LocalDate, String, Position> positions) {
@@ -41,7 +56,7 @@ public class Solution {
 		this.positions = positions;
 		this.workLoads = new HashMap<>(physicians.size());
 
-		for (Cell<LocalDate, String, Position> position : positions.cellSet()) {
+		for (final Cell<LocalDate, String, Position> position : positions.cellSet()) {
 			// Gets the solution from solver of the selected physician
 			final int selectedWorker = position.getValue().getInternalChocoRepresentation().getValue();
 			if (physicians.containsKey(selectedWorker)) {
@@ -98,13 +113,39 @@ public class Solution {
 			// 4 - DIVIDE THE WORKLOAD
 			workLoad.setValue(Long.divideUnsigned(workLoad.getValue(), clonedWorkedDays.size()));
 		}
+		
+		// Sets the mean workload
+		if (workLoads.size() == 0)
+			meanWorkLoad = 0D;
+		else
+			meanWorkLoad = workLoads.values().stream().collect(Collectors.averagingDouble((value) -> value));
+		
+		// Sets the Standard deviation of workloads
+		if (workLoads.size() < 1)
+			workLoadSD = Double.MAX_VALUE;
+		else
+			workLoadSD = Math.sqrt(
+					workLoads.values().stream().collect(Collectors.summingDouble((value) -> Math.pow(value.doubleValue() - meanWorkLoad, 2D))) /
+					((double) workLoads.size() - 1D));
+		
+		// Sets the number of undefined positions
+		undefinedPositionsNb = positions.values().stream().filter((position) -> position.getWorker().getInternalIndice() == -1).count();
 	}
 	
+	/**
+	 * Returns the positions for the planning
+	 * @return
+	 */
 	public HashBasedTable<LocalDate, String, Position> getPositions() {
 		return positions;
 	}
 	
-	public Long getWorkLoad(Worker physician) {
+	/**
+	 * Returns the workload for a specific employee
+	 * @param physician
+	 * @return
+	 */
+	public Long getWorkLoad(final Worker physician) {
 		return workLoads.get(physician.getInternalIndice());
 	}
 
@@ -114,13 +155,7 @@ public class Solution {
 	 * @return
 	 */
 	public double getWorkLoadSD() {
-		// Mean value
-		final Double mean = getMeanWorkLoad();
-		// Now, sum of square difference to mean
-		final Double sumSquare = 
-				workLoads.values().stream().collect(Collectors.summingDouble((value) -> Math.pow(value.doubleValue() - mean, 2D)));
-		// return the sqrt of sumSquare divided by num of elements - 1 (SD)
-		return Math.sqrt(sumSquare / ((double) workLoads.size() - 1D));
+		return workLoadSD;
 	}
 
 	/**
@@ -128,9 +163,7 @@ public class Solution {
 	 * @return
 	 */
 	public double getMeanWorkLoad() {
-		if (workLoads.size() == 0)
-			throw new IllegalArgumentException("No solution has been set");
-		return workLoads.values().stream().collect(Collectors.averagingDouble((value) -> value));
+		return meanWorkLoad;
 	}
 
 	/**
@@ -138,6 +171,6 @@ public class Solution {
 	 * @return
 	 */
 	public long getUndefinedWorkers() {
-		return positions.values().stream().filter((position) -> position.getWorker().getInternalIndice() == -1).count();
+		return undefinedPositionsNb;
 	}
 }

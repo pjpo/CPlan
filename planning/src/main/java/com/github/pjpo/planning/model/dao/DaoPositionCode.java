@@ -6,22 +6,41 @@ import java.io.IOException;
 
 import com.github.pjpo.planning.model.PositionDefinition;
 
+/**
+ * Data access object for employees positions : can read or write
+ * a position definition on a writer or from a reader
+ * @author jp@dm.lan
+ *
+ */
 public class DaoPositionCode {
 
 	private final BufferedWriter writer; 
 
 	private final BufferedReader reader;
 	
+	/**
+	 * Creates the Dao for writing
+	 * @param writer
+	 */
 	public DaoPositionCode(final BufferedWriter writer) {
 		this.writer = writer;
 		this.reader = null;
 	}
 	
+	/**
+	 * Creates the Dao for reading
+	 * @param reader
+	 */
 	public DaoPositionCode(final BufferedReader reader) {
 		this.reader = reader;
 		this.writer = null;
 	}
 	
+	/**
+	 * Stores a position definition on the writer
+	 * @param positionCode
+	 * @throws IOException
+	 */
 	public void store(final PositionDefinition positionCode) throws IOException {
 		
 		if (writer == null)
@@ -43,6 +62,11 @@ public class DaoPositionCode {
 		writer.append(tokenBuilder).append("\n");
 	}	
 
+	/**
+	 * Loads the position code from the reader
+	 * @return
+	 * @throws IOException
+	 */
 	public PositionDefinition load() throws IOException {
 		
 		String positionName = null;
