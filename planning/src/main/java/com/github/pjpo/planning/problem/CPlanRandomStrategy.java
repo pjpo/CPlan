@@ -39,6 +39,9 @@ public class CPlanRandomStrategy implements IntValueSelector {
 	/** Number of retrys before we suggest that no solution exists */
 	private final static int MAX_RETRYS = 800;
 	
+	/** Buffer : keeps in memory which employee can work at a position */
+	private final HashMap<IntVar, LinkedList<Integer>> employeesPerPosition = new HashMap<>();
+	
 	/** Random */
 	private final Random random = new Random(new Date().getTime());
 	
@@ -93,29 +96,39 @@ public class CPlanRandomStrategy implements IntValueSelector {
 				}
 				
 				// Nobody has to specifically work this day, list the people able to work at this position
-				final LinkedList<Integer> employeesAbleToWorkIndices = new LinkedList<>();
-				eachPhysician : for (final Entry<Integer, Worker> physician : physicians.entrySet()) {
-					
-					// CHECK IF THIS PHYSICIAN HAS THE RIGHT TO WORK AT THIS POSITION
-					if (physician.getValue().getRefusedPositions().contains(position.getName()))
-						continue eachPhysician;					
-					
-					// CHECK IF PHYSICIAN IS IN PAID VACATIONS
-					for (final IntervalDateTime vacation : physician.getValue().getPaidVacations()) {
-						if (vacation.isOverlapping(position.getBounds()))
-							continue eachPhysician;
+				final LinkedList<Integer> employeesAbleToWorkIndices =
+						employeesPerPosition.containsKey(var) ?
+								employeesPerPosition.get(var) : new LinkedList<>();
+				
+				// If this element has not been computed, list employees
+				if (!employeesPerPosition.containsKey(var)) {
+				
+					eachPhysician : for (final Entry<Integer, Worker> physician : physicians.entrySet()) {
+						
+						// CHECK IF THIS PHYSICIAN HAS THE RIGHT TO WORK AT THIS POSITION
+						if (physician.getValue().getRefusedPositions().contains(position.getName()))
+							continue eachPhysician;					
+						
+						// CHECK IF PHYSICIAN IS IN PAID VACATIONS
+						for (final IntervalDateTime vacation : physician.getValue().getPaidVacations()) {
+							if (vacation.isOverlapping(position.getBounds()))
+								continue eachPhysician;
+						}
+						
+						// CHECK IF PHYSICIAN IS IN UNPAID VACATIONS
+						for (final IntervalDateTime vacation : physician.getValue().getUnpaidVacations()) {
+							if (vacation.isOverlapping(position.getBounds()))
+								continue eachPhysician;
+						}
+						
+						// THIS PHYSICIAN CAN WORK AT THIS POSITION AT THIS DAY
+						employeesAbleToWorkIndices.add(physician.getKey());
 					}
-					
-					// CHECK IF PHYSICIAN IS IN UNPAID VACATIONS
-					for (final IntervalDateTime vacation : physician.getValue().getUnpaidVacations()) {
-						if (vacation.isOverlapping(position.getBounds()))
-							continue eachPhysician;
-					}
-					
-					// THIS PHYSICIAN CAN WORK AT THIS POSITION AT THIS DAY
-					employeesAbleToWorkIndices.add(physician.getKey());
+				
+					employeesPerPosition.put(var, employeesAbleToWorkIndices);
+				
 				}
-
+				
 				// Nobody able to work, return a pseudo worker
 				if (employeesAbleToWorkIndices.size() == 0) {
 					return random.nextInt(Integer.MAX_VALUE - physicians.size() - 1) + physicians.size();
