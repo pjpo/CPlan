@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 
 import javafx.application.Application;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
@@ -16,6 +17,7 @@ import javafx.stage.Stage;
 
 import com.github.pjpo.planning.model.Worker;
 import com.github.pjpo.planning.model.PositionDefinition;
+import com.github.pjpo.planning.ui.controller.ConstraintsOverviewController;
 import com.github.pjpo.planning.ui.controller.GenerationOverviewController;
 import com.github.pjpo.planning.ui.controller.PhysicianEditDialogController;
 import com.github.pjpo.planning.ui.controller.PhysicianOverviewController;
@@ -29,6 +31,8 @@ public class PlanningMainUIApp extends Application {
 	final private ObservableList<Worker> physicians = FXCollections.observableArrayList();
 	
 	final private ObservableList<PositionDefinition> positions = FXCollections.observableArrayList();
+	
+	final private SimpleStringProperty constraintsCode = new SimpleStringProperty("");
 	
 	private GenerationOverviewController generationOverviewController;
 	
@@ -80,6 +84,9 @@ public class PlanningMainUIApp extends Application {
         // LOADS THE POSITIONS CODE
         AnchorPane positionsOverview = loadPositionsOverview();
         
+        // LOADS THE CONSTRAINTS CODE
+        AnchorPane constraintsOverview = loadConstraintsOverview();
+        
         // LOADS THE GENERATION OVERVIEW
         AnchorPane generationOverview = loadGenerationOverview();
 
@@ -87,7 +94,8 @@ public class PlanningMainUIApp extends Application {
         TabPane tabPane = (TabPane) borderPane.getCenter();
         tabPane.getTabs().get(0).setContent(physicianOverview);
         tabPane.getTabs().get(1).setContent(positionsOverview);
-        tabPane.getTabs().get(2).setContent(generationOverview);
+        tabPane.getTabs().get(2).setContent(constraintsOverview);
+        tabPane.getTabs().get(3).setContent(generationOverview);
         
         return borderPane;
 	}
@@ -142,6 +150,22 @@ public class PlanningMainUIApp extends Application {
     	return overviewPage;
     }
 
+    public AnchorPane loadConstraintsOverview() throws IOException {
+    	// LOADS UI DEFINITION
+    	FXMLLoader loader = new FXMLLoader(PlanningMainUIApp.class.getResource("view/ConstraintsOverview.fxml"));
+        
+    	// LOADS LAYOUT
+    	AnchorPane constraintPage = (AnchorPane) loader.load();
+
+    	// RETRIEVES THE CONTROLLER
+    	ConstraintsOverviewController controller = loader.getController();
+    	
+    	// SETS CONTROLLER DEFINITIONS
+    	controller.setMainApp(this);
+    	
+    	return constraintPage;
+    }
+
     public ObservableList<Worker> getPhysicians() {
 		return physicians;
 	}
@@ -185,5 +209,9 @@ public class PlanningMainUIApp extends Application {
 
 	public ObservableList<PositionDefinition> getPositions() {
 		return positions;
+	}
+	
+	public SimpleStringProperty getConstraintsCode() {
+		return constraintsCode;
 	}
 }

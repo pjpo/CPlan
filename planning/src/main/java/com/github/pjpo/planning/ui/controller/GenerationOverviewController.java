@@ -2,7 +2,6 @@ package com.github.pjpo.planning.ui.controller;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -25,9 +24,9 @@ import javafx.scene.control.Label;
 import javafx.stage.FileChooser;
 import au.com.bytecode.opencsv.CSVWriter;
 
-import com.github.pjpo.planning.model.Worker;
 import com.github.pjpo.planning.model.Position;
 import com.github.pjpo.planning.model.PositionConstraintBase;
+import com.github.pjpo.planning.model.Worker;
 import com.github.pjpo.planning.model.dao.DaoConstraints;
 import com.github.pjpo.planning.problem.PlanningDefinition;
 import com.github.pjpo.planning.problem.PlanningForInterval;
@@ -105,88 +104,82 @@ public class GenerationOverviewController {
     public void handleGenerateButton() {
 
     	// Loads the constraints
-    	try (final InputStream is = PlanningMainUIApp.class.getResourceAsStream("/com/github/pjpo/planning/conditions.cfg")) {
-    		final DaoConstraints daoConstraints = new DaoConstraints(is);
-    		final List<PositionConstraintBase> constraints = daoConstraints.load();
+    	final DaoConstraints daoConstraints = new DaoConstraints(mainApp.getConstraintsCode().getValue());
+    	final List<PositionConstraintBase> constraints = daoConstraints.load();
 
-        	// Creates couples of physician // integer
-    		final HashMap<Integer, Worker> workers = new HashMap<>();
-    		int i = 0;
-    		for (final Worker physician: mainApp.getPhysicians()) {
-    			final Worker clonedPhysician = new Worker();
-    			clonedPhysician.setInternalIndice(i);
-    			clonedPhysician.setName(physician.getName());
-    			clonedPhysician.setPaidVacations(new ArrayList<>(physician.getPaidVacations()));
-    			clonedPhysician.setRefusedPositions(new ArrayList<String>(physician.getRefusedPositions()));
-    			clonedPhysician.setTimePart(physician.getTimePart());
-    			clonedPhysician.setUnpaidVacations(new ArrayList<>(physician.getUnpaidVacations()));
-    			clonedPhysician.setWorkedVacs(HashMultimap.create(physician.getWorkedPositions()));
-    			workers.put(i, clonedPhysician);
-    			i++;
+    	// Creates couples of physician // integer
+    	final HashMap<Integer, Worker> workers = new HashMap<>();
+    	int i = 0;
+    	for (final Worker physician: mainApp.getPhysicians()) {
+    		final Worker clonedPhysician = new Worker();
+    		clonedPhysician.setInternalIndice(i);
+    		clonedPhysician.setName(physician.getName());
+    		clonedPhysician.setPaidVacations(new ArrayList<>(physician.getPaidVacations()));
+    		clonedPhysician.setRefusedPositions(new ArrayList<String>(physician.getRefusedPositions()));
+    		clonedPhysician.setTimePart(physician.getTimePart());
+    		clonedPhysician.setUnpaidVacations(new ArrayList<>(physician.getUnpaidVacations()));
+    		clonedPhysician.setWorkedVacs(HashMultimap.create(physician.getWorkedPositions()));
+    		workers.put(i, clonedPhysician);
+    		i++;
+    	}
+    	// Creates the definition of planning
+    	final PlanningDefinition planningConstraints =
+    			new PlanningDefinition(
+    					workers,
+    					mainApp.getPositions(),
+    					constraints);
+    	
+    	// Planning for the interval defined
+    	final PlanningForInterval planningImplementation =
+    			planningConstraints.generatePlanningImplementation(
+    					new IntervalDate(startPeriodPicker.getValue(), endPeriodPicker.getValue()));
+    	
+    	// Solver for this planning
+        	
+    	task = new PlanningGenerationTask(planningImplementation, this);
+
+    	task.setOnFailed( (event) -> {
+    		Throwable exception  =
+    				event.getSource().getException() == null ?
+    						new Exception("Erreur inconnue") :
+    							event.getSource().getException();
+    		if (exception instanceof SolutionException) {
+    			Alert alert = new Alert(AlertType.INFORMATION);
+    			alert.setTitle("Information");
+    			alert.setHeaderText("Pas de solution");
+    			alert.setContentText(exception.getMessage());
+    			alert.showAndWait();
+    		} else {
+    			Alert alert = new Alert(AlertType.INFORMATION);
+    			alert.setTitle("Information");
+    			alert.setHeaderText("Erreur");
+    			alert.setContentText(exception.getMessage());
+    			alert.showAndWait();
     		}
-    		// Creates the definition of planning
-    		final PlanningDefinition planningConstraints =
-    				new PlanningDefinition(
-        					workers,
-        					mainApp.getPositions(),
-        					constraints);
+			setButtonsStatus(true, false, false);
+		});
 
-        	// Planning for the interval defined
-        	final PlanningForInterval planningImplementation =
-        			planningConstraints.generatePlanningImplementation(
-        					new IntervalDate(startPeriodPicker.getValue(), endPeriodPicker.getValue()));
-        	
-        	// Solver for this planning
-        	
-        	task = new PlanningGenerationTask(planningImplementation, this);
+    	task.setOnSucceeded( (event) -> {
+    		try {
+				if (task.get() == null)
+					setButtonsStatus(true, false, false);
+				else {
+					setButtonsStatus(true, false, true);
+					this.solution = task.get();
+				}
+			} catch (Exception e) {
+    			Alert alert = new Alert(AlertType.INFORMATION);
+    			alert.setTitle("Information");
+    			alert.setHeaderText("Erreur");
+    			alert.setContentText(e.getMessage());
+    			alert.showAndWait();
+			}
+    	});
+    	
+    	new Thread(task).start();
 
-        	task.setOnFailed( (event) -> {
-        		Throwable exception  =
-        				event.getSource().getException() == null ?
-        						new Exception("Erreur inconnue") :
-        							event.getSource().getException();
-        		if (exception instanceof SolutionException) {
-        			Alert alert = new Alert(AlertType.INFORMATION);
-        			alert.setTitle("Information");
-        			alert.setHeaderText("Pas de solution");
-        			alert.setContentText(exception.getMessage());
-        			alert.showAndWait();
-        		} else {
-        			Alert alert = new Alert(AlertType.INFORMATION);
-        			alert.setTitle("Information");
-        			alert.setHeaderText("Erreur");
-        			alert.setContentText(exception.getMessage());
-        			alert.showAndWait();
-        		}
-    			setButtonsStatus(true, false, false);
-    		});
-
-        	task.setOnSucceeded( (event) -> {
-        		try {
-    				if (task.get() == null)
-    					setButtonsStatus(true, false, false);
-    				else {
-    					setButtonsStatus(true, false, true);
-    					this.solution = task.get();
-    				}
-    			} catch (Exception e) {
-        			Alert alert = new Alert(AlertType.INFORMATION);
-        			alert.setTitle("Information");
-        			alert.setHeaderText("Erreur");
-        			alert.setContentText(e.getMessage());
-        			alert.showAndWait();
-    			}
-        	});
-        	
-        	new Thread(task).start();
-
-        	// ADAPTS BUTTONS VISIBILITY
-        	setButtonsStatus(false, true, false);
-        	
-    	} catch (final IOException e) {
-			e.printStackTrace();
-		}
-
+    	// ADAPTS BUTTONS VISIBILITY
+    	setButtonsStatus(false, true, false);
     }	
     
     public void handlePauseButton() {

@@ -87,9 +87,7 @@ public class RootLayoutController {
 					daoPhysician.store(physician);
 				}
 			}
-		}
 
-		try (final FileSystem zipFile = FileSystems.newFileSystem(uri, env)) {
 			final Path positionsCodesFile = zipFile.getPath("/", "positions");
 			try (final BufferedWriter writer = Files.newBufferedWriter(
 					positionsCodesFile, Charset.forName("UTF-8"),
@@ -101,7 +99,17 @@ public class RootLayoutController {
 					daoPositionCode.store(positionCode);
 				}
 			}
+
+			final Path constraintsFile = zipFile.getPath("/", "constraints");
+			try (final BufferedWriter writer = Files.newBufferedWriter(
+					constraintsFile, Charset.forName("UTF-8"),
+					StandardOpenOption.WRITE,
+					StandardOpenOption.CREATE,
+					StandardOpenOption.TRUNCATE_EXISTING)) {
+				writer.append(mainApp.getConstraintsCode().getValue());
+			}
 		}
+
 }
 
 	@FXML
@@ -179,6 +187,20 @@ public class RootLayoutController {
 			mainApp.getPositions().add(positionCode);
 		}
 
+		// Récupération des constraintes
+		final Path constraintsFile = fs.getPath("/", "constraints");
+		
+		try (final BufferedReader reader = Files.newBufferedReader(
+				constraintsFile, Charset.forName("UTF-8"))) {
+			final StringBuilder constraintsCode = new StringBuilder();
+			String line = null;
+			while ((line = reader.readLine()) != null) {
+				constraintsCode.append(line).append('\n');
+			}
+			if (constraintsCode.length() != 0)
+				constraintsCode.deleteCharAt(constraintsCode.length() - 1);
+			mainApp.getConstraintsCode().set(constraintsCode.toString());
+		}
 	}
 
 }
