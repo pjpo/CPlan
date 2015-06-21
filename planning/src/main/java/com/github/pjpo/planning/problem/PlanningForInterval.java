@@ -112,7 +112,7 @@ public class PlanningForInterval {
 			}
 			// 2 - Try to decrease the workloadsd
 			else if (solution != null && newUndefinedPositions == previousUndefinedPositions && 
-					newWorkLoadSD < previousWorkLoad) {
+					newWorkLoadSD <= previousWorkLoad) {
 				// Accepted solution
 				this.solution = newSolution;
 				previousUndefinedPositions = newUndefinedPositions;

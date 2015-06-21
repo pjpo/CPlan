@@ -16,25 +16,25 @@ import com.google.common.collect.Multimap;
 public class Worker implements Cloneable {
 
 	/** Worker's name */
-	private String name;
+	private String name = null;
 	
 	/** Part time (can be of any scale) */
-	private Integer timePart;
+	private Integer timePart = null;
 	
 	/** List of paid vacations */
-	private List<IntervalDateTime> paidVacations;
+	private List<IntervalDateTime> paidVacations = null;
 	
 	/** List of unpaid vacations */
-	private List<IntervalDateTime> unpaidVacations;
+	private List<IntervalDateTime> unpaidVacations = null;
 
 	/** List of predefined worked positions */
-	private Multimap<LocalDate, String> workedPositions;
+	private Multimap<LocalDate, String> workedPositions = null;
 	
 	/** List of positions that this worker can not fill */
-	private List<String> refusedPositions;
+	private List<String> refusedPositions = null;
 	
 	/** Internal indice for this worker (used in choco solver) */
-	private Integer internalIndice;
+	private Integer internalIndice = null;
 
 	public String getName() {
 		return name;
@@ -88,7 +88,7 @@ public class Worker implements Cloneable {
 		return internalIndice;
 	}
 
-	public void setInternalIndice(int internalIndice) {
+	public void setInternalIndice(final Integer internalIndice) {
 		this.internalIndice = internalIndice;
 	}
 	
