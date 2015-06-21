@@ -2,18 +2,17 @@ package com.github.pjpo.planning.ui.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import javafx.application.Application;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -22,9 +21,6 @@ import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.stage.FileChooser;
-import au.com.bytecode.opencsv.CSVWriter;
-
-import com.github.pjpo.planning.model.Position;
 import com.github.pjpo.planning.model.PositionConstraintBase;
 import com.github.pjpo.planning.model.Worker;
 import com.github.pjpo.planning.model.dao.DaoConstraints;
@@ -32,10 +28,9 @@ import com.github.pjpo.planning.problem.PlanningDefinition;
 import com.github.pjpo.planning.problem.PlanningForInterval;
 import com.github.pjpo.planning.problem.Solution;
 import com.github.pjpo.planning.ui.PlanningMainUIApp;
-import com.github.pjpo.planning.ui.controller.utils.DefaultDatePickerConverter;
+import com.github.pjpo.planning.ui.controller.utils.DaoSolution;
 import com.github.pjpo.planning.ui.controller.utils.PlanningGenerationTask;
 import com.github.pjpo.planning.utils.IntervalDate;
-import com.google.common.collect.HashMultimap;
 
 public class GenerationOverviewController {
 
@@ -58,28 +53,40 @@ public class GenerationOverviewController {
     
     /** Reference to the main application */
     private PlanningMainUIApp mainApp;
-
-	/** Date formatter */
-	@SuppressWarnings("unused")
-	private DateTimeFormatter dateFormatter;
 	
+    /** Solution set when the generation of planning succeded */
 	private Solution solution = null;
 
+	/** Reference to task generating the solution */
 	private PlanningGenerationTask task = null; 
 	
 	@FXML
     private void initialize() {
     	// INITIALIZES THE BUTTONS VISIBILITY
     	setButtonsStatus(true, false, false);
-    	
+
+    	// Defines the default value of startperiodpicker and endperiodpicker
     	startPeriodPicker.setValue(LocalDate.now());
-    	
     	endPeriodPicker.setValue(startPeriodPicker.getValue().plusDays(1));
-    	endPeriodPicker.setDayCellFactory( (datePicker) -> {
+    	
+    	// Colorises the datecells in endPeriodPicker which are before startPeriodPicker 
+    	endPeriodPicker.setDayCellFactory((datePicker) -> {
     		return new DateCell() {
-    			@Override public void updateItem(LocalDate item, boolean empty) {
+    			@Override public void updateItem(final LocalDate item, final boolean empty) {
     				super.updateItem(item, empty);
-    				if (!item.isAfter(startPeriodPicker.getValue())) {
+    				if (startPeriodPicker.getValue() != null && !item.isAfter(startPeriodPicker.getValue())) {
+    					setDisable(true);
+    					setStyle("-fx-background-color: #ffc0cb;");
+    				}
+    			}
+    		};
+    	});
+    	// Colorises the datecells in startPeriodPicker which are after startPeriodPicker 
+    	startPeriodPicker.setDayCellFactory((datePicker) -> {
+    		return new DateCell() {
+    			@Override public void updateItem(final LocalDate item, final boolean empty) {
+    				super.updateItem(item, empty);
+    				if (endPeriodPicker.getValue() != null && !item.isBefore(endPeriodPicker.getValue())) {
     					setDisable(true);
     					setStyle("-fx-background-color: #ffc0cb;");
     				}
@@ -87,19 +94,36 @@ public class GenerationOverviewController {
     		};
     	});
 
+    	// Sets values when actions on start and end date pickers are modified
     	startPeriodPicker.setOnAction(
-    			(event) -> {if (startPeriodPicker.getValue() == null) startPeriodPicker.setValue(LocalDate.now());});
+    			(event) -> {
+    				// If a start date is set, check if it is valid, and if it is berfore end date
+    				// Correct if if needed
+    				if (startPeriodPicker.getValue() == null)
+    					startPeriodPicker.setValue(endPeriodPicker.getValue() == null ?
+    							LocalDate.now() : endPeriodPicker.getValue().minusDays(1L));
+    				else if (endPeriodPicker.getValue() != null && !startPeriodPicker.getValue().isBefore(endPeriodPicker.getValue()))
+    					startPeriodPicker.setValue(endPeriodPicker.getValue().minusDays(1L));
+    				});
     	endPeriodPicker.setOnAction(
     			(event) -> {
+    				// If an end date is set, check if it is valid, and if it is after start date
+    				// Correct if if needed
     				if (endPeriodPicker.getValue() == null)
-    					endPeriodPicker.setValue(startPeriodPicker.getValue().plusDays(1));
+    					endPeriodPicker.setValue(startPeriodPicker.getValue() == null ?
+    							LocalDate.now().plusDays(1L) : startPeriodPicker.getValue().plusDays(1L));
+    				else if (startPeriodPicker.getValue() != null && !endPeriodPicker.getValue().isAfter(startPeriodPicker.getValue()))
+    					endPeriodPicker.setValue(startPeriodPicker.getValue().plusDays(1L));
     				});
 
-    	// CLEARS THE TESTS LABELS
+    	// CLEARS THE feedback labels
     	showFeedBack(null, null);
-
     }
     
+	@FXML
+	/**
+	 * Launched when the generate button has been pressed
+	 */
     public void handleGenerateButton() {
 
     	// Loads the constraints
@@ -109,36 +133,24 @@ public class GenerationOverviewController {
     	// Creates couples of physician // integer
     	final HashMap<Integer, Worker> workers = new HashMap<>();
     	int i = 0;
-    	for (final Worker physician: mainApp.getPhysicians()) {
-    		final Worker clonedPhysician = new Worker();
-    		clonedPhysician.setInternalIndice(i);
-    		clonedPhysician.setName(physician.getName());
-    		clonedPhysician.setPaidVacations(new ArrayList<>(physician.getPaidVacations()));
-    		clonedPhysician.setRefusedPositions(new ArrayList<String>(physician.getRefusedPositions()));
-    		clonedPhysician.setTimePart(physician.getTimePart());
-    		clonedPhysician.setUnpaidVacations(new ArrayList<>(physician.getUnpaidVacations()));
-    		clonedPhysician.setWorkedVacs(HashMultimap.create(physician.getWorkedPositions()));
-    		workers.put(i, clonedPhysician);
-    		i++;
+    	for (final Worker worker: mainApp.getPhysicians()) {
+    		final Worker clonedWorker = worker.clone(); 
+    		clonedWorker.setInternalIndice(i);
+    		workers.put(i++, clonedWorker);
     	}
     	// Creates the definition of planning
-    	final PlanningDefinition planningConstraints =
-    			new PlanningDefinition(
-    					workers,
-    					mainApp.getPositions(),
-    					constraints);
+    	final PlanningDefinition planningDefinition =
+    			new PlanningDefinition(workers, mainApp.getPositions(), constraints);
     	
     	// Planning for the interval defined
-    	final PlanningForInterval planningImplementation =
-    			planningConstraints.generatePlanningImplementation(
-    					new IntervalDate(startPeriodPicker.getValue(), endPeriodPicker.getValue()));
+    	final PlanningForInterval planningPositions =
+    			planningDefinition.generatePlanningImplementation(new IntervalDate(startPeriodPicker.getValue(), endPeriodPicker.getValue()));
     	
-    	// Solver for this planning
-        	
-    	task = new PlanningGenerationTask(planningImplementation, this);
+    	// Solver task for this planning
+    	task = new PlanningGenerationTask(planningPositions, this);
 
     	task.setOnFailed( (event) -> {
-    		Throwable exception  =
+    		final Throwable exception  =
     				event.getSource().getException() == null ?
     						new Exception("Erreur inconnue") :
     							event.getSource().getException();
@@ -148,6 +160,7 @@ public class GenerationOverviewController {
    			alert.setContentText(exception.getMessage());
    			alert.showAndWait();
 			setButtonsStatus(true, false, false);
+			this.solution = null;
 		});
 
     	task.setOnSucceeded( (event) -> {
@@ -159,26 +172,34 @@ public class GenerationOverviewController {
 					this.solution = task.get();
 				}
 			} catch (Exception e) {
-    			Alert alert = new Alert(AlertType.INFORMATION);
+				final Alert alert = new Alert(AlertType.INFORMATION);
     			alert.setTitle("Information");
     			alert.setHeaderText("Erreur");
     			alert.setContentText(e.getMessage());
     			alert.showAndWait();
 			}
     	});
-    	
+
+    	// Starts the task
     	new Thread(task).start();
 
-    	// ADAPTS BUTTONS VISIBILITY
+    	// adapts buttons visibility when generation is occuring
     	setButtonsStatus(false, true, false);
     }	
-    
+
+	/**
+	 * Handles the pause button action
+	 */
+	@FXML
     public void handlePauseButton() {
     	// If task is null, it means the window has been closed
     	if (task != null)
     		task.stopProcessing("Stopped by user");
     }
-    
+
+	/**
+	 * Handles the save button action
+	 */
     public void handleSaveButton() {
     	FileChooser fileChooser = new FileChooser();
     	fileChooser.setTitle("Save Planning");
@@ -187,8 +208,8 @@ public class GenerationOverviewController {
     	if (saveFile != null) {
     		try {
     			saveConfiguration(saveFile);
-    		} catch (IOException e) {
-    			Alert alert = new Alert(AlertType.INFORMATION);
+    		} catch (final IOException e) {
+    			final Alert alert = new Alert(AlertType.INFORMATION);
     			alert.setTitle("Information");
     			alert.setHeaderText("Erreur");
     			alert.setContentText(e.getMessage());
@@ -197,64 +218,46 @@ public class GenerationOverviewController {
     	}
     }
     
-    public void saveConfiguration(File file) throws IOException {
+    public void saveConfiguration(final File file) throws IOException {
 		 Path saveFile = Paths.get(file.toURI());
-		 try (CSVWriter csvWriter = new CSVWriter(Files.newBufferedWriter(
+		 try (final Writer writer = Files.newBufferedWriter(
 				 saveFile, Charset.forName("UTF-8"),
 				 StandardOpenOption.WRITE,
 				 StandardOpenOption.CREATE,
-				 StandardOpenOption.TRUNCATE_EXISTING))) {
-			 
-			 // List of positions names and dates
-			 final List<String> positionsNames = new ArrayList<String>(solution.getPositions().columnKeySet());
-			 final List<LocalDate> positionDates = new ArrayList<LocalDate>(solution.getPositions().rowKeySet());
-			 Collections.sort(positionsNames);
-			 Collections.sort(positionDates);
-
-			 // WRITE HEADERS
-			final ArrayList<String> header = new ArrayList<>(positionsNames.size() + 1);
-			header.add("");
-			header.addAll(positionsNames);
-			csvWriter.writeNext(header.stream().toArray(size-> new String[size]));
-			
-			// WRITE CONTENTS
-			for (final LocalDate localDate : positionDates) {
-				final ArrayList<String> content = new ArrayList<>(positionsNames.size() + 1);
-				content.add(localDate.toString());
-				for (final String positionName : positionsNames) {
-					final Position position = solution.getPositions().get(localDate, positionName);
-					content.add(position == null ? "" : position.getWorker().getName());
-				}
-				csvWriter.writeNext(content.toArray(new String[content.size()]));
-			 }
+				 StandardOpenOption.TRUNCATE_EXISTING)) {
+			 final DaoSolution daoSolution = new DaoSolution(writer);
+			 daoSolution.store(solution);
 		 }
-	 }
-
-	 public void showFeedBack(Integer nbTests, Double optimizeIndice) {
-		nbTestsLabel.setText(nbTests == null ? "" : nbTests.toString());
-		optimizeIndexLabel.setText(optimizeIndice == null ? "" : optimizeIndice.toString());
     }
-    
-    private void setButtonsStatus(boolean generateStatus, boolean pauseStatus, boolean saveStatus) {
+
+    /**
+     * Sets the feedback about the searching solution
+     * @param nbTests
+     * @param optimizeIndice
+     */
+    public void showFeedBack(final Integer nbTests, final Double optimizeIndice) {
+    	nbTestsLabel.setText(nbTests == null ? "" : nbTests.toString());
+    	optimizeIndexLabel.setText(optimizeIndice == null ? "" : optimizeIndice.toString());
+    }
+
+    /**
+     * Sets the visibility of buttons
+     * @param generateStatus
+     * @param pauseStatus
+     * @param saveStatus
+     */
+    private void setButtonsStatus(final boolean generateStatus, final boolean pauseStatus, final boolean saveStatus) {
 		generateButton.setDisable(!generateStatus);
 		pauseButton.setDisable(!pauseStatus);
 		saveButton.setDisable(!saveStatus);
     }
-    
+
+    /**
+     * Sets the javafx {@link Application}
+     * @param mainApp
+     */
     public void setMainApp(PlanningMainUIApp mainApp) {
         this.mainApp = mainApp;
     }
-
-	public void setDateFormatter(DateTimeFormatter dateFormatter) {
-		this.dateFormatter = dateFormatter;
-		// ONCE THE DATE FORMATTER HAS BEEN SET, WE CAN SET THE DATE HANDLING FOR DATEPICKERS
-    	startPeriodPicker.setConverter(
-    			new DefaultDatePickerConverter(dateFormatter,
-    					null, endPeriodPicker));
-    	endPeriodPicker.setConverter(
-    			new DefaultDatePickerConverter(dateFormatter,
-    					startPeriodPicker, null));
-	}
-
 
 }

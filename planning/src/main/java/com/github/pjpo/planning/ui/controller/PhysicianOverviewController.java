@@ -1,14 +1,13 @@
 package com.github.pjpo.planning.ui.controller;
 
-import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 import com.github.pjpo.planning.model.Worker;
@@ -28,10 +27,6 @@ public class PhysicianOverviewController {
     private Label nameLabel;
     @FXML
     private Label parttimeLabel;
-
-    /** Date Formatter */
-    @SuppressWarnings("unused")
-	private DateTimeFormatter dateFormatter;
 
     /** Reference to the main application */
     private PlanningMainUIApp mainApp;
@@ -128,9 +123,5 @@ public class PhysicianOverviewController {
         // Add observable list data to the table
         physicianTable.setItems(mainApp.getPhysicians());
     }
-
-	public void setDateFormatter(DateTimeFormatter dateFormatter) {
-		this.dateFormatter = dateFormatter;
-	}
     
 }

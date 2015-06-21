@@ -1,7 +1,6 @@
 package com.github.pjpo.planning.ui;
 
 import java.io.IOException;
-import java.time.format.DateTimeFormatter;
 
 import javafx.application.Application;
 import javafx.beans.property.SimpleStringProperty;
@@ -15,8 +14,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import com.github.pjpo.planning.model.Worker;
 import com.github.pjpo.planning.model.PositionDefinition;
+import com.github.pjpo.planning.model.Worker;
 import com.github.pjpo.planning.ui.controller.ConstraintsOverviewController;
 import com.github.pjpo.planning.ui.controller.GenerationOverviewController;
 import com.github.pjpo.planning.ui.controller.PhysicianEditDialogController;
@@ -24,6 +23,11 @@ import com.github.pjpo.planning.ui.controller.PhysicianOverviewController;
 import com.github.pjpo.planning.ui.controller.PositionsOverviewController;
 import com.github.pjpo.planning.ui.controller.RootLayoutController;
 
+/**
+ * Entry point for javafx application 
+ * @author jp@dm.lan
+ *
+ */
 public class PlanningMainUIApp extends Application {
 
 	private Stage primaryStage;
@@ -36,10 +40,8 @@ public class PlanningMainUIApp extends Application {
 	
 	private GenerationOverviewController generationOverviewController;
 	
-	private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-	
 	@Override
-	public void start(Stage primaryStage) {
+	public void start(final Stage primaryStage) {
 
 		this.primaryStage = primaryStage;
         this.primaryStage.setTitle("Planning");
@@ -112,7 +114,6 @@ public class PlanningMainUIApp extends Application {
 
     	// SETS CONTROLLER DEFINITIONS
     	controller.setMainApp(this);
-    	controller.setDateFormatter(dateFormatter);
     	
     	return overviewPage;
     }
@@ -145,7 +146,6 @@ public class PlanningMainUIApp extends Application {
 
     	// SETS CONTROLLER DEFINITIONS
     	generationOverviewController.setMainApp(this);
-    	generationOverviewController.setDateFormatter(dateFormatter);
     	
     	return overviewPage;
     }

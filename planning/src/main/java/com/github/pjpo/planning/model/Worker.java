@@ -1,9 +1,11 @@
 package com.github.pjpo.planning.model;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.github.pjpo.planning.utils.IntervalDateTime;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
 /**
@@ -11,7 +13,7 @@ import com.google.common.collect.Multimap;
  * @author jp@dm.lan
  *
  */
-public class Worker {
+public class Worker implements Cloneable {
 
 	/** Worker's name */
 	private String name;
@@ -93,6 +95,18 @@ public class Worker {
 	@Override
 	public String toString() {
 		return name + " : (timepart = " + timePart + "; internalindice = " + internalIndice + ")"; 
+	}
+	
+	public Worker clone() {
+		final Worker clonedWorker = new Worker();
+		clonedWorker.setInternalIndice(internalIndice);
+		clonedWorker.setName(name);
+		clonedWorker.setPaidVacations(new ArrayList<>(paidVacations));
+		clonedWorker.setRefusedPositions(new ArrayList<>(refusedPositions));
+		clonedWorker.setTimePart(timePart);
+		clonedWorker.setUnpaidVacations(new ArrayList<>(unpaidVacations));
+		clonedWorker.setWorkedVacs(HashMultimap.create(workedPositions));
+		return clonedWorker;
 	}
 
 }
