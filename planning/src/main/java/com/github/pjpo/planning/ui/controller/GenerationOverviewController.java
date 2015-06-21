@@ -31,7 +31,6 @@ import com.github.pjpo.planning.model.dao.DaoConstraints;
 import com.github.pjpo.planning.problem.PlanningDefinition;
 import com.github.pjpo.planning.problem.PlanningForInterval;
 import com.github.pjpo.planning.problem.Solution;
-import com.github.pjpo.planning.problem.SolutionException;
 import com.github.pjpo.planning.ui.PlanningMainUIApp;
 import com.github.pjpo.planning.ui.controller.utils.DefaultDatePickerConverter;
 import com.github.pjpo.planning.ui.controller.utils.PlanningGenerationTask;
@@ -143,19 +142,11 @@ public class GenerationOverviewController {
     				event.getSource().getException() == null ?
     						new Exception("Erreur inconnue") :
     							event.getSource().getException();
-    		if (exception instanceof SolutionException) {
-    			Alert alert = new Alert(AlertType.INFORMATION);
-    			alert.setTitle("Information");
-    			alert.setHeaderText("Pas de solution");
-    			alert.setContentText(exception.getMessage());
-    			alert.showAndWait();
-    		} else {
-    			Alert alert = new Alert(AlertType.INFORMATION);
-    			alert.setTitle("Information");
-    			alert.setHeaderText("Erreur");
-    			alert.setContentText(exception.getMessage());
-    			alert.showAndWait();
-    		}
+   			Alert alert = new Alert(AlertType.INFORMATION);
+   			alert.setTitle("Information");
+   			alert.setHeaderText("Pas de solution");
+   			alert.setContentText(exception.getMessage());
+   			alert.showAndWait();
 			setButtonsStatus(true, false, false);
 		});
 

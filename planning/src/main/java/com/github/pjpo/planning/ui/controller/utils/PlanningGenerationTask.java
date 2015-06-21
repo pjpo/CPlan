@@ -5,7 +5,6 @@ import javafx.concurrent.Task;
 
 import com.github.pjpo.planning.problem.PlanningForInterval;
 import com.github.pjpo.planning.problem.Solution;
-import com.github.pjpo.planning.problem.SolutionException;
 import com.github.pjpo.planning.ui.controller.GenerationOverviewController;
 
 public class PlanningGenerationTask extends Task<Solution> {
@@ -38,14 +37,11 @@ public class PlanningGenerationTask extends Task<Solution> {
 			}
 			
 			try {
-				if (planningImplementation.findNewSolution() == false && planningImplementation.getSolution() == null) {
-					throw new SolutionException("No solution found");
-				} else {
-					final Integer finalRetrys = Integer.valueOf(retrys);
-					// UPDATES VALUES IN LABELS
-					Platform.runLater(() ->
-					controller.showFeedBack(finalRetrys, planningImplementation.getWorkLoadSD()));
-				}
+				planningImplementation.findNewSolution();
+				final Integer finalRetrys = Integer.valueOf(retrys);
+				// UPDATES VALUES IN LABELS
+				Platform.runLater(() ->
+				controller.showFeedBack(finalRetrys, planningImplementation.getWorkLoadSD()));
 			} catch (Throwable th) {
 				th.printStackTrace();
 			}
