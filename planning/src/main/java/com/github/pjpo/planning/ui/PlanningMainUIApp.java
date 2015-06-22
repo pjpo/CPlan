@@ -125,6 +125,14 @@ public class PlanningMainUIApp extends Application {
         return borderPane;
 	}
 
+	/**
+	 * Loads an FXML source, its controller, and executes an init function which will return a value.
+	 * Uses lots of generics in order to be polyvalent
+	 * @param fxmlSource
+	 * @param initFunction
+	 * @return
+	 * @throws IOException
+	 */
 	private <T, U, V> V load(
 			final String fxmlSource,
 			final FxmlLoader<T, U, V> initFunction) throws IOException {
@@ -141,7 +149,12 @@ public class PlanningMainUIApp extends Application {
 		return initFunction.apply(fxml, controller);
 	}
 
-    public boolean showPhysicianEditDialog(Worker physician) {
+	/**
+	 * Shows the dialog for editing en employee
+	 * @param employee
+	 * @return
+	 */
+    public boolean showEmployeeEditDialog(final Worker employee) {
     	try {
     		// Load the fxml file and create a new stage for the popup
     		return load("view/PhysicianEditDialog.fxml",
@@ -156,40 +169,68 @@ public class PlanningMainUIApp extends Application {
 
     	  	    // Sets the parameters of controller
     	  	    controller.setDialogStage(dialogStage);
-    	  	    controller.setPhysician(physician);
+    	  	    controller.setPhysician(employee);
 
     	  	    // Show the dialog and wait until the user closes it
     	  	    dialogStage.showAndWait();
     	  	    
     	  	    return controller.isOkClicked();
     		});
-    	} catch (IOException e) {
+    	} catch (final IOException e) {
     		// Exception gets thrown if the fxml file could not be loaded
     		e.printStackTrace();
     		return false;
     	}
     }
 
+    /**
+     * Main function for standalone functionning
+     * @param args
+     */
 	public static void main(String[] args) {
 		launch(args);
 	}
 
+	/**
+	 * Returns the primary stage of this ui
+	 * @return
+	 */
     public Stage getPrimaryStage() {
 		return primaryStage;
 	}
 
+    /**
+     * Returns the definitions of positions
+     * @return
+     */
 	public ObservableList<PositionDefinition> getPositions() {
 		return positions;
 	}
-	
+
+	/**
+	 * Returns the constraint code
+	 * @return
+	 */
 	public SimpleStringProperty getConstraintsCode() {
 		return constraintsCode;
 	}
 	
-    public ObservableList<Worker> getPhysicians() {
+	/**
+	 * Returns the Employee definitions
+	 * @return
+	 */
+    public ObservableList<Worker> getEmployees() {
 		return employees;
 	}
 
+    /**
+     * Used in private load function
+     * @author jp@dm.lan
+     *
+     * @param <T>
+     * @param <U>
+     * @param <V>
+     */
 	@FunctionalInterface
 	private interface FxmlLoader<T, U, V> {
 		public V apply(T fxml, U controller);

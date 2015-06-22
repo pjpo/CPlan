@@ -74,9 +74,9 @@ public class PhysicianOverviewController {
       tempPhysician.setRefusedPositions(new LinkedList<>());
       tempPhysician.setUnpaidVacations(new LinkedList<>());
       tempPhysician.setWorkedVacs(HashMultimap.create());
-      boolean okClicked = mainApp.showPhysicianEditDialog(tempPhysician);
+      boolean okClicked = mainApp.showEmployeeEditDialog(tempPhysician);
       if (okClicked) {
-        mainApp.getPhysicians().add(tempPhysician);
+        mainApp.getEmployees().add(tempPhysician);
       }
     }
 
@@ -88,7 +88,7 @@ public class PhysicianOverviewController {
     private void handleEditPhysician() {
       Worker selectedPhysician = physicianTable.getSelectionModel().getSelectedItem();
       if (selectedPhysician != null) {
-        boolean okClicked = mainApp.showPhysicianEditDialog(selectedPhysician);
+        boolean okClicked = mainApp.showEmployeeEditDialog(selectedPhysician);
         if (okClicked) {
           refreshPhysicianTable();
           showPhysicianDetails(selectedPhysician);
@@ -108,7 +108,7 @@ public class PhysicianOverviewController {
     	  int selectedIndex = physicianTable.getSelectionModel().getSelectedIndex();
     	  physicianTable.setItems(null);
     	  physicianTable.layout();
-    	  physicianTable.setItems(mainApp.getPhysicians());
+    	  physicianTable.setItems(mainApp.getEmployees());
     	  physicianTable.getSelectionModel().select(selectedIndex);
     }
     
@@ -121,7 +121,7 @@ public class PhysicianOverviewController {
         this.mainApp = mainApp;
 
         // Add observable list data to the table
-        physicianTable.setItems(mainApp.getPhysicians());
+        physicianTable.setItems(mainApp.getEmployees());
     }
     
 }

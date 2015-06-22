@@ -83,7 +83,7 @@ public class RootLayoutController {
 					StandardOpenOption.CREATE,
 					StandardOpenOption.TRUNCATE_EXISTING)) {
 				final DaoPhysician daoPhysician = new DaoPhysician(writer);
-				for (final Worker physician : mainApp.getPhysicians()) {
+				for (final Worker physician : mainApp.getEmployees()) {
 					daoPhysician.store(physician);
 				}
 			}
@@ -158,9 +158,9 @@ public class RootLayoutController {
 		}
 		
 		// READING WAS FINE, CHANGE DATAS IN tHE UI
-		mainApp.getPhysicians().clear();
+		mainApp.getEmployees().clear();
 		for (final Worker physician : physicians) {
-			mainApp.getPhysicians().add(physician);
+			mainApp.getEmployees().add(physician);
 		}
 
 		// Récupération du fichier des positions dans l'archive

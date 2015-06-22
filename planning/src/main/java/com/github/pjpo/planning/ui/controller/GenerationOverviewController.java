@@ -133,7 +133,7 @@ public class GenerationOverviewController {
     	// Creates couples of physician // integer
     	final HashMap<Integer, Worker> workers = new HashMap<>();
     	int i = 0;
-    	for (final Worker worker: mainApp.getPhysicians()) {
+    	for (final Worker worker: mainApp.getEmployees()) {
     		final Worker clonedWorker = worker.clone(); 
     		clonedWorker.setInternalIndice(i);
     		workers.put(i++, clonedWorker);
