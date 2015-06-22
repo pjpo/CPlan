@@ -2,6 +2,7 @@ package com.github.pjpo.planning.ui.controller;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -43,6 +44,7 @@ public class PhysicianEditDialogController {
     private TableColumn<IntervalDateTime, String> paidVacationsStartColumn;
     @FXML
     private TableColumn<IntervalDateTime, String> paidVacationEndColumn;
+    
 	private ObservableList<IntervalDateTime> paidVacationsList = FXCollections.observableArrayList();
     
 	@FXML
@@ -51,6 +53,7 @@ public class PhysicianEditDialogController {
     private TableColumn<IntervalDateTime, String> unpaidVacationsStartColumn;
     @FXML
     private TableColumn<IntervalDateTime, String> unpaidVacationEndColumn;
+    
 	private ObservableList<IntervalDateTime> unpaidVacationsList = FXCollections.observableArrayList();
 	
 	@FXML
@@ -59,6 +62,7 @@ public class PhysicianEditDialogController {
     private TableColumn<Poste, LocalDate> neededVacDateColumn;
     @FXML
     private TableColumn<Poste, String> neededVacPosteColumn;
+    
 	private ObservableList<Poste> neededVacList = FXCollections.observableArrayList();
 	
 	private Stage dialogStage;
@@ -67,13 +71,14 @@ public class PhysicianEditDialogController {
 
     private boolean okClicked = false;
     
+    private final DateTimeFormatter sdf = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT);
+    
     private class StartCellFormat implements Callback<CellDataFeatures<IntervalDateTime, String>, ObservableValue<String>> {
 
 		@Override
 		public ObservableValue<String> call(
-				CellDataFeatures<IntervalDateTime, String> param) {
-			SimpleStringProperty property = new SimpleStringProperty();
-			DateTimeFormatter sdf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+				final CellDataFeatures<IntervalDateTime, String> param) {
+			final SimpleStringProperty property = new SimpleStringProperty();
 			if (param.getValue().getStart() != null)
 				property.setValue(sdf.format(param.getValue().getStart()));
 			else
@@ -87,10 +92,9 @@ public class PhysicianEditDialogController {
 
 		@Override
 		public ObservableValue<String> call(
-				CellDataFeatures<IntervalDateTime, String> param) {
-			SimpleStringProperty property = new SimpleStringProperty();
-			DateTimeFormatter sdf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-			if (param.getValue().getStart() != null)
+				final CellDataFeatures<IntervalDateTime, String> param) {
+			final SimpleStringProperty property = new SimpleStringProperty();
+			if (param.getValue().getEnd() != null)
 				property.setValue(sdf.format(param.getValue().getEnd()));
 			else
 				property.setValue("Non déterminé");
@@ -98,10 +102,9 @@ public class PhysicianEditDialogController {
 		}
     	
     }
-
+    
     @FXML
     private void initialize() {
-    	
     	// Initialize the paid vacations
     	paidVacationsStartColumn.setCellValueFactory(new StartCellFormat());
         paidVacationEndColumn.setCellValueFactory(new EndCellFormat());
@@ -115,11 +118,11 @@ public class PhysicianEditDialogController {
         neededVacDateColumn.setCellValueFactory(new PropertyValueFactory<Poste, LocalDate>("date"));
     }
 
-    public void setDialogStage(Stage dialogStage) {
+    public void setDialogStage(final Stage dialogStage) {
         this.dialogStage = dialogStage;
     }
     
-    public void setPhysician(Worker physician) {
+    public void setPhysician(final Worker physician) {
         this.physician = physician;
 
         nameField.setText(physician.getName() == null ? "" : physician.getName());

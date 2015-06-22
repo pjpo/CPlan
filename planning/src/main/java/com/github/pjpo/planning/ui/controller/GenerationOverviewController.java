@@ -154,7 +154,7 @@ public class GenerationOverviewController {
     				event.getSource().getException() == null ?
     						new Exception("Erreur inconnue") :
     							event.getSource().getException();
-   			Alert alert = new Alert(AlertType.INFORMATION);
+   			final Alert alert = new Alert(AlertType.INFORMATION);
    			alert.setTitle("Information");
    			alert.setHeaderText("Pas de solution");
    			alert.setContentText(exception.getMessage());

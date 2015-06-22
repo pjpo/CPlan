@@ -30,15 +30,17 @@ import com.github.pjpo.planning.ui.controller.RootLayoutController;
  */
 public class PlanningMainUIApp extends Application {
 
+	/** Root stage */
 	private Stage primaryStage;
     
-	final private ObservableList<Worker> physicians = FXCollections.observableArrayList();
+	/** Defined employees shown in user interface */
+	final private ObservableList<Worker> employees = FXCollections.observableArrayList();
 	
+	/** Positions definitions shown in ui */
 	final private ObservableList<PositionDefinition> positions = FXCollections.observableArrayList();
-	
+
+	/** Code for constraints shown in ui */
 	final private SimpleStringProperty constraintsCode = new SimpleStringProperty("");
-	
-	private GenerationOverviewController generationOverviewController;
 	
 	@Override
 	public void start(final Stage primaryStage) {
@@ -48,163 +50,132 @@ public class PlanningMainUIApp extends Application {
 
         try {        	
             // LOADS THE ROOT LAYOUT
-        	BorderPane rootLayout = loadRootLayout();
-
-        	// USE THIS ELEMENT AS ROOT FOR THE SCENE
-            Scene scene = new Scene(rootLayout);
-
-            primaryStage.setScene(scene);
-            
-            primaryStage.setOnCloseRequest( (event) -> {
-            	generationOverviewController.handlePauseButton();
-            });
+        	loadRootLayout(primaryStage);
             
             primaryStage.show();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             // Exception gets thrown if the fxml file could not be loaded
             e.printStackTrace();
         }
         
 	}
-	
-	private BorderPane loadRootLayout() throws IOException {
+
+	/**
+	 * Loads the root layout and fills the different tabs
+	 * @return
+	 * @throws IOException
+	 */
+	private BorderPane loadRootLayout(final Stage stage) throws IOException {
 		// LOADS UI DEFINITION
-        FXMLLoader loader = new FXMLLoader(PlanningMainUIApp.class.getResource("view/RootLayout.fxml"));
+		final BorderPane borderPane =
+				load("view/RootLayout.fxml",
+						(BorderPane fxml, RootLayoutController controller) -> {
+							controller.setMainApp(this);
+							return fxml;
+						});
 
-        // LOADS ROOT LAYOUT
-        BorderPane borderPane = (BorderPane) loader.load();
+    	// Use this element as root scene
+        final Scene scene = new Scene(borderPane);
 
-        // RETRIEVES CONTROLLER
-        RootLayoutController controller = loader.getController();
+        stage.setScene(scene);
 
-        // SETS CONTROLLER DEFINITIONS
-        controller.setMainApp(this);
+        // Loads employee overview
+		final AnchorPane employeePane =
+				load("view/PhysicianOverview.fxml",
+						(AnchorPane fxml, PhysicianOverviewController controller) -> {
+							controller.setMainApp(this);
+							return fxml;
+						});
         
-        // LOADS THE PHYSICIAN OVERVIEW
-        AnchorPane physicianOverview = loadPhysicianOverview();
-        
-        // LOADS THE POSITIONS CODE
-        AnchorPane positionsOverview = loadPositionsOverview();
-        
-        // LOADS THE CONSTRAINTS CODE
-        AnchorPane constraintsOverview = loadConstraintsOverview();
-        
-        // LOADS THE GENERATION OVERVIEW
-        AnchorPane generationOverview = loadGenerationOverview();
+		// Loads positions definitions
+		final AnchorPane positionsPane =
+				load("view/PositionsOverview.fxml",
+						(AnchorPane fxml, PositionsOverviewController controller) -> {
+							controller.setMainApp(this);
+							return fxml;
+						});
 
+		// Loads constraints definitions
+		final AnchorPane constraintPane =
+				load("view/ConstraintsOverview.fxml",
+						(AnchorPane fxml, ConstraintsOverviewController controller) -> {
+							controller.setMainApp(this);
+							return fxml;
+						});
+
+        // Loads generation ui
+		final AnchorPane generationPane =
+				load("view/GenerationOverview.fxml",
+						(AnchorPane fxml, GenerationOverviewController controller) -> {
+							controller.setMainApp(this);
+					        // Stops the planning generation if window is closed
+							stage.setOnCloseRequest( (event) -> {
+					        	controller.handlePauseButton();
+					        });
+							return fxml;
+						});
+		
         // SETS THE TAB PANES
-        TabPane tabPane = (TabPane) borderPane.getCenter();
-        tabPane.getTabs().get(0).setContent(physicianOverview);
-        tabPane.getTabs().get(1).setContent(positionsOverview);
-        tabPane.getTabs().get(2).setContent(constraintsOverview);
-        tabPane.getTabs().get(3).setContent(generationOverview);
+        final TabPane tabPane = (TabPane) borderPane.getCenter();
+        tabPane.getTabs().get(0).setContent(employeePane);
+        tabPane.getTabs().get(1).setContent(positionsPane);
+        tabPane.getTabs().get(2).setContent(constraintPane);
+        tabPane.getTabs().get(3).setContent(generationPane);
         
         return borderPane;
 	}
 
-    public AnchorPane loadPhysicianOverview() throws IOException {
-    	// LOADS UI DEFINITION
-    	FXMLLoader loader = new FXMLLoader(PlanningMainUIApp.class.getResource("view/PhysicianOverview.fxml"));
-        
-    	// LOADS LAYOUT
-    	AnchorPane overviewPage = (AnchorPane) loader.load();
-
-    	// RETRIEVES CONTROLLER
-    	PhysicianOverviewController controller = loader.getController();
-
-    	// SETS CONTROLLER DEFINITIONS
-    	controller.setMainApp(this);
-    	
-    	return overviewPage;
-    }
-    
-    public AnchorPane loadPositionsOverview() throws IOException {
-    	// LOADS UI DEFINITION
-    	FXMLLoader loader = new FXMLLoader(PlanningMainUIApp.class.getResource("view/PositionsOverview.fxml"));
-    	
-    	// LOADS LAYOUT
-    	AnchorPane positionsOverview = (AnchorPane) loader.load();
-    	
-    	// RETRIEVES THE CONTROLLER
-    	PositionsOverviewController controller = loader.getController();
-    	
-    	// SETS CONTROLLER DEFINITIONS
-    	controller.setMainApp(this);
-    	
-    	return positionsOverview;
-    }
-    
-    public AnchorPane loadGenerationOverview() throws IOException {
-    	// LOADS UI DEFINITION
-    	FXMLLoader loader = new FXMLLoader(PlanningMainUIApp.class.getResource("view/GenerationOverview.fxml"));
-        
-    	// LOADS LAYOUT
-    	AnchorPane overviewPage = (AnchorPane) loader.load();
-
-    	// RETRIEVES CONTROLLER
-    	generationOverviewController = loader.getController();
-
-    	// SETS CONTROLLER DEFINITIONS
-    	generationOverviewController.setMainApp(this);
-    	
-    	return overviewPage;
-    }
-
-    public AnchorPane loadConstraintsOverview() throws IOException {
-    	// LOADS UI DEFINITION
-    	FXMLLoader loader = new FXMLLoader(PlanningMainUIApp.class.getResource("view/ConstraintsOverview.fxml"));
-        
-    	// LOADS LAYOUT
-    	AnchorPane constraintPage = (AnchorPane) loader.load();
-
-    	// RETRIEVES THE CONTROLLER
-    	ConstraintsOverviewController controller = loader.getController();
-    	
-    	// SETS CONTROLLER DEFINITIONS
-    	controller.setMainApp(this);
-    	
-    	return constraintPage;
-    }
-
-    public ObservableList<Worker> getPhysicians() {
-		return physicians;
+	private <T, U, V> V load(
+			final String fxmlSource,
+			final FxmlLoader<T, U, V> initFunction) throws IOException {
+		// URL of fxml with ui definition
+		final FXMLLoader loader = new FXMLLoader(PlanningMainUIApp.class.getResource(fxmlSource));
+		
+		// Loads the fxml
+		final T fxml = loader.load();
+		
+        // retrieves the controller
+		final U controller = loader.getController();
+		
+		// Executes the corresponding code
+		return initFunction.apply(fxml, controller);
 	}
 
     public boolean showPhysicianEditDialog(Worker physician) {
-  	  try {
-  	    // Load the fxml file and create a new stage for the popup
-  	    FXMLLoader loader = new FXMLLoader(PlanningMainUIApp.class.getResource("view/PhysicianEditDialog.fxml"));
-  	    AnchorPane page = (AnchorPane) loader.load();
-  	    Stage dialogStage = new Stage();
-  	    dialogStage.setTitle("Modifier médecin");
-  	    dialogStage.initModality(Modality.WINDOW_MODAL);
-  	    dialogStage.initOwner(primaryStage);
-  	    Scene scene = new Scene(page);
-  	    dialogStage.setScene(scene);
+    	try {
+    		// Load the fxml file and create a new stage for the popup
+    		return load("view/PhysicianEditDialog.fxml",
+    				(AnchorPane fxml, PhysicianEditDialogController controller) -> {
+    			// Creates a new window
+    			final Stage dialogStage = new Stage();
+    	  	    dialogStage.setTitle("Modifier médecin");
+    	  	    dialogStage.initModality(Modality.WINDOW_MODAL);
+    	  	    dialogStage.initOwner(primaryStage);
+    	  	    final Scene scene = new Scene(fxml);
+    	  	    dialogStage.setScene(scene);
 
-  	    // Set the person into the controller
-  	    PhysicianEditDialogController controller = loader.getController();
-  	    controller.setDialogStage(dialogStage);
-  	    controller.setPhysician(physician);
+    	  	    // Sets the parameters of controller
+    	  	    controller.setDialogStage(dialogStage);
+    	  	    controller.setPhysician(physician);
 
-  	    // Show the dialog and wait until the user closes it
-  	    dialogStage.showAndWait();
-
-  	    return controller.isOkClicked();
-
-  	  } catch (IOException e) {
-  	    // Exception gets thrown if the fxml file could not be loaded
-  	    e.printStackTrace();
-  	    return false;
-  	  }
-  	}
-
-    public Stage getPrimaryStage() {
-		return primaryStage;
-	}
+    	  	    // Show the dialog and wait until the user closes it
+    	  	    dialogStage.showAndWait();
+    	  	    
+    	  	    return controller.isOkClicked();
+    		});
+    	} catch (IOException e) {
+    		// Exception gets thrown if the fxml file could not be loaded
+    		e.printStackTrace();
+    		return false;
+    	}
+    }
 
 	public static void main(String[] args) {
 		launch(args);
+	}
+
+    public Stage getPrimaryStage() {
+		return primaryStage;
 	}
 
 	public ObservableList<PositionDefinition> getPositions() {
@@ -213,5 +184,14 @@ public class PlanningMainUIApp extends Application {
 	
 	public SimpleStringProperty getConstraintsCode() {
 		return constraintsCode;
+	}
+	
+    public ObservableList<Worker> getPhysicians() {
+		return employees;
+	}
+
+	@FunctionalInterface
+	private interface FxmlLoader<T, U, V> {
+		public V apply(T fxml, U controller);
 	}
 }
